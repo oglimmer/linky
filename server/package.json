@@ -1,0 +1,29 @@
+{
+  "name": "linky-server",
+  "version": "0.1.0",
+  "description": "linky server",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./server.js",
+    "dev": "NODE_ENV=debug nodemon ./server.js"
+  },
+  "author": "Ozy",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^1.0.2",
+    "bluebird": "^3.4.7",
+    "body-parser": "^1.15.2",
+    "compression": "^1.6.2",
+    "express": "^4.14.0",
+    "express-winston": "^2.1.2",
+    "jsonwebtoken": "^7.2.1",
+    "lodash": "^4.17.4",
+    "nano": "^6.2.0",
+    "winston": "^2.3.0",
+    "winston-config": "^0.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}

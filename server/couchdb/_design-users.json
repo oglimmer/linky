@@ -1,0 +1,1 @@
+{"_id":"_design/users","language":"javascript","views":{"byEmail":{"map":"function(doc) {\n  if(doc.type === 'user') {\n    emit(doc.email, doc);\n  }\n}"}}}

@@ -1,0 +1,1 @@
+{"_id":"_design/links","language":"javascript","views":{"byUserid":{"map":"function(doc) {\n  if(doc.type === 'link') {\n    emit(doc.userid, doc);\n  }\n}"}}}
