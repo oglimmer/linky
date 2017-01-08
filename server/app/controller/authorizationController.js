@@ -16,7 +16,7 @@ class Verification {
 
   fail(err) {
     ResponseUtil.sendErrorResponse("Invalid auth token: " + err, this.res);
-    this.next(false);
+    this.next(new Error(err));
   }
 
   succeed(user) {

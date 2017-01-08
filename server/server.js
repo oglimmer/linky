@@ -40,6 +40,11 @@ winstonConf.fromFile(path.join(__dirname, './winston-config.json'), (error, wins
     	level: 'silly'
     }));
 
+		app.use(function(err, req, res, next) {
+			// don't print errors
+			next();
+		});
+
     if(!debug) {
     	const pathToStatic = path.join(__dirname, '../client/src/client');
 			app.use(express.static(pathToStatic));
