@@ -4,7 +4,7 @@
 
 import React, { Component } from 'react';
 import { PageHeader, FormGroup,ControlLabel, FormControl, HelpBlock, Button, Jumbotron, Alert } from 'react-bootstrap';
-import fetch from '../components/fetch';
+import fetch from '../utils/fetch';
 import { withRouter } from 'react-router'
 
 //withRouter
