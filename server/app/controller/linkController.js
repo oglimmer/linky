@@ -83,19 +83,19 @@ class DeleteProcessor extends BaseProcessor {
 
 }
 
-module.exports = new class LinkController {
+module.exports = {
 
-  createLink(req, res, next) {
+  createLink: function(req, res, next) {
     const crp = new CreateLinkProcessor(req, res, next);
     crp.doProcess();
-  }
+  },
 
-  getLinkCollection(req, res, next) {
+  getLinkCollection: function(req, res, next) {
     const glp = new GetLinkProcessor(req, res, next);
     glp.doProcess();
-  }
+  },
 
-  deleteLink(req, res, next) {
+  deleteLink: function(req, res, next) {
   	const dp = new DeleteProcessor(req, res, next);
     dp.doProcess();
   }

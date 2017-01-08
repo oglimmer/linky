@@ -11,7 +11,7 @@ class Verification {
   constructor({ req, res, next }) {
     this.req = req;
     this.res = res;
-    this.next = next;    
+    this.next = next;
   }
 
   fail(err) {
@@ -48,12 +48,12 @@ class Verification {
 }
 
 // replace this by npm restify-jwt
-class AuthorizationController {
+module.exports = {
 
-  checkAuthorization(req, res, next) {
+	checkAuthorization: function(req, res, next) {
     bluebird.coroutine(function*() {
       const v = new Verification({ req, res, next });
-      try {        
+      try {
         const authToken = yield v.getAuthToken();
         const user = yield v.getUserForAuthToken(authToken);
         v.succeed(user);
@@ -64,6 +64,4 @@ class AuthorizationController {
     })();
   }
 
-}
-
-module.exports = new AuthorizationController();
+};

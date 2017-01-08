@@ -3,9 +3,9 @@
 const JwtUtil = require('../util/JwtUtil');
 const ResponseUtil = require('../util/ResponseUtil');
 
-class AuthorizationController {
+module.exports = {
 
-  checkAuthorization(req, res, next) {
+  checkAuthorization: function(req, res, next) {
     const { authorization } = req.headers;
     let failed = true;
     if(authorization) {
@@ -27,6 +27,4 @@ class AuthorizationController {
     }
   }
 
-}
-
-module.exports = new AuthorizationController();
+};

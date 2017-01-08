@@ -91,14 +91,14 @@ class AuthenticateProcessor extends BaseProcessor {
 
 }
 
-module.exports = new class UserController {
+module.exports = {
 
-    authenticate(req, res, next) {
+    authenticate: function(req, res, next) {
       const ap = new AuthenticateProcessor(req, res, next);
       ap.doProcess();
-    }
+    },
 
-    createUser(req, res, next) {
+    createUser: function(req, res, next) {
       const cup = new CreateUserProcessor(req, res, next);
       cup.doProcess();
     }
