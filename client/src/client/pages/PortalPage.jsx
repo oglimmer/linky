@@ -4,7 +4,7 @@
 
 import React, { Component } from 'react';
 import { PageHeader, FormGroup,ControlLabel, FormControl, HelpBlock, Button, Jumbotron, Alert, ListGroup, ListGroupItem } from 'react-bootstrap';
-import fetch from 'whatwg-fetch-importable';
+import fetch from '../components/fetch';
 
 import _ from 'lodash';
 
@@ -22,12 +22,7 @@ export default class PortalPage extends Component {
 		this.handleDelete = this.handleDelete.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 
-		fetch('/rest/links', {
-			method: "GET",
-			headers: {
-				'authorization': 'Bearer ' + this.props.authToken
-			}
-		}).then((response) => {
+		fetch.get('/rest/links', this.props.authToken).then((response) => {
 			return response.json();
 		}).then((json) => {
 			this.setState({
@@ -53,14 +48,7 @@ export default class PortalPage extends Component {
 		if(!linkUrl.startsWith("http")) {
 			linkUrl = "http://" + linkUrl;
 		}
-		fetch('/rest/links', {
-			method: "POST",
-			body: JSON.stringify({ linkUrl }),
-			headers: {
-				'Content-Type': 'application/json',
-				'authorization': 'Bearer ' + this.props.authToken
-			}
-		}).then((response) => {
+		fetch.post('/rest/links', { linkUrl }, this.props.authToken).then((response) => {
 			return response.json();
 		}).then((json) => {
 			this.setState((newState, props) => { return {
@@ -75,12 +63,7 @@ export default class PortalPage extends Component {
 
 	handleDelete(event, elem) {
 		event.preventDefault();
-		fetch('/rest/links/' + elem.id, {
-			method: "DELETE",
-			headers: {
-				'authorization': 'Bearer ' + this.props.authToken
-			}
-		}).then(() => {
+		fetch.delete('/rest/links/' + elem.id, this.props.authToken).then(() => {
 			this.setState((newState, props) => {
 				return {
 					linkList: _.remove(newState.linkList, value => value.id !== elem.id)

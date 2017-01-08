@@ -4,7 +4,7 @@
 
 import React, { Component } from 'react';
 import { PageHeader, FormGroup,ControlLabel, FormControl, HelpBlock, Button, Jumbotron, Alert } from 'react-bootstrap';
-import fetch from 'whatwg-fetch-importable';
+import fetch from '../components/fetch';
 import { withRouter } from 'react-router'
 
 //withRouter
@@ -40,15 +40,9 @@ export default (class Login extends Component {
 		event.preventDefault();
 		this.setState( { errorMessage: '' } );
 		let responseCode;
-		fetch('/rest/authenticate', {
-			method: "POST",
-			body: JSON.stringify({
+		fetch.post('/rest/authenticate', {
 				email: this.state.email,
 				password: this.state.password
-			}),
-			headers: {
-				'Content-Type': 'application/json'
-			}
 		}).then((response) => {
 			responseCode = response.status;
 			return response.json();
