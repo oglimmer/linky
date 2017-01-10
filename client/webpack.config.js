@@ -11,7 +11,7 @@ var APP_DIR = BASE_DIR + '/app';
 module.exports = {
   context: BASE_DIR,
   devtool: debug ? "inline-sourcemap" : null,
-  entry: APP_DIR + '/main.jsx',
+  entry: APP_DIR + '/main.js',
   output: {
     path: BUILD_DIR,
     filename: 'bundle.js',

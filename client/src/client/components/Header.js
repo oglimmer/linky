@@ -2,8 +2,9 @@
 
 import React, { Component } from 'react';
 import { Navbar, Nav, NavItem, MenuItem, NavDropdown } from 'react-bootstrap';
+import { withRouter } from 'react-router'
 
-export default class Header extends Component {
+export default withRouter(class Header extends Component {
 
 	constructor(props) {
 		super(props);
@@ -22,7 +23,7 @@ export default class Header extends Component {
 			<Navbar.Collapse>
 				<Nav>
 					{this.props.isLoggedIn &&
-						<NavItem eventKey={1} onClick={this.props.logout}>Log out</NavItem>
+						<NavItem eventKey={1} onClick={()=>{this.props.logout(this.props.router)}}>Log out</NavItem>
 					}
 					{/*
 					<NavItem eventKey={2} href="#">Link</NavItem>
@@ -40,4 +41,4 @@ export default class Header extends Component {
 			</Navbar>
 	);
 	}
-}
+});

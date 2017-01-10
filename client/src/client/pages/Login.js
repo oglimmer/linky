@@ -7,11 +7,11 @@ import { PageHeader, FormGroup,ControlLabel, FormControl, HelpBlock, Button, Jum
 import fetch from '../utils/fetch';
 import { withRouter } from 'react-router'
 
-//withRouter
-export default (class Login extends Component {
+export default withRouter(class Login extends Component {
 
 	constructor(props) {
 		super(props);
+		foo=1;
 		this.state = {
 			email: '',
 			password: '',
@@ -48,7 +48,7 @@ export default (class Login extends Component {
 			return response.json();
 		}).then((json) => {
 			if(responseCode===200) {
-				this.props.onLoggedIn(json.token);
+				this.props.onLoggedIn(json.token, this.props.router);
 			} else {
 				throw json.message;
 			}
