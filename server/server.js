@@ -46,7 +46,7 @@ winstonConf.fromFile(path.join(__dirname, './winston-config.json'), (error, wins
 		});
 
     if(!debug) {
-    	const pathToStatic = path.join(__dirname, '../client/src/client');
+    	const pathToStatic = path.join(__dirname, '../client/build/');
 			app.use(express.static(pathToStatic));
 			winston.info('Serving static files from ' + pathToStatic);
     }

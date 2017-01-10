@@ -9,11 +9,11 @@ Install couchdb and import the views (see server/readme.md)
 
 ## terminal 1
 
-This starts a webpack-dev-server at :8080 with a proxy to :8088 for all REST endpoints.
+This starts a webpack-dev-server at :3000 with a proxy to :8088 for all REST endpoints.
 
 - cd client
 - npm install
-- npm run dev
+- npm start
 
 ## terminal 2
 
@@ -23,7 +23,7 @@ This starts a nodemon monitored webserver at :8088 for the REST services. Static
 - npm install
 - npm run dev
 
-=> open http://localhost:8080
+=> open http://localhost:3000
 
 # Playing with the REST service
 
