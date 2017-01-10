@@ -1,9 +1,8 @@
-'use strict'
 
 // https://react-bootstrap.github.io/components.html#forms
 
 import React, { Component } from 'react';
-import { PageHeader, FormGroup,ControlLabel, FormControl, HelpBlock, Button, Jumbotron, Alert, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { FormGroup,ControlLabel, FormControl, Button, ListGroup, ListGroupItem } from 'react-bootstrap';
 import fetch from '../utils/fetch';
 
 import _ from 'lodash';
@@ -80,11 +79,11 @@ export default class PortalPage extends Component {
 	}
 
 	render() {
-		const { errorMessage, submitAllowed } = this.state;
+		const { submitAllowed } = this.state;
 		const submitStyle = submitAllowed ? "primary" : "default";
 		const list = _.map(this.state.linkList, (elem, index) => {
 			return (
-				<ListGroupItem key={elem.id} href={elem.linkUrl}>{elem.linkUrl} <Button class="pull-right btn-xs" onClick={(e)=>this.handleDelete(e, elem)}>X</Button></ListGroupItem>
+				<ListGroupItem key={elem.id} href={elem.linkUrl}>{elem.linkUrl} <Button className="pull-right btn-xs" onClick={(e)=>this.handleDelete(e, elem)}>X</Button></ListGroupItem>
 			)
 		});
 		return (

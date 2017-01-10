@@ -1,4 +1,3 @@
-'use strict'
 
 import React from 'react';
 
@@ -10,7 +9,7 @@ export default (props) => {
 	return (
 		<div>
 			<Header logout={props.logout} isLoggedIn={props.isLoggedIn} />
-			<div class="container">
+			<div className="container">
 				{props.children}
 				<Footer />
 			</div>

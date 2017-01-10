@@ -1,14 +1,9 @@
-'use strict'
 
 import React, { Component } from 'react';
-import { Navbar, Nav, NavItem, MenuItem, NavDropdown } from 'react-bootstrap';
+import { Navbar, Nav, NavItem } from 'react-bootstrap';
 import { withRouter } from 'react-router'
 
 export default withRouter(class Header extends Component {
-
-	constructor(props) {
-		super(props);
-	}
 
 	render() {
 		return (

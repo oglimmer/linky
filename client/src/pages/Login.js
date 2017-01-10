@@ -1,9 +1,8 @@
-'use strict'
 
 // https://react-bootstrap.github.io/components.html#forms
 
 import React, { Component } from 'react';
-import { PageHeader, FormGroup,ControlLabel, FormControl, HelpBlock, Button, Jumbotron, Alert } from 'react-bootstrap';
+import { FormGroup,ControlLabel, FormControl, Button, Jumbotron, Alert } from 'react-bootstrap';
 import fetch from '../utils/fetch';
 import { withRouter } from 'react-router'
 
@@ -11,7 +10,6 @@ export default withRouter(class Login extends Component {
 
 	constructor(props) {
 		super(props);
-		foo=1;
 		this.state = {
 			email: '',
 			password: '',

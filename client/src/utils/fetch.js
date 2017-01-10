@@ -1,6 +1,3 @@
-'use strict'
-
-import fetch from 'whatwg-fetch-importable';
 
 export default {
 
