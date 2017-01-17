@@ -1,4 +1,3 @@
-'use strict';
 
 const appLogger = require('winston').loggers.get('application');
 const _ = require('lodash');
@@ -15,19 +14,21 @@ class CreateLinkProcessor extends BaseProcessor {
 
   collectBodyParameters() {
     const { linkUrl } = this.req.body;
-    this.data = { type: "link" , linkUrl };
+    this.data = { type: 'link', linkUrl };
   }
 
+  /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return [ "linkUrl" ];
+    return ['linkUrl'];
   }
+  /* eslint-enable class-methods-use-this */
 
-  *process() {
+  * process() {
     try {
       const { id } = yield linkDao.insert(this.data);
-      this.res.send( { id } );
-      appLogger.debug("Create link id=%s to db: %j", id, this.data);
-    } catch(err) {
+      this.res.send({ id });
+      appLogger.debug('Create link id=%s to db: %j', id, this.data);
+    } catch (err) {
       appLogger.error(err);
       ResponseUtil.sendErrorResponse(err, this.res);
     }
@@ -42,15 +43,15 @@ class GetLinkProcessor extends BaseProcessor {
     super(req, res, next, true);
   }
 
-  *process() {
+  * process() {
     try {
       const rows = yield linkDao.listByUserid(this.data.userid);
-      const responseArr = _.map(rows, (row) => {
-      	return { id: row.value._id, linkUrl: row.value.linkUrl };
-      });
+      /* eslint-disable no-underscore-dangle */
+      const responseArr = _.map(rows, row => ({ id: row.value._id, linkUrl: row.value.linkUrl }));
+      /* eslint-enable no-underscore-dangle */
       this.res.send(responseArr);
-      appLogger.debug("Get all links from db for user %s resulted in %d rows", this.data.userid, responseArr.length);
-    } catch(err) {
+      appLogger.debug('Get all links from db for user %s resulted in %d rows', this.data.userid, responseArr.length);
+    } catch (err) {
       appLogger.error(err);
       ResponseUtil.sendErrorResponse(err, this.res);
     }
@@ -65,16 +66,18 @@ class DeleteProcessor extends BaseProcessor {
     super(req, res, next, true);
   }
 
+  /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return [ "linkid" ];
+    return ['linkid'];
   }
+  /* eslint-enable class-methods-use-this */
 
-  *process() {
+  * process() {
     try {
       yield linkDao.deleteLatest(this.data.linkid);
       this.res.send();
-      appLogger.debug("Deleted link with id=%s", this.data.linkid);
-    } catch(err) {
+      appLogger.debug('Deleted link with id=%s', this.data.linkid);
+    } catch (err) {
       appLogger.error(err);
       ResponseUtil.sendErrorResponse(err, this.res);
     }
@@ -85,19 +88,19 @@ class DeleteProcessor extends BaseProcessor {
 
 module.exports = {
 
-  createLink: function(req, res, next) {
+  createLink: function createLink(req, res, next) {
     const crp = new CreateLinkProcessor(req, res, next);
     crp.doProcess();
   },
 
-  getLinkCollection: function(req, res, next) {
+  getLinkCollection: function getLinkCollection(req, res, next) {
     const glp = new GetLinkProcessor(req, res, next);
     glp.doProcess();
   },
 
-  deleteLink: function(req, res, next) {
-  	const dp = new DeleteProcessor(req, res, next);
+  deleteLink: function deleteLink(req, res, next) {
+    const dp = new DeleteProcessor(req, res, next);
     dp.doProcess();
-  }
+  },
 
-}
+};

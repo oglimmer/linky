@@ -5,14 +5,22 @@ import Header from './Header';
 import Footer from './Footer';
 
 
-export default (props) => {
-	return (
-		<div>
-			<Header logout={props.logout} isLoggedIn={props.isLoggedIn} />
-			<div className="container">
-				{props.children}
-				<Footer />
-			</div>
-		</div>
-	);
-}
+const Layout = props => (
+  <div>
+    <Header logout={props.logout} isLoggedIn={props.isLoggedIn} />
+    <div className="container">
+      {props.children}
+      <Footer />
+    </div>
+  </div>
+);
+Layout.propTypes = {
+  logout: React.PropTypes.func.isRequired,
+  isLoggedIn: React.PropTypes.string,
+  children: React.PropTypes.element.isRequired,
+};
+Layout.defaultProps = {
+  isLoggedIn: '',
+};
+
+export default Layout;

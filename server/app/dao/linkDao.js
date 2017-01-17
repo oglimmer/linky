@@ -1,12 +1,11 @@
-'use strict';
 
 const BaseDataAccessObject = require('./BaseDataAccessObject');
 
 class LinkDao extends BaseDataAccessObject {
 
-	listByUserid(userid) {
-		return this.listByView('links', 'byUserid', userid);
-	}
+  listByUserid(userid) {
+    return this.listByView('links', 'byUserid', userid);
+  }
 
 }
 
