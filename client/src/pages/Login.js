@@ -2,7 +2,7 @@
 // https://react-bootstrap.github.io/components.html#forms
 
 import React, { Component } from 'react';
-import { withRouter } from 'react-router';
+import { withRouter, routerShape } from 'react-router';
 import { FormGroup, ControlLabel, FormControl, Button, Jumbotron, Alert } from 'react-bootstrap';
 import fetch from '../utils/fetch';
 
@@ -110,7 +110,7 @@ class Login extends Component {
 }
 Login.propTypes = {
   onLoggedIn: React.PropTypes.func.isRequired,
-  router: React.PropTypes.object.isRequired,
+  router: routerShape.isRequired,
 };
 
 export default withRouter(Login);
