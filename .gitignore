@@ -3,3 +3,5 @@ dist/*
 /server/logs
 server.sublime-project
 server.sublime-workspace
+client.sublime-project
+client.sublime-workspace
