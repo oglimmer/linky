@@ -39,15 +39,21 @@ winstonConf.fromFile(path.join(__dirname, './winston-config.json'), (error, wins
       level: 'silly',
     }));
 
+    if (!debug) {
+      const pathToStatic = path.join(__dirname, '../client/build');
+      app.use(express.static(pathToStatic));
+
+      // support for browserHistory (instead of hashHistory)
+      app.get('*', (req, res) => {
+        res.sendFile(path.resolve(pathToStatic, 'index.html'));
+      });
+
+      winston.info(`Serving static files from ${pathToStatic}`);
+    }
+
     app.use((err, req, res, next) => {
       // don't print errors
       next();
     });
-
-    if (!debug) {
-      const pathToStatic = path.join(__dirname, '../client/build/');
-      app.use(express.static(pathToStatic));
-      winston.info(`Serving static files from ${pathToStatic}`);
-    }
   }
 });

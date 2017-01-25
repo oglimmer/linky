@@ -1,73 +1,41 @@
 
-import React, { Component } from 'react';
-import { Router, IndexRoute, Route, hashHistory } from 'react-router';
+import React from 'react';
+import { Router, browserHistory } from 'react-router';
+
 import Layout from './Layout';
 import Login from '../pages/Login';
 import PortalPage from '../pages/PortalPage';
 
-export default class RootElement extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      authToken: localStorage.authToken,
-    };
-    this.handleLoggedin = this.handleLoggedin.bind(this);
-    this.handleLogout = this.handleLogout.bind(this);
-    this.checkUserLoggedIn = this.checkUserLoggedIn.bind(this);
-    this.redirectNotLoggedInUser = this.redirectNotLoggedInUser.bind(this);
+const checkSecured = (replace) => {
+  if (!localStorage.authToken) {
+    replace('/');
   }
-
-  handleLoggedin(authToken, router) {
-    this.setState({
-      authToken,
-    });
-    localStorage.authToken = authToken;
-    router.replace('/');
+};
+const redirectIfLoggedIn = (replace) => {
+  if (localStorage.authToken) {
+    replace('/portalPage');
   }
+};
 
-  handleLogout(router) {
-    this.setState({
-      authToken: null,
-    });
-    localStorage.removeItem('authToken');
-    router.replace('/');
-  }
 
-  checkUserLoggedIn(nextState, replace) {
-    if (!this.state.authToken) {
-      replace('/');
-    }
-  }
+const routesConfig = {
+  path: '/',
+  component: Layout,
+  indexRoute: {
+    component: Login,
+    onEnter: ((newState, replace) => redirectIfLoggedIn(replace)),
+  },
+  childRoutes: [
+    {
+      path: 'portalPage',
+      component: PortalPage,
+      onEnter: ((newState, replace) => checkSecured(replace)),
+    },
+  ],
+};
 
-  redirectNotLoggedInUser(nextState, replace) {
-    if (this.state.authToken) {
-      replace('/portalPage');
-    }
-  }
+const RootElement = () => (
+  <Router history={browserHistory} routes={routesConfig} />
+);
 
-  render() {
-    return (
-      <Router key={Math.random()} history={hashHistory}>
-        <Route
-          path="/"
-          component={props => (
-            <Layout logout={this.handleLogout} isLoggedIn={this.state.authToken}>
-              {props.children}
-            </Layout>
-          )}
-        >
-          <IndexRoute
-            component={() => (<Login onLoggedIn={this.handleLoggedin} />)}
-            onEnter={this.redirectNotLoggedInUser}
-          />
-          <Route
-            path="portalPage"
-            component={() => (<PortalPage authToken={this.state.authToken} />)}
-            onEnter={this.checkUserLoggedIn}
-          />
-        </Route>
-      </Router>
-    );
-  }
-}
+export default RootElement;

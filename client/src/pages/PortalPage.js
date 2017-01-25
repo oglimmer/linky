@@ -1,126 +1,114 @@
 
 // https://react-bootstrap.github.io/components.html#forms
 
-import React, { Component } from 'react';
-import _ from 'lodash';
+import React, { PropTypes } from 'react';
 import { FormGroup, ControlLabel, FormControl, Button, ListGroup, ListGroupItem } from 'react-bootstrap';
-import fetch from '../utils/fetch';
+import { connect } from 'react-redux';
+
+import { delLink, addLink } from '../redux/actions';
+
+const ListGroupItemButton = ({ id, linkUrl, onDeleteLink }) => (
+  <ListGroupItem href={linkUrl}>
+    {linkUrl}
+    <Button
+      className="pull-right btn-xs"
+      onClick={(e) => { e.preventDefault(); onDeleteLink(id); }}
+    >X</Button>
+  </ListGroupItem>
+);
+ListGroupItemButton.propTypes = {
+  id: React.PropTypes.string.isRequired,
+  linkUrl: React.PropTypes.string.isRequired,
+  onDeleteLink: React.PropTypes.func.isRequired,
+};
+
+const ListGroupItemList = ({ linkList, onDeleteLink }) => (
+  <ListGroup>
+    { linkList.map(link =>
+      <ListGroupItemButton
+        key={link.id}
+        id={link.id}
+        linkUrl={link.linkUrl}
+        onDeleteLink={() => onDeleteLink(link.id)}
+      />
+    ) }
+  </ListGroup>
+);
+/* eslint-disable react/no-unused-prop-types */
+ListGroupItemList.propTypes = {
+  linkList: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    linkUrl: PropTypes.string.isRequired,
+  }).isRequired).isRequired,
+  onDeleteLink: PropTypes.func.isRequired,
+};
+/* eslint-enable react/no-unused-prop-types */
 
 
-class PortalPage extends Component {
+const mapStateToProps = state => ({
+  linkList: state.mainData.linkList,
+});
 
-  static handleSubmit(event) {
-    event.preventDefault();
-    return false;
-  }
+const mapDispatchToProps = dispatch => ({
+  onDeleteLink: (id) => {
+    dispatch(delLink(id));
+  },
+});
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      linkUrl: '',
-      submitAllowed: false,
-      linkList: [],
-    };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleAdd = this.handleAdd.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
+const VisibleListGroupItemList = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ListGroupItemList);
 
-    fetch.get('/rest/links', this.props.authToken).then(response => response.json(),
-    ).then((json) => {
-      this.setState({
-        linkList: json,
-      });
-    }).catch((ex) => {
-      console.log(ex);
-    });
-  }
-
-  handleChange(ctrlName, e) {
-    const value = e.target.value;
-    this.setState((state) => {
-      const newState = state;
-      newState[ctrlName] = value;
-      newState.submitAllowed = newState.linkUrl.length > 0;
-      return newState;
-    });
-  }
-
-  handleAdd(event) {
-    event.preventDefault();
-    let linkUrl = this.state.linkUrl;
-    if (!linkUrl.startsWith('http')) {
-      linkUrl = `http://${linkUrl}`;
-    }
-    fetch.post('/rest/links', { linkUrl }, this.props.authToken).then(response => response.json(),
-    ).then((json) => {
-      this.setState(newState => ({
-        linkUrl: '',
-        submitAllowed: false,
-        linkList: [...newState.linkList, { id: json.id, linkUrl }],
-      }));
-    }).catch((ex) => {
-      console.log(ex);
-    });
-  }
-
-  handleDelete(event, elem) {
-    event.preventDefault();
-    fetch.delete(`/rest/links/${elem.id}`, this.props.authToken).then(() => {
-      this.setState(newState => ({
-        linkList: _.remove(newState.linkList, value => value.id !== elem.id),
-      }));
-    }).catch((ex) => {
-      console.log(ex);
-    });
-  }
-
-  render() {
-    const { submitAllowed } = this.state;
-    const submitStyle = submitAllowed ? 'primary' : 'default';
-    const list = _.map(this.state.linkList, elem => (
-      <ListGroupItem
-        key={elem.id}
-        href={elem.linkUrl}
+let AddLinkInputBox = ({ dispatch }) => {
+  let input;
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!input.value.trim()) {
+          return false;
+        }
+        dispatch(addLink(input.value));
+        input.value = '';
+        return true;
+      }}
+    >
+      <FormGroup controlId="linkUrl">
+        <ControlLabel>Add a new link</ControlLabel>
+        <FormControl
+          type="text"
+          placeholder="url"
+          inputRef={(node) => {
+            input = node;
+          }}
+          autoFocus="true"
+          autoComplete="off"
+        />
+        <FormControl.Feedback />
+      </FormGroup>
+      <Button
+        type="submit"
       >
-        {elem.linkUrl}
-        <Button className="pull-right btn-xs" onClick={e => this.handleDelete(e, elem)}>X</Button>
-      </ListGroupItem>
-    ));
-    return (
-      <div>
-        <form onSubmit={PortalPage.handleSubmit}>
-          <FormGroup controlId="linkUrl">
-            <ControlLabel>Add a new link</ControlLabel>
-            <FormControl
-              type="text"
-              value={this.state.linkUrl}
-              placeholder="url"
-              onChange={e => this.handleChange('linkUrl', e)}
-              autoFocus="true"
-              autoComplete="off"
-            />
-            <FormControl.Feedback />
-          </FormGroup>
-          <Button
-            type="submit"
-            bsStyle={submitStyle}
-            onClick={this.handleAdd}
-            disabled={!submitAllowed}
-          >
-            Create link
-          </Button>
-          <hr />
-          <ListGroup>
-            {list}
-          </ListGroup>
-        </form>
-      </div>
-    );
-  }
+        Create link
+      </Button>
+    </form>
+  );
+};
+AddLinkInputBox.propTypes = {
+  dispatch: React.PropTypes.func.isRequired,
+};
+AddLinkInputBox = connect()(AddLinkInputBox);
 
-}
+const PortalPage = () => (
+  <div>
+    <AddLinkInputBox />
+    <hr />
+    <VisibleListGroupItemList />
+  </div>
+);
+
 PortalPage.propTypes = {
-  authToken: React.PropTypes.string.isRequired,
 };
 
 export default PortalPage;

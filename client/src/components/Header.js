@@ -1,9 +1,12 @@
 
 import React from 'react';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
-export default withRouter(props => (
+import { clearAuthToken } from '../redux/actions';
+
+const InternalHeader = ({ router, logout }) => (
   <Navbar collapseOnSelect>
     <Navbar.Header>
       <Navbar.Brand>
@@ -13,10 +16,10 @@ export default withRouter(props => (
     </Navbar.Header>
     <Navbar.Collapse>
       <Nav>
-        {props.isLoggedIn &&
+        {localStorage.authToken &&
           <NavItem
             eventKey={1}
-            onClick={() => { props.logout(props.router); }}
+            onClick={() => { logout(router); }}
           >Log out</NavItem>
         }
         {/*
@@ -32,4 +35,21 @@ export default withRouter(props => (
       </Nav>
     </Navbar.Collapse>
   </Navbar>
-));
+);
+InternalHeader.propTypes = {
+  logout: React.PropTypes.func.isRequired,
+  router: React.PropTypes.shape().isRequired,
+};
+
+const mapDispatchToProps = dispatch => ({
+  logout: (router) => {
+    dispatch(clearAuthToken(router));
+  },
+});
+
+const Header = connect(
+  null,
+  mapDispatchToProps
+)(InternalHeader);
+
+export default withRouter(Header);
