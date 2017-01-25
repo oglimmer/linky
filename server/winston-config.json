@@ -16,8 +16,7 @@
     },
     "http": {
       "console": {
-        "level": "debug",
-        "colorize": true
+        "level": "error"
       },
       "file": {
         "timestamp": true,
@@ -25,7 +24,20 @@
         "filename": "logs/http.log",
         "maxfiles": 5,
         "maxsize": 10485760,
-        "level": "debug"
+        "level": "warn"
+      }
+    },
+    "http-errors": {
+      "console": {
+        "level": "silly"
+      },
+      "file": {
+        "timestamp": true,
+        "json": false,
+        "filename": "logs/http-errors.log",
+        "maxfiles": 5,
+        "maxsize": 10485760,
+        "level": "silly"
       }
     }
   }

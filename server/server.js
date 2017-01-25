@@ -9,51 +9,56 @@ const compression = require('compression');
 const path = require('path');
 const winstonConf = require('winston-config');
 const expressWinston = require('express-winston');
+const morgan = require('morgan');
+const fs = require('fs');
+const FileStreamRotator = require('file-stream-rotator');
 
 const routes = require('./config/routes');
 
-winstonConf.fromFile(path.join(__dirname, './winston-config.json'), (error, winston) => {
-  if (error) {
-    console.log('error during winston configuration');
-    console.log(error);
-    process.exit(1);
-  } else {
-    const app = express();
+const winston = winstonConf.fromFileSync(path.join(__dirname, './winston-config.json'));
 
-    app.use(bodyParser.json());
-    app.use(compression());
+const app = express();
 
-    // winston
-    app.use(expressWinston.logger({
-      winstonInstance: winston.loggers.get('http'),
-      level: 'silly',
-    }));
+const logDirectory = path.join(__dirname, 'logs');
+if (!fs.existsSync(logDirectory)) {
+  fs.mkdirSync(logDirectory);
+}
 
-    app.listen(8088, 'localhost');
-    winston.info('Server started.');
-
-    routes(app);
-
-    app.use(expressWinston.errorLogger({
-      winstonInstance: winston.loggers.get('http'),
-      level: 'silly',
-    }));
-
-    if (!debug) {
-      const pathToStatic = path.join(__dirname, '../client/build');
-      app.use(express.static(pathToStatic));
-
-      // support for browserHistory (instead of hashHistory)
-      app.get('*', (req, res) => {
-        res.sendFile(path.resolve(pathToStatic, 'index.html'));
-      });
-
-      winston.info(`Serving static files from ${pathToStatic}`);
-    }
-
-    app.use((err, req, res, next) => {
-      // don't print errors
-      next();
-    });
-  }
+const accessLogStream = FileStreamRotator.getStream({
+  date_format: 'YYYYMMDD',
+  filename: path.join(logDirectory, 'access-%DATE%.log'),
+  frequency: 'daily',
+  verbose: false,
 });
+
+app.use(bodyParser.json());
+app.use(compression());
+app.use(morgan('combined', { stream: accessLogStream }));
+
+
+app.use(expressWinston.logger({
+  winstonInstance: winston.loggers.get('http'),
+}));
+
+routes(app);
+
+if (!debug) {
+  const pathToStatic = path.join(__dirname, '../client/build');
+  app.use(express.static(pathToStatic));
+
+  // support for browserHistory (instead of hashHistory)
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(pathToStatic, 'index.html'));
+  });
+
+  winston.loggers.get('http').info(`Serving static files from ${pathToStatic}`);
+}
+
+app.use(expressWinston.errorLogger({
+  winstonInstance: winston.loggers.get('http-errors'),
+}));
+
+const port = process.env.PORT || '8088';
+const bind = process.env.BIND || '127.0.0.1';
+app.listen(port, bind);
+winston.loggers.get('http').info(`Server started at ${bind}:${port}.`);

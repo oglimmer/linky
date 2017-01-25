@@ -17,8 +17,10 @@
     "compression": "^1.6.2",
     "express": "^4.14.0",
     "express-winston": "^2.1.2",
+    "file-stream-rotator": "0.0.7",
     "jsonwebtoken": "^7.2.1",
     "lodash": "^4.17.4",
+    "morgan": "^1.7.0",
     "nano": "^6.2.0",
     "winston": "^2.3.0",
     "winston-config": "^0.5.1"
