@@ -6,7 +6,7 @@ import { withRouter } from 'react-router';
 
 import { clearAuthToken } from '../redux/actions';
 
-const InternalHeader = ({ router, logout }) => (
+const InternalHeader = ({ dispatch, router }) => (
   <Navbar collapseOnSelect>
     <Navbar.Header>
       <Navbar.Brand>
@@ -19,7 +19,7 @@ const InternalHeader = ({ router, logout }) => (
         {localStorage.authToken &&
           <NavItem
             eventKey={1}
-            onClick={() => { logout(router); }}
+            onClick={() => { dispatch(clearAuthToken(router)); }}
           >Log out</NavItem>
         }
         {/*
@@ -37,19 +37,9 @@ const InternalHeader = ({ router, logout }) => (
   </Navbar>
 );
 InternalHeader.propTypes = {
-  logout: React.PropTypes.func.isRequired,
-  router: React.PropTypes.shape().isRequired,
+  dispatch: React.PropTypes.func.isRequired,
+  router: React.PropTypes.func.isRequired,
 };
-
-const mapDispatchToProps = dispatch => ({
-  logout: (router) => {
-    dispatch(clearAuthToken(router));
-  },
-});
-
-const Header = connect(
-  null,
-  mapDispatchToProps
-)(InternalHeader);
+const Header = connect()(InternalHeader);
 
 export default withRouter(Header);
