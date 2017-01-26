@@ -3,65 +3,16 @@
 
 import React, { PropTypes } from 'react';
 import { withRouter } from 'react-router';
-import { FormGroup, ControlLabel, FormControl, Button, Jumbotron, Alert } from 'react-bootstrap';
-import { Form, Control } from 'react-redux-form';
+import { Button, Jumbotron } from 'react-bootstrap';
+import { Form } from 'react-redux-form';
 import { connect } from 'react-redux';
 
 import { checkAuth } from '../redux/actions';
 
-const FormControlAdapter = props => (
-  <FormControl
-    type={props.type}
-    value={props.value}
-    onChange={props.onChange}
-    autoFocus={props.autoFocus}
-    placeholder={props.placeholder}
-  />
-);
-FormControlAdapter.propTypes = {
-  type: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  autoFocus: PropTypes.string,
-  placeholder: PropTypes.string.isRequired,
-};
+import AlertAdapter from '../components/AlertAdapter';
+import FormGroupAdapter from '../components/FormGroupAdapter';
 
-const FormGroupAdapter = ({ label, model, placeholder, autoFocus }) => (
-  <FormGroup
-    controlId="email"
-  >
-    <ControlLabel>{label}</ControlLabel>
-    <Control.text
-      model={`.${model}`}
-      component={FormControlAdapter}
-      autoFocus={autoFocus}
-      placeholder={placeholder}
-    />
-    <FormControl.Feedback />
-  </FormGroup>
-);
-FormGroupAdapter.propTypes = {
-  label: PropTypes.string.isRequired,
-  model: PropTypes.string.isRequired,
-  placeholder: PropTypes.string.isRequired,
-  autoFocus: PropTypes.string,
-};
-
-let AlertAdapter = ({ errorMessage }) => {
-  if (!errorMessage) {
-    return null;
-  }
-  return (<Alert bsStyle="danger">{errorMessage}</Alert>);
-};
-AlertAdapter.propTypes = {
-  errorMessage: React.PropTypes.string,
-};
-const mapStateToProps = state => ({
-  errorMessage: state.mainData.errorMessage,
-});
-AlertAdapter = connect(mapStateToProps)(AlertAdapter);
-
-let Login = ({ dispatch, router }) => (
+const Login = ({ dispatch, router }) => (
   <div>
     <Jumbotron>
       <h1>Linky</h1>
@@ -70,7 +21,11 @@ let Login = ({ dispatch, router }) => (
     <AlertAdapter />
     <Form
       model="login"
-      onSubmit={formData => dispatch(checkAuth(formData.email, formData.password, router))}
+      onSubmit={(formData) => {
+        dispatch(checkAuth(formData.email, formData.password)).then(() => {
+          router.replace('/portalPage');
+        });
+      }}
     >
       <FormGroupAdapter
         label="Enter your registered email address"
@@ -82,9 +37,8 @@ let Login = ({ dispatch, router }) => (
   </div>
 );
 Login.propTypes = {
-  dispatch: React.PropTypes.func.isRequired,
-  router: React.PropTypes.shape().isRequired,
+  dispatch: PropTypes.func.isRequired,
+  router: PropTypes.shape().isRequired,
 };
-Login = connect()(Login);
 
-export default withRouter(Login);
+export default withRouter(connect()(Login));

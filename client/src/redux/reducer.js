@@ -16,6 +16,25 @@ const initialStateMainData = {
   errorMessage: '',
 };
 
+const initialStateAuth = {
+  token: '',
+};
+
+function auth(state = initialStateAuth, action) {
+  switch (action.type) {
+    case SET_AUTH_TOKEN:
+      localStorage.authToken = action.authToken;
+      return Object.assign({}, state, {
+        token: action.authToken,
+      });
+    case CLEAR_AUTH_TOKEN:
+      localStorage.removeItem('authToken');
+      return Object.assign({}, state, initialStateAuth);
+    default:
+      return state;
+  }
+}
+
 function mainData(state = initialStateMainData, action) {
   switch (action.type) {
     case ADD_LINK:
@@ -36,12 +55,6 @@ function mainData(state = initialStateMainData, action) {
       return Object.assign({}, state, {
         linkList: action.linkList,
       });
-    case SET_AUTH_TOKEN:
-      localStorage.authToken = action.authToken;
-      return state;
-    case CLEAR_AUTH_TOKEN:
-      localStorage.removeItem('authToken');
-      return Object.assign({}, state, initialStateMainData);
     case SET_ERROR_MESSAGE:
       return Object.assign({}, state, {
         errorMessage: action.errorMessage,
@@ -53,5 +66,6 @@ function mainData(state = initialStateMainData, action) {
 
 export default combineReducers({
   mainData,
+  auth,
   login: combineForms(loginForm, 'login'),
 });
