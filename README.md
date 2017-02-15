@@ -41,4 +41,10 @@ See build/test for test.sh. The follwing commands are supported:
 
 **The jwt private key is hardcoded as "foobar"!!**
 
-NOT IMPLEMENTED
+To build the client side bundle.js:
+
+- npm run build
+
+To start the server without dynamic bundle.js generation:
+
+- npm start

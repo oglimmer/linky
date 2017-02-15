@@ -4,10 +4,7 @@ const webpack = require('webpack');
 
 module.exports = {
 
-  devtool: '#inline-source-map',
-
   entry: [
-    'webpack-hot-middleware/client',
     require.resolve('./polyfills'),
     './src/index.js',
   ],
@@ -19,14 +16,32 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.optimize.OccurenceOrderPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin(),
+    new webpack.DefinePlugin({
+      'process.env': {
+        NODE_ENV: JSON.stringify('production'),
+      },
+    }),
+    // This helps ensure the builds are consistent if source hasn't changed
+    new webpack.optimize.OccurrenceOrderPlugin(),
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        screw_ie8: true, // React doesn't support IE8
+        warnings: false,
+      },
+      mangle: {
+        screw_ie8: true,
+      },
+      output: {
+        comments: false,
+        screw_ie8: true,
+      },
+    }),
   ],
 
   resolve: {
     alias: {},
-    extensions: ['', '.js', '.jsx'],
+    extensions: ['', '.js'],
   },
 
   module: {

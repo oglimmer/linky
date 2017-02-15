@@ -73,6 +73,8 @@
     "url-loader": "0.5.7"
   },
   "scripts": {
-    "dev": "NODE_ENV=development node server/"
+    "dev": "NODE_ENV=development node server/",
+    "start": "NODE_ENV=production node server/",
+    "build": "webpack --config build/webpack.prod.config.js"
   }
 }

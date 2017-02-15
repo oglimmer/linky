@@ -1,6 +1,6 @@
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+const React = require('react');
+const ReactDOM = require('react-dom');
 
 const { Provider } = require('react-redux');
 const { createStore, applyMiddleware, compose } = require('redux');
@@ -17,17 +17,14 @@ const combineReducers = require('./redux/reducer');
 
 const middlewares = [thunkMiddleware];
 
-if (process.env.NODE_ENV === 'development') {
-  const logger = createLogger();
-  middlewares.push(logger);
-}
+const logger = createLogger();
+middlewares.push(logger);
 
 let state;
 if (window.$REDUX_STATE) {
   state = window.$REDUX_STATE;
 }
 
-// const store = createStore(combineReducers, applyMiddleware(...middlewares));
 const store = compose(applyMiddleware(...middlewares))(createStore)(combineReducers, state);
 
 const routes = getRoutes(store);

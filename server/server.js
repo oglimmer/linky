@@ -25,6 +25,11 @@ const combinedReducers = require('../src/redux/reducer');
 const fetchComponentData = require('./util/fetchComponentData');
 const preMatchRouteFetchData = require('./util/preMatchRouteFetchData');
 
+const webpack = require('webpack');
+const webpackDevMiddleware = require('webpack-dev-middleware');
+const webpackHotMiddleware = require('webpack-hot-middleware');
+const config = require('../build/webpack.dev.config');
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -40,14 +45,12 @@ restRoutes(app);
 
 app.use(express.static(path.join(__dirname, '../static')));
 
-const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
-const webpackHotMiddleware = require('webpack-hot-middleware');
-const config = require('../build/webpack.config');
-
-const compiler = webpack(config);
-app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: config.output.publicPath }));
-app.use(webpackHotMiddleware(compiler));
+if (process.env.NODE_ENV === 'development') {
+  const compiler = webpack(config);
+  app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: config.output.publicPath }));
+  app.use(webpackHotMiddleware(compiler));
+  console.log('Server running with dynamic bundle.js generation');
+}
 
 const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
 
