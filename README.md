@@ -16,7 +16,7 @@ This project features:
 
 # initial setup
 
-Install couchdb and import the views
+Install couchdb and import the views (see https://www.npmjs.com/package/couchviews and build/couchdb/)
 
 # dev setup
 
@@ -45,6 +45,6 @@ To build the client side bundle.js:
 
 - npm run build
 
-To start the server without dynamic bundle.js generation:
+To start the server at :8080 without dynamic bundle.js generation:
 
 - npm start
