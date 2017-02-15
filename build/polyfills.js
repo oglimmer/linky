@@ -7,7 +7,8 @@ if (typeof Promise === 'undefined') {
 }
 
 // fetch() polyfill for making API calls.
-require('whatwg-fetch');
+// but we use require('isomorphic-fetch'); for server and client
+// require('whatwg-fetch');
 
 // Object.assign() is commonly used with React.
 // It will use the native implementation if it's present and isn't buggy.

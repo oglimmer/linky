@@ -1,5 +1,5 @@
 
-const fetch = require('./fetchWrapper');
+require('isomorphic-fetch');
 
 let baseUrl = '';
 if (typeof window === 'undefined') {
