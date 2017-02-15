@@ -30,6 +30,14 @@ module.exports = {
   },
 
   module: {
+    preLoaders: [
+      {
+        test: /\.(js|jsx)$/,
+        loader: 'eslint',
+        exclude: /node_modules/,
+        include: path.join(__dirname, '..'),
+      },
+    ],
     loaders: [{
       test: /\.jsx?$/,
       loader: 'babel',

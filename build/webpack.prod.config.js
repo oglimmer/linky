@@ -4,6 +4,8 @@ const webpack = require('webpack');
 
 module.exports = {
 
+  bail: true,
+
   entry: [
     require.resolve('./polyfills'),
     './src/index.js',
@@ -45,6 +47,14 @@ module.exports = {
   },
 
   module: {
+    preLoaders: [
+      {
+        test: /\.(js|jsx)$/,
+        loader: 'eslint',
+        exclude: /node_modules/,
+        include: path.join(__dirname, '..'),
+      },
+    ],
     loaders: [{
       test: /\.jsx?$/,
       loader: 'babel',
