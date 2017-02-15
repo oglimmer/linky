@@ -1,8 +1,15 @@
 
+const fetch = require('./fetchWrapper');
+
+let baseUrl = '';
+if (typeof window === 'undefined') {
+  baseUrl = 'http://localhost:8080';
+}
+
 module.exports = {
 
   get: function get(url, authToken) {
-    return fetch(url, {
+    return fetch(baseUrl + url, {
       method: 'GET',
       headers: {
         authorization: `Bearer ${authToken}`,
@@ -11,7 +18,7 @@ module.exports = {
   },
 
   post: function post(url, obj, authToken) {
-    return fetch(url, {
+    return fetch(baseUrl + url, {
       method: 'POST',
       body: JSON.stringify(obj),
       headers: {
@@ -22,7 +29,7 @@ module.exports = {
   },
 
   delete: function deleteObj(url, authToken) {
-    return fetch(url, {
+    return fetch(baseUrl + url, {
       method: 'DELETE',
       headers: {
         authorization: `Bearer ${authToken}`,

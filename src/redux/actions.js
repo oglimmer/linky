@@ -27,12 +27,10 @@ module.exports.SET_ERROR_MESSAGE = SET_ERROR_MESSAGE;
 function setLinks(linkList) {
   return { type: SET_LINKS, linkList };
 }
-module.exports.setLinks = setLinks;
 
 function clearAuthToken() {
   return { type: CLEAR_AUTH_TOKEN };
 }
-module.exports.clearAuthToken = clearAuthToken;
 
 function logout() {
   return (dispatch) => {
@@ -41,22 +39,18 @@ function logout() {
     return Promise.resolve();
   };
 }
-module.exports.logout = logout;
 
 function setAuthToken(authToken) {
   return { type: SET_AUTH_TOKEN, authToken };
 }
-module.exports.setAuthToken = setAuthToken;
 
 function setErrorMessage(errorMessage) {
   return { type: SET_ERROR_MESSAGE, errorMessage };
 }
-module.exports.setErrorMessage = setErrorMessage;
 
 function addLinkPost(id, linkUrl) {
   return { type: ADD_LINK, id, linkUrl };
 }
-module.exports.addLinkPost = addLinkPost;
 
 function addLink(url, authToken) {
   let linkUrl = url;
@@ -70,12 +64,10 @@ function addLink(url, authToken) {
       console.log(error);
     });
 }
-module.exports.addLink = addLink;
 
 function delLinkPost(id) {
   return { type: DEL_LINK, id };
 }
-module.exports.delLinkPost = delLinkPost;
 
 function delLink(id, authToken) {
   return dispatch => fetch.delete(`/rest/links/${id}`, authToken)
@@ -84,7 +76,6 @@ function delLink(id, authToken) {
       console.log(error);
     });
 }
-module.exports.delLink = delLink;
 
 function initialLoad(authToken) {
   return dispatch => fetch.get('/rest/links', authToken)
@@ -96,7 +87,6 @@ function initialLoad(authToken) {
       console.log(error);
     });
 }
-module.exports.initialLoad = initialLoad;
 
 function checkAuth(email, password) {
   return (dispatch) => {
@@ -125,4 +115,15 @@ function checkAuth(email, password) {
     });
   };
 }
+
+module.exports.setLinks = setLinks;
+module.exports.clearAuthToken = clearAuthToken;
+module.exports.logout = logout;
+module.exports.setAuthToken = setAuthToken;
+module.exports.setErrorMessage = setErrorMessage;
+module.exports.addLinkPost = addLinkPost;
+module.exports.addLink = addLink;
+module.exports.delLinkPost = delLinkPost;
+module.exports.delLink = delLink;
+module.exports.initialLoad = initialLoad;
 module.exports.checkAuth = checkAuth;
