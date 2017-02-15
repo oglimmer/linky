@@ -1,0 +1,46 @@
+
+// https://react-bootstrap.github.io/components.html#forms
+
+const React = require('react');
+const { withRouter } = require('react-router');
+const { Button, Jumbotron } = require('react-bootstrap');
+const { Form } = require('react-redux-form');
+const { connect } = require('react-redux');
+
+const { checkAuth } = require('../redux/actions');
+
+const AlertAdapter = require('../components/AlertAdapter');
+const FormGroupAdapter = require('../components/FormGroupAdapter');
+
+const { PropTypes } = React;
+
+const Login = ({ dispatch, router }) => (
+  <div>
+    <Jumbotron>
+      <h1>Linky</h1>
+      <p>world&#39;s best link management system</p>
+    </Jumbotron>
+    <AlertAdapter />
+    <Form
+      model="login"
+      onSubmit={(formData) => {
+        dispatch(checkAuth(formData.email, formData.password)).then(() => {
+          router.replace('/portalPage');
+        });
+      }}
+    >
+      <FormGroupAdapter
+        label="Enter your registered email address"
+        model="email" placeholder="email" autoFocus="true"
+      />
+      <FormGroupAdapter label="Enter password" model="password" placeholder="password" />
+      <Button type="submit">Log in</Button>
+    </Form>
+  </div>
+);
+Login.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  router: PropTypes.shape().isRequired,
+};
+
+module.exports = withRouter(connect()(Login));
