@@ -61,6 +61,7 @@
     "gzip-size": "3.0.0",
     "html-webpack-plugin": "2.24.0",
     "http-proxy-middleware": "0.17.2",
+    "nodemon": "^1.11.0",
     "object-assign": "4.1.0",
     "path-exists": "2.1.0",
     "postcss-loader": "1.0.0",
@@ -74,6 +75,7 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development node server/",
+    "nodemon": "NODE_ENV=development nodemon server/",
     "start": "NODE_ENV=production node server/",
     "build": "webpack --config build/webpack.prod.config.js"
   }
