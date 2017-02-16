@@ -2,13 +2,16 @@
 const path = require('path');
 const webpack = require('webpack');
 
+console.log('Using webpack.dev.config.js');
+
 module.exports = {
 
-  devtool: '#inline-source-map',
+  devtool: 'cheap-module-eval-source-map',
 
   entry: [
     'webpack-hot-middleware/client',
-    require.resolve('./polyfills'),
+    'react-hot-loader/patch',
+    './build/polyfills',
     './src/index.js',
   ],
 
@@ -19,36 +22,26 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoErrorsPlugin(),
+    new webpack.NoEmitOnErrorsPlugin(),
   ],
 
-  resolve: {
-    alias: {},
-    extensions: ['', '.js'],
-  },
-
   module: {
-    preLoaders: [
+    rules: [
       {
-        test: /\.(js|jsx)$/,
-        loader: 'eslint',
+        enforce: 'pre',
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        include: path.join(__dirname, '..'),
+        loader: 'eslint-loader',
+      },
+      {
+        test: /\.jsx?$/,
+        loader: 'babel-loader',
         exclude: /node_modules/,
         include: path.join(__dirname, '..'),
       },
     ],
-    loaders: [{
-      test: /\.jsx?$/,
-      loader: 'babel',
-      exclude: /node_modules/,
-      include: path.join(__dirname, '..'),
-      query: {
-        presets: ['react-hmre', 'es2015', 'stage-0', 'react'],
-      },
-    }, {
-      test: /\.css$/,
-      loader: 'style!css',
-    }],
   },
+
 };

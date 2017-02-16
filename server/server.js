@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -47,7 +46,7 @@ app.use(express.static(path.join(__dirname, '../static')));
 
 if (process.env.NODE_ENV === 'development') {
   const compiler = webpack(config);
-  app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: config.output.publicPath }));
+  app.use(webpackDevMiddleware(compiler, { publicPath: config.output.publicPath }));
   app.use(webpackHotMiddleware(compiler));
   console.log('Server running with dynamic bundle.js generation');
 }
@@ -138,4 +137,4 @@ const port = process.env.PORT || '8080';
 const bind = process.env.BIND || '127.0.0.1';
 app.listen(port, bind);
 
-console.log('server started....');
+console.log(`Server started at ${bind}:${port}....`);

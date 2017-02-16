@@ -27,5 +27,8 @@ FormGroupAdapter.propTypes = {
   placeholder: PropTypes.string.isRequired,
   autoFocus: PropTypes.string,
 };
+FormGroupAdapter.defaultProps = {
+  autoFocus: '',
+};
 
 module.exports = FormGroupAdapter;

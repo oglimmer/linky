@@ -15,6 +15,9 @@ const AlertAdapter = ({ errorMessage }) => {
 AlertAdapter.propTypes = {
   errorMessage: PropTypes.string,
 };
+AlertAdapter.defaultProps = {
+  errorMessage: '',
+};
 
 const mapStateToProps = state => ({
   errorMessage: state.mainData.errorMessage,

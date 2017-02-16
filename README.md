@@ -25,6 +25,10 @@ generated bundle.js
 
 - npm run dev
 
+When using nodemon instead of dev you start the server with a nodemon watcher underneath.
+
+- npm run nodemon
+
 => open http://localhost:8080
 
 # Playing with the REST service

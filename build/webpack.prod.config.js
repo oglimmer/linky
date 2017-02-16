@@ -2,12 +2,18 @@
 const path = require('path');
 const webpack = require('webpack');
 
+console.log('Using webpack.prod.config.js');
+// https://github.com/webpack/webpack/issues/2537
+process.env.NODE_ENV = 'production';
+
 module.exports = {
 
   bail: true,
 
+  devtool: 'hidden-source-map',
+
   entry: [
-    require.resolve('./polyfills'),
+    './build/polyfills',
     './src/index.js',
   ],
 
@@ -23,9 +29,6 @@ module.exports = {
         NODE_ENV: JSON.stringify('production'),
       },
     }),
-    // This helps ensure the builds are consistent if source hasn't changed
-    new webpack.optimize.OccurrenceOrderPlugin(),
-    new webpack.optimize.DedupePlugin(),
     new webpack.optimize.UglifyJsPlugin({
       compress: {
         screw_ie8: true, // React doesn't support IE8
@@ -38,34 +41,26 @@ module.exports = {
         comments: false,
         screw_ie8: true,
       },
+      // https://github.com/webpack/webpack/issues/1385
+      sourceMap: true,
     }),
   ],
 
-  resolve: {
-    alias: {},
-    extensions: ['', '.js'],
-  },
-
   module: {
-    preLoaders: [
+    rules: [
       {
-        test: /\.(js|jsx)$/,
-        loader: 'eslint',
+        enforce: 'pre',
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        include: path.join(__dirname, '..'),
+        loader: 'eslint-loader',
+      },
+      {
+        test: /\.jsx?$/,
+        loader: 'babel-loader',
         exclude: /node_modules/,
         include: path.join(__dirname, '..'),
       },
     ],
-    loaders: [{
-      test: /\.jsx?$/,
-      loader: 'babel',
-      exclude: /node_modules/,
-      include: path.join(__dirname, '..'),
-      query: {
-        presets: ['react-hmre', 'es2015', 'stage-0', 'react'],
-      },
-    }, {
-      test: /\.css$/,
-      loader: 'style!css',
-    }],
   },
 };

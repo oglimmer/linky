@@ -20,5 +20,8 @@ FormControlAdapter.propTypes = {
   autoFocus: PropTypes.string,
   placeholder: PropTypes.string.isRequired,
 };
+FormControlAdapter.defaultProps = {
+  autoFocus: '',
+};
 
 module.exports = FormControlAdapter;

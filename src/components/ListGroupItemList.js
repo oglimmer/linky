@@ -17,7 +17,7 @@ const ListGroupItemList = ({ linkList, onDeleteLink, authToken }) => (
         id={link.id}
         linkUrl={link.linkUrl}
         onDeleteLink={() => onDeleteLink(link.id, authToken)}
-      />
+      />,
     ) }
   </ListGroup>
 );
@@ -46,5 +46,5 @@ const mapDispatchToProps = dispatch => ({
 
 module.exports = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(ListGroupItemList);
