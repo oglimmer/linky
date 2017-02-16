@@ -9,10 +9,10 @@ module.exports = {
   devtool: 'cheap-module-eval-source-map',
 
   entry: [
-    'webpack-hot-middleware/client',
     'react-hot-loader/patch',
+    'webpack-hot-middleware/client',
     './build/polyfills',
-    './src/index.js',
+    './src/indexDebug.js',
   ],
 
   output: {

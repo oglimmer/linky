@@ -2,7 +2,8 @@
   "presets": [ "es2015", "stage-0", "react" ],
   "env": {
     "development": {
-      "presets": [ "react-hmre" ]
+      "presets": [ ],
+      "plugins": [ "react-hot-loader/babel" ],
     },
     "production": {
       "presets": [ ]
