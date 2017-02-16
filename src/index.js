@@ -2,7 +2,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 
-const Root = require('./Root');
+const Root = require('./components/Root');
 
 ReactDOM.render(
   <Root />,

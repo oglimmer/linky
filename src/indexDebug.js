@@ -4,7 +4,7 @@ const ReactDOM = require('react-dom');
 
 const { AppContainer } = require('react-hot-loader');
 
-const Root = require('./Root');
+const Root = require('./components/Root');
 
 ReactDOM.render(
   <AppContainer><Root /></AppContainer>,
@@ -13,8 +13,8 @@ ReactDOM.render(
 
 /* eslint-disable global-require */
 if (module.hot) {
-  module.hot.accept('./Root', () => {
-    const ReRoot = require('./Root');
+  module.hot.accept('./components/Root', () => {
+    const ReRoot = require('./components/Root');
     ReactDOM.render(
       <AppContainer><ReRoot /></AppContainer>,
       document.getElementById('root'),

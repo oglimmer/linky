@@ -8,8 +8,8 @@ const createLogger = require('redux-logger');
 
 const { Router, browserHistory } = require('react-router');
 
-const getRoutes = require('./routes/routing');
-const combineReducers = require('./redux/reducer');
+const getRoutes = require('../routes/routing');
+const combineReducers = require('../redux/reducer');
 
 // https://bootswatch.com/united/
 // const  './css/bootstrap-theme.min.css');
