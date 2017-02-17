@@ -29,7 +29,7 @@ import preMatchRouteFetchData from './util/preMatchRouteFetchData';
 
 import config from '../build/webpack.dev.config';
 
-import { emptyCache } from './reload';
+import { emptyCache } from './util/reload';
 
 const app = express();
 
