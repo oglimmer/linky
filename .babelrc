@@ -3,10 +3,11 @@
   "env": {
     "development": {
       "presets": [ ],
-      "plugins": [ "react-hot-loader/babel" ],
+      "plugins": [ "react-hot-loader/babel" ]
     },
     "production": {
-      "presets": [ ]
+      "presets": [ ],
+      "plugins": [  "lodash" ]
     }
   }
 }

@@ -1,6 +1,7 @@
 
 const path = require('path');
 const webpack = require('webpack');
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 console.log('Using webpack.prod.config.js');
 // https://github.com/webpack/webpack/issues/2537
@@ -24,6 +25,7 @@ module.exports = {
   },
 
   plugins: [
+    new LodashModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       'process.env': {
         NODE_ENV: JSON.stringify('production'),
