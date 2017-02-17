@@ -1,12 +1,12 @@
 
-require('isomorphic-fetch');
+import 'isomorphic-fetch';
 
 let baseUrl = '';
 if (typeof window === 'undefined') {
   baseUrl = 'http://localhost:8080';
 }
 
-module.exports = {
+export default {
 
   get: function get(url, authToken) {
     return fetch(baseUrl + url, {

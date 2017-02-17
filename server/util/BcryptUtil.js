@@ -1,6 +1,6 @@
 
 
-const bcrypt = require('bcrypt');
+import bcrypt from 'bcrypt';
 
 const saltRounds = 10;
 
@@ -16,4 +16,4 @@ class BcryptUtil {
 
 }
 
-module.exports = BcryptUtil;
+export default BcryptUtil;

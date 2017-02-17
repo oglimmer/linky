@@ -1,11 +1,9 @@
 
-const React = require('react');
-const { FormGroup, ControlLabel, FormControl } = require('react-bootstrap');
-const { Control } = require('react-redux-form');
+import React, { PropTypes } from 'react';
+import { FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
+import { Control } from 'react-redux-form';
 
-const FormControlAdapter = require('./FormControlAdapter');
-
-const { PropTypes } = React;
+import FormControlAdapter from './FormControlAdapter';
 
 const FormGroupAdapter = ({ label, model, placeholder, autoFocus }) => (
   <FormGroup
@@ -31,4 +29,4 @@ FormGroupAdapter.defaultProps = {
   autoFocus: '',
 };
 
-module.exports = FormGroupAdapter;
+export default FormGroupAdapter;

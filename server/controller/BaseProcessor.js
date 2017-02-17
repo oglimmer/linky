@@ -1,8 +1,10 @@
 
-const assert = require('assert');
-const ResponseUtil = require('../../src/util/ResponseUtil');
-const bluebird = require('bluebird');
-const _ = require('lodash');
+import assert from 'assert';
+import bluebird from 'bluebird';
+import _ from 'lodash';
+
+import ResponseUtil from '../../src/util/ResponseUtil';
+
 
 /* abstract*/ class BaseProcessor {
 
@@ -69,4 +71,4 @@ const _ = require('lodash');
 
 }
 
-module.exports = BaseProcessor;
+export default BaseProcessor;

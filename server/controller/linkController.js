@@ -1,8 +1,8 @@
 
-const _ = require('lodash');
-const linkDao = require('../dao/linkDao');
-const ResponseUtil = require('../../src/util/ResponseUtil');
-const BaseProcessor = require('./BaseProcessor');
+import _ from 'lodash';
+import linkDao from '../dao/linkDao';
+import ResponseUtil from '../../src/util/ResponseUtil';
+import BaseProcessor from './BaseProcessor';
 
 
 class CreateLinkProcessor extends BaseProcessor {
@@ -29,7 +29,7 @@ class CreateLinkProcessor extends BaseProcessor {
       console.log('Create link id=%s to db: %j', id, this.data);
     } catch (err) {
       console.log(err);
-      ResponseUtil.sendErrorResponse(err, this.res);
+      ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();
   }
@@ -52,7 +52,7 @@ class GetLinkProcessor extends BaseProcessor {
       console.log('Get all links from db for user %s resulted in %d rows', this.data.userid, responseArr.length);
     } catch (err) {
       console.log(err);
-      ResponseUtil.sendErrorResponse(err, this.res);
+      ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();
   }
@@ -78,14 +78,14 @@ class DeleteProcessor extends BaseProcessor {
       console.log('Deleted link with id=%s', this.data.linkid);
     } catch (err) {
       console.log(err);
-      ResponseUtil.sendErrorResponse(err, this.res);
+      ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();
   }
 
 }
 
-module.exports = {
+export default {
 
   createLink: function createLink(req, res, next) {
     const crp = new CreateLinkProcessor(req, res, next);

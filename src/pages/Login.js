@@ -1,18 +1,16 @@
 
 // https://react-bootstrap.github.io/components.html#forms
 
-const React = require('react');
-const { withRouter } = require('react-router');
-const { Button, Jumbotron } = require('react-bootstrap');
-const { Form } = require('react-redux-form');
-const { connect } = require('react-redux');
+import React, { PropTypes } from 'react';
+import { withRouter } from 'react-router';
+import { Button, Jumbotron } from 'react-bootstrap';
+import { Form } from 'react-redux-form';
+import { connect } from 'react-redux';
 
-const { checkAuth } = require('../redux/actions');
+import { checkAuth } from '../redux/actions';
 
-const AlertAdapter = require('../components/AlertAdapter');
-const FormGroupAdapter = require('../components/FormGroupAdapter');
-
-const { PropTypes } = React;
+import AlertAdapter from '../components/AlertAdapter';
+import FormGroupAdapter from '../components/FormGroupAdapter';
 
 const Login = ({ dispatch, router }) => (
   <div>
@@ -43,4 +41,4 @@ Login.propTypes = {
   router: PropTypes.shape().isRequired,
 };
 
-module.exports = withRouter(connect()(Login));
+export default withRouter(connect()(Login));

@@ -1,9 +1,9 @@
 
-const userDao = require('../dao/userDao');
-const BcryptUtil = require('../util/BcryptUtil');
-const JwtUtil = require('../util/JwtUtil');
-const ResponseUtil = require('../../src/util/ResponseUtil');
-const BaseProcessor = require('./BaseProcessor');
+import userDao from '../dao/userDao';
+import BcryptUtil from '../util/BcryptUtil';
+import JwtUtil from '../util/JwtUtil';
+import ResponseUtil from '../../src/util/ResponseUtil';
+import BaseProcessor from './BaseProcessor';
 
 class CreateUserProcessor extends BaseProcessor {
 
@@ -36,7 +36,7 @@ class CreateUserProcessor extends BaseProcessor {
       }
     } catch (err) {
       console.log(err);
-      ResponseUtil.sendErrorResponse(err, this.res);
+      ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();
   }
@@ -85,14 +85,14 @@ class AuthenticateProcessor extends BaseProcessor {
       }
     } catch (err) {
       console.log(err);
-      ResponseUtil.sendErrorResponse(err, this.res);
+      ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();
   }
 
 }
 
-module.exports = {
+export default {
 
   authenticate: function authenticate(req, res, next) {
     const ap = new AuthenticateProcessor(req, res, next);

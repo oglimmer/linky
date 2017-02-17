@@ -1,8 +1,6 @@
 
-const React = require('react');
-const { FormControl } = require('react-bootstrap');
-
-const { PropTypes } = React;
+import React, { PropTypes } from 'react';
+import { FormControl } from 'react-bootstrap';
 
 const FormControlAdapter = props => (
   <FormControl
@@ -24,4 +22,4 @@ FormControlAdapter.defaultProps = {
   autoFocus: '',
 };
 
-module.exports = FormControlAdapter;
+export default FormControlAdapter;

@@ -1,7 +1,9 @@
 
-const assert = require('assert');
-const _ = require('lodash');
-const linkyDb = require('nano')('http://localhost:5984/linky');
+import assert from 'assert';
+import _ from 'lodash';
+import nano from 'nano';
+
+const linkyDb = nano('http://localhost:5984/linky');
 
 /* eslint-disable no-underscore-dangle */
 class BaseDataAccessObject {
@@ -79,4 +81,4 @@ class BaseDataAccessObject {
 }
 /* eslint-disable no-underscore-dangle */
 
-module.exports = BaseDataAccessObject;
+export default BaseDataAccessObject;

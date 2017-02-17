@@ -1,5 +1,5 @@
 
-const BaseDataAccessObject = require('./BaseDataAccessObject');
+import BaseDataAccessObject from './BaseDataAccessObject';
 
 class LinkDao extends BaseDataAccessObject {
 
@@ -9,4 +9,4 @@ class LinkDao extends BaseDataAccessObject {
 
 }
 
-module.exports = new LinkDao();
+export default new LinkDao();

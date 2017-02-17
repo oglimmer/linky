@@ -1,38 +1,30 @@
 
-const fetch = require('../util/fetch');
+import fetch from '../util/fetch';
 
 /*
  * action types
  */
 
-const ADD_LINK = 'ADD_LINK';
-const DEL_LINK = 'DEL_LINK';
-const SET_LINKS = 'SET_LINKS';
-const SET_AUTH_TOKEN = 'SET_AUTH_TOKEN';
-const CLEAR_AUTH_TOKEN = 'CLEAR_AUTH_TOKEN';
-const SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE';
-
-module.exports.ADD_LINK = ADD_LINK;
-module.exports.DEL_LINK = DEL_LINK;
-module.exports.SET_LINKS = SET_LINKS;
-module.exports.SET_AUTH_TOKEN = SET_AUTH_TOKEN;
-module.exports.CLEAR_AUTH_TOKEN = CLEAR_AUTH_TOKEN;
-module.exports.SET_ERROR_MESSAGE = SET_ERROR_MESSAGE;
-
+export const ADD_LINK = 'ADD_LINK';
+export const DEL_LINK = 'DEL_LINK';
+export const SET_LINKS = 'SET_LINKS';
+export const SET_AUTH_TOKEN = 'SET_AUTH_TOKEN';
+export const CLEAR_AUTH_TOKEN = 'CLEAR_AUTH_TOKEN';
+export const SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE';
 
 /*
  * action creators
  */
 
-function setLinks(linkList) {
+export function setLinks(linkList) {
   return { type: SET_LINKS, linkList };
 }
 
-function clearAuthToken() {
+export function clearAuthToken() {
   return { type: CLEAR_AUTH_TOKEN };
 }
 
-function logout() {
+export function logout() {
   return (dispatch) => {
     dispatch(clearAuthToken());
     dispatch(setLinks([]));
@@ -40,19 +32,19 @@ function logout() {
   };
 }
 
-function setAuthToken(authToken) {
+export function setAuthToken(authToken) {
   return { type: SET_AUTH_TOKEN, authToken };
 }
 
-function setErrorMessage(errorMessage) {
+export function setErrorMessage(errorMessage) {
   return { type: SET_ERROR_MESSAGE, errorMessage };
 }
 
-function addLinkPost(id, linkUrl) {
+export function addLinkPost(id, linkUrl) {
   return { type: ADD_LINK, id, linkUrl };
 }
 
-function addLink(url, authToken) {
+export function addLink(url, authToken) {
   let linkUrl = url;
   if (!linkUrl.startsWith('http')) {
     linkUrl = `http://${linkUrl}`;
@@ -65,11 +57,11 @@ function addLink(url, authToken) {
     });
 }
 
-function delLinkPost(id) {
+export function delLinkPost(id) {
   return { type: DEL_LINK, id };
 }
 
-function delLink(id, authToken) {
+export function delLink(id, authToken) {
   return dispatch => fetch.delete(`/rest/links/${id}`, authToken)
     .then(() => dispatch(delLinkPost(id)))
     .catch((error) => {
@@ -77,7 +69,7 @@ function delLink(id, authToken) {
     });
 }
 
-function initialLoad(authToken) {
+export function initialLoad(authToken) {
   return dispatch => fetch.get('/rest/links', authToken)
     .then(response => response.json())
     .then((linkList) => {
@@ -88,7 +80,7 @@ function initialLoad(authToken) {
     });
 }
 
-function checkAuth(email, password) {
+export function checkAuth(email, password) {
   return (dispatch) => {
     dispatch(setErrorMessage(''));
     let responseCode;
@@ -115,15 +107,3 @@ function checkAuth(email, password) {
     });
   };
 }
-
-module.exports.setLinks = setLinks;
-module.exports.clearAuthToken = clearAuthToken;
-module.exports.logout = logout;
-module.exports.setAuthToken = setAuthToken;
-module.exports.setErrorMessage = setErrorMessage;
-module.exports.addLinkPost = addLinkPost;
-module.exports.addLink = addLink;
-module.exports.delLinkPost = delLinkPost;
-module.exports.delLink = delLink;
-module.exports.initialLoad = initialLoad;
-module.exports.checkAuth = checkAuth;

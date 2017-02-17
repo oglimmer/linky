@@ -1,13 +1,11 @@
 
-const React = require('react');
-const { ListGroup } = require('react-bootstrap');
-const { connect } = require('react-redux');
+import React, { PropTypes } from 'react';
+import { ListGroup } from 'react-bootstrap';
+import { connect } from 'react-redux';
 
-const { delLink } = require('../redux/actions');
+import { delLink } from '../redux/actions';
 
-const ListGroupItemButton = require('./ListGroupItemButton');
-
-const { PropTypes } = React;
+import ListGroupItemButton from './ListGroupItemButton';
 
 const ListGroupItemList = ({ linkList, onDeleteLink, authToken }) => (
   <ListGroup>
@@ -44,7 +42,7 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-module.exports = connect(
+export default connect(
   mapStateToProps,
   mapDispatchToProps,
 )(ListGroupItemList);

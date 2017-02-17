@@ -1,30 +1,24 @@
 
-const React = require('react');
+import React, { PropTypes } from 'react';
 
-const { Provider } = require('react-redux');
+import { Provider } from 'react-redux';
 
-const { Router, browserHistory } = require('react-router');
+import { Router, browserHistory } from 'react-router';
 
-const getRoutes = require('../routes/routing');
+import getRoutes from '../routes/routing';
 
-const configureStore = require('../util/configureStore');
+// key={Math.random()} is needed for react-hot-loading
 
-// https://bootswatch.com/united/
-// const  './css/bootstrap-theme.min.css');
+const Root = ({ store }) => {
+  const routes = getRoutes(store);
+  return (
+    <Provider store={store}>
+      <Router history={browserHistory} routes={routes} key={Math.random()} />
+    </Provider>
+  );
+};
+Root.propTypes = {
+  store: PropTypes.shape().isRequired,
+};
 
-let state;
-if (window.$REDUX_STATE) {
-  state = window.$REDUX_STATE;
-}
-
-const store = configureStore(state);
-
-const routes = getRoutes(store);
-
-const Root = () => (
-  <Provider store={store}>
-    <Router history={browserHistory} routes={routes} />
-  </Provider>
-);
-
-module.exports = Root;
+export default Root;

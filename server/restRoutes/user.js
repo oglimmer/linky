@@ -1,7 +1,7 @@
 
-const userController = require('../controller/userController');
+import userController from '../controller/userController';
 
-module.exports = (app) => {
+export default (app) => {
   app.post('/rest/authenticate', userController.authenticate);
   app.post('/rest/users', userController.createUser);
 };

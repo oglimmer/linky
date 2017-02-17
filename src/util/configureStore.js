@@ -1,10 +1,10 @@
 
-const thunkMiddleware = require('redux-thunk').default;
-const createLogger = require('redux-logger');
+import thunkMiddleware from 'redux-thunk';
+import createLogger from 'redux-logger';
 
-const { createStore, applyMiddleware } = require('redux');
+import { createStore, applyMiddleware } from 'redux';
 
-const combineReducers = require('../redux/reducer');
+import combineReducers from '../redux/reducer';
 
 const middlewares = [thunkMiddleware];
 
@@ -17,7 +17,7 @@ function configureStore(state) {
   /* eslint-disable global-require */
   if (module.hot) {
     module.hot.accept('../redux/reducer', () => {
-      const nextRootReducer = require('../redux/reducer');
+      const nextRootReducer = require('../redux/reducer').default;
       store.replaceReducer(nextRootReducer);
     });
   }
@@ -26,4 +26,4 @@ function configureStore(state) {
   return store;
 }
 
-module.exports = configureStore;
+export default configureStore;

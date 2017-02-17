@@ -1,8 +1,7 @@
 
-const React = require('react');
-const ReactDOM = require('react-dom');
-
-const Root = require('./components/Root');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Root from './components/Root';
 
 ReactDOM.render(
   <Root />,

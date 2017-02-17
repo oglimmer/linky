@@ -1,33 +1,35 @@
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const compression = require('compression');
-const cookieParser = require('cookie-parser');
+import express from 'express';
 
-const path = require('path');
+import bodyParser from 'body-parser';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
 
-const React = require('react');
-const ReactDOMServer = require('react-dom/server');
+import path from 'path';
 
-const { RouterContext, match } = require('react-router');
-const { Provider } = require('react-redux');
+import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 
-const { applyMiddleware, createStore } = require('redux');
-const thunkMiddleware = require('redux-thunk').default;
+import { RouterContext, match } from 'react-router';
+import { Provider } from 'react-redux';
 
-const restRoutes = require('./util/restRoutesEntry');
+import { applyMiddleware, createStore } from 'redux';
+import thunkMiddleware from 'redux-thunk';
 
-const getRoutes = require('../src/routes/routing');
+import webpack from 'webpack';
+import webpackDevMiddleware from 'webpack-dev-middleware';
+import webpackHotMiddleware from 'webpack-hot-middleware';
 
-const combinedReducers = require('../src/redux/reducer');
+import restRoutes from './util/restRoutesEntry';
 
-const fetchComponentData = require('./util/fetchComponentData');
-const preMatchRouteFetchData = require('./util/preMatchRouteFetchData');
+import getRoutes from '../src/routes/routing';
 
-const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
-const webpackHotMiddleware = require('webpack-hot-middleware');
-const config = require('../build/webpack.dev.config');
+import combinedReducers from '../src/redux/reducer';
+
+import fetchComponentData from './util/fetchComponentData';
+import preMatchRouteFetchData from './util/preMatchRouteFetchData';
+
+import config from '../build/webpack.dev.config';
 
 const app = express();
 
@@ -46,7 +48,8 @@ app.use(express.static(path.join(__dirname, '../static')));
 
 if (process.env.NODE_ENV === 'development') {
   const compiler = webpack(config);
-  app.use(webpackDevMiddleware(compiler, { publicPath: config.output.publicPath }));
+  app.use(webpackDevMiddleware(compiler, {
+    publicPath: config.output.publicPath, stats: { colors: true } }));
   app.use(webpackHotMiddleware(compiler));
   console.log('Server running with dynamic bundle.js generation');
 }

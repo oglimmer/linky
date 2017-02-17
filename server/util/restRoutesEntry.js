@@ -1,8 +1,8 @@
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-module.exports = (server) => {
+export default (server) => {
   function walk(pathToWalk) {
     fs.readdirSync(pathToWalk).forEach((file) => {
       const newPath = `${pathToWalk}/${file}`;
@@ -10,7 +10,7 @@ module.exports = (server) => {
       if (stat.isFile()) {
         if (/(.*)\.(js$|coffee$)/.test(file)) {
           /* eslint-disable global-require */
-          require(newPath)(server);
+          require(newPath).default(server);
           /* eslint-enable global-require */
         }
       } else if (stat.isDirectory() && file !== 'middlewares') {

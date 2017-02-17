@@ -1,8 +1,8 @@
 
-const { initialLoad } = require('../../src/redux/actions');
+import { initialLoad } from '../../src/redux/actions';
 
 
-module.exports = (dispatch, components, params, store) => {
+export default (dispatch, components, params, store) => {
   const authToken = store.getState().auth.token;
   if (authToken) {
     return Promise.all([

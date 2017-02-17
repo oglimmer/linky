@@ -1,8 +1,8 @@
 
-const React = require('react');
-const { Navbar, Nav } = require('react-bootstrap');
+import React from 'react';
+import { Navbar, Nav } from 'react-bootstrap';
 
-const LogoutButton = require('./LogoutButton');
+import LogoutButton from './LogoutButton';
 
 const Header = () => (
   <Navbar collapseOnSelect>
@@ -20,4 +20,4 @@ const Header = () => (
   </Navbar>
 );
 
-module.exports = Header;
+export default Header;

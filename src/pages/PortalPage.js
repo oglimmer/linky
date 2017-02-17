@@ -1,10 +1,10 @@
 
 // https://react-bootstrap.github.io/components.html#forms
 
-const React = require('react');
+import React from 'react';
 
-const AddLinkInputBox = require('../components/AddLinkInputBox');
-const ListGroupItemList = require('../components/ListGroupItemList');
+import AddLinkInputBox from '../components/AddLinkInputBox';
+import ListGroupItemList from '../components/ListGroupItemList';
 
 const PortalPage = () => (
   <div>
@@ -14,4 +14,4 @@ const PortalPage = () => (
   </div>
 );
 
-module.exports = PortalPage;
+export default PortalPage;

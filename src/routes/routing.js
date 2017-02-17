@@ -1,9 +1,9 @@
 
-const Layout = require('../pages/Layout');
-const Login = require('../pages/Login');
-const PortalPage = require('../pages/PortalPage');
+import Layout from '../pages/Layout';
+import Login from '../pages/Login';
+import PortalPage from '../pages/PortalPage';
 
-module.exports = (store) => {
+export default (store) => {
   const checkSecured = (newState, replace) => {
     const { auth } = store.getState();
     if (!auth.token) {

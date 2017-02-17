@@ -1,15 +1,15 @@
 {
-    "extends": "airbnb",
-    "plugins": [
-        "react",
-        "jsx-a11y",
-        "import"
-    ],
-    "rules": {
-      "react/jsx-filename-extension": ["error", { "extensions": [".js", ".jsx"] }],
-      "no-console": 0
-    },
-    "env": {
-      "browser": true
-    }
+  "extends": "airbnb",
+  "plugins": [
+    "react",
+    "jsx-a11y",
+    "import"
+  ],
+  "rules": {
+    "react/jsx-filename-extension": ["error", { "extensions": [".js", ".jsx"] }],
+    "no-console": 0
+  },
+  "env": {
+    "browser": true
+  }
 }

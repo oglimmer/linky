@@ -1,5 +1,5 @@
 
-const _ = require('lodash');
+import _ from 'lodash';
 
 class ResponseUtil {
 
@@ -30,4 +30,4 @@ class ResponseUtil {
 
 }
 
-module.exports = ResponseUtil;
+export default ResponseUtil;

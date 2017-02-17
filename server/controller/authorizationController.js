@@ -1,8 +1,9 @@
 
-const assert = require('assert');
-const JwtUtil = require('../util/JwtUtil');
-const ResponseUtil = require('../../src/util/ResponseUtil');
-const bluebird = require('bluebird');
+import assert from 'assert';
+import bluebird from 'bluebird';
+
+import JwtUtil from '../util/JwtUtil';
+import ResponseUtil from '../../src/util/ResponseUtil';
 
 class Verification {
 
@@ -48,7 +49,7 @@ class Verification {
 }
 
 // replace this by npm restify-jwt
-module.exports = {
+export default {
 
   checkAuthorization: function checkAuthorization(req, res, next) {
     bluebird.coroutine(function* main() {

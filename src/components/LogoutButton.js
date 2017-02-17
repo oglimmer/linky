@@ -1,10 +1,10 @@
 
-const React = require('react');
-const { NavItem } = require('react-bootstrap');
-const { connect } = require('react-redux');
-const { withRouter } = require('react-router');
+import React from 'react';
+import { NavItem } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 
-const { logout } = require('../redux/actions');
+import { logout } from '../redux/actions';
 
 const LogoutButton = ({ dispatch, router, authToken }) => {
   if (!authToken) {
@@ -30,4 +30,4 @@ const mapStateToProps = state => ({
   authToken: state.auth.token,
 });
 
-module.exports = withRouter(connect(mapStateToProps)(LogoutButton));
+export default withRouter(connect(mapStateToProps)(LogoutButton));

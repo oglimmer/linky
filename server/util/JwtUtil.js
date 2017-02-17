@@ -1,6 +1,6 @@
 
-const _ = require('lodash');
-const jwt = require('jsonwebtoken');
+import _ from 'lodash';
+import jwt from 'jsonwebtoken';
 
 const jwtSecret = 'foobar';
 
@@ -24,4 +24,4 @@ class JwtUtil {
 
 }
 
-module.exports = JwtUtil;
+export default JwtUtil;

@@ -1,11 +1,11 @@
 
-const _ = require('lodash');
-const { combineForms } = require('react-redux-form');
-const { combineReducers } = require('redux');
-const Cookies = require('js-cookie');
+import _ from 'lodash';
+import { combineForms } from 'react-redux-form';
+import { combineReducers } from 'redux';
+import Cookies from 'js-cookie';
 
-const { ADD_LINK, DEL_LINK, SET_LINKS,
-  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE } = require('./actions');
+import { ADD_LINK, DEL_LINK, SET_LINKS,
+  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE } from './actions';
 
 const loginForm = {
   email: 'foo@test.com',
@@ -65,7 +65,7 @@ function mainData(state = initialStateMainData, action) {
   }
 }
 
-module.exports = combineReducers({
+export default combineReducers({
   mainData,
   auth,
   login: combineForms(loginForm, 'login'),

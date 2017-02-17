@@ -1,8 +1,8 @@
 
-const React = require('react');
+import React from 'react';
 
-const Header = require('../components/Header');
-const Footer = require('../components/Footer');
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const Layout = props => (
   <div>
@@ -18,4 +18,4 @@ Layout.propTypes = {
   children: React.PropTypes.element.isRequired,
 };
 
-module.exports = Layout;
+export default Layout;

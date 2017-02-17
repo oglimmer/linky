@@ -1,11 +1,9 @@
 
-const React = require('react');
-const { FormGroup, ControlLabel, FormControl, Button } = require('react-bootstrap');
-const { connect } = require('react-redux');
+import React, { PropTypes } from 'react';
+import { FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
+import { connect } from 'react-redux';
 
-const { addLink } = require('../redux/actions');
-
-const { PropTypes } = React;
+import { addLink } from '../redux/actions';
 
 const AddLinkInputBox = ({ dispatch, authToken }) => {
   let input;
@@ -52,4 +50,4 @@ const mapStateToPropsAddLinkInputBox = state => ({
   authToken: state.auth.token,
 });
 
-module.exports = connect(mapStateToPropsAddLinkInputBox)(AddLinkInputBox);
+export default connect(mapStateToPropsAddLinkInputBox)(AddLinkInputBox);

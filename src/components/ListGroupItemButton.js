@@ -1,8 +1,6 @@
 
-const React = require('react');
-const { Button, ListGroupItem } = require('react-bootstrap');
-
-const { PropTypes } = React;
+import React, { PropTypes } from 'react';
+import { Button, ListGroupItem } from 'react-bootstrap';
 
 const ListGroupItemButton = ({ id, linkUrl, onDeleteLink }) => (
   <ListGroupItem href={linkUrl}>
@@ -19,4 +17,4 @@ ListGroupItemButton.propTypes = {
   onDeleteLink: PropTypes.func.isRequired,
 };
 
-module.exports = ListGroupItemButton;
+export default ListGroupItemButton;
