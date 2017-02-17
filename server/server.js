@@ -126,11 +126,13 @@ app.get('*', (req, res) => {
 });
 
 // global error catcher, need four arguments
+/* eslint-disable no-unused-vars */
 app.use((err, req, res, next) => {
   console.log('Error on request %s %s', req.method, req.url);
   console.log(err.stack);
   res.status(500).send('Server error');
 });
+/* eslint-enable no-unused-vars */
 
 process.on('uncaughtException', (evt) => {
   console.log('uncaughtException: ', evt);

@@ -13,6 +13,7 @@ This project features:
 * react-redux-form
 * CouchDB backend via nano
 * browserHistory
+* react-hot-loader
 
 # initial setup
 
@@ -25,11 +26,15 @@ generated bundle.js
 
 - npm run dev
 
+=> open http://localhost:8080
+
 When using nodemon instead of dev you start the server with a nodemon watcher underneath.
 
 - npm run nodemon
 
-=> open http://localhost:8080
+You can check the whole project via eslint with
+
+- npm run eslint
 
 # Playing with the REST service
 

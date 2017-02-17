@@ -57,6 +57,7 @@
     "dev": "NODE_ENV=development node server/",
     "nodemon": "NODE_ENV=development nodemon server/",
     "start": "NODE_ENV=production node server/",
-    "build": "webpack -p --progress --colors --config build/webpack.prod.config.js"
+    "build": "webpack -p --progress --colors --config build/webpack.prod.config.js",
+    "eslint": "eslint server src"
   }
 }

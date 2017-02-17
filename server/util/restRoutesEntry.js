@@ -10,7 +10,9 @@ export default (server) => {
       if (stat.isFile()) {
         if (/(.*)\.(js$|coffee$)/.test(file)) {
           /* eslint-disable global-require */
+          /* eslint-disable import/no-dynamic-require */
           require(newPath).default(server);
+          /* eslint-enable import/no-dynamic-require */
           /* eslint-enable global-require */
         }
       } else if (stat.isDirectory() && file !== 'middlewares') {
