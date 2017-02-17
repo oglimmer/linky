@@ -22,14 +22,14 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 
 import restRoutes from './util/restRoutesEntry';
 
-import getRoutes from '../src/routes/routing';
-
 import combinedReducers from '../src/redux/reducer';
 
 import fetchComponentData from './util/fetchComponentData';
 import preMatchRouteFetchData from './util/preMatchRouteFetchData';
 
 import config from '../build/webpack.dev.config';
+
+import { emptyCache } from './reload';
 
 const app = express();
 
@@ -62,6 +62,13 @@ app.use((req, res) => {
   preMatchRouteFetchData(store, req)
   .then(() => {
     console.log(`Processing match at url = ${req.url}`);
+
+    if (process.env.NODE_ENV === 'development') {
+      emptyCache();
+    }
+    /* eslint-disable global-require */
+    const getRoutes = require('../src/routes/routing').default;
+    /* eslint-enable global-require */
 
     const routes = getRoutes(store);
 
