@@ -6,3 +6,4 @@ server.sublime-workspace
 client.sublime-project
 client.sublime-workspace
 static/js/
+/.idea/
