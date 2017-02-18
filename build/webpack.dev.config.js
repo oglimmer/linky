@@ -12,7 +12,7 @@ module.exports = {
     'react-hot-loader/patch',
     'webpack-hot-middleware/client',
     './build/polyfills',
-    './src/indexDebug.js',
+    './src/index.js',
   ],
 
   output: {
