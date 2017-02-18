@@ -11,7 +11,7 @@ module.exports = {
   entry: [
     'react-hot-loader/patch',
     'webpack-hot-middleware/client',
-    './build/polyfills',
+    'babel-polyfill',
     './src/index.js',
   ],
 
