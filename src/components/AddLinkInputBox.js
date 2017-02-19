@@ -1,46 +1,28 @@
 
 import React, { PropTypes } from 'react';
-import { FormGroup, ControlLabel, FormControl, Button } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
+import { Form, actions } from 'react-redux-form';
 import { connect } from 'react-redux';
 
 import { addLink } from '../redux/actions';
+import FormGroupAdapter from '../components/FormGroupAdapter';
 
-const AddLinkInputBox = ({ dispatch, authToken }) => {
-  let input;
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (!input.value.trim()) {
-          return false;
-        }
-        dispatch(addLink(input.value, authToken));
-        input.value = '';
-        return true;
-      }}
-    >
-      <FormGroup controlId="linkUrl">
-        <ControlLabel>Add a new link</ControlLabel>
-        <FormControl
-          type="text"
-          placeholder="url"
-          inputRef={(node) => {
-            input = node;
-          }}
-          autoFocus="true"
-          autoComplete="off"
-        />
-        <FormControl.Feedback />
-      </FormGroup>
-      <Button
-        type="submit"
-      >
-        Create link
-      </Button>
-    </form>
-  );
-};
-
+const AddLinkInputBox = ({ dispatch, authToken }) => (
+  <Form
+    model="addUrl"
+    onSubmit={(formData) => {
+      if (formData.url.trim()) {
+        dispatch(addLink(formData.url, authToken)).then(() => dispatch(actions.reset('addUrl.url')));
+      }
+    }}
+  >
+    <FormGroupAdapter
+      label="Add a new link"
+      model="url" placeholder="url to add (with or without http://)" autoFocus="true" autoComplete="off"
+    />
+    <Button type="submit">Create Link</Button>
+  </Form>
+);
 AddLinkInputBox.propTypes = {
   dispatch: PropTypes.func.isRequired,
   authToken: PropTypes.string.isRequired,

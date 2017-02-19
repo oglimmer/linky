@@ -11,6 +11,9 @@ const loginForm = {
   email: 'foo@test.com',
   password: 'foo',
 };
+const addUrlForm = {
+  url: '',
+};
 
 const initialStateMainData = {
   linkList: [],
@@ -35,7 +38,7 @@ function auth(state = initialStateAuth, action) {
       return state;
   }
 }
-/* eslint-disable comma-dangle */
+
 function mainData(state = initialStateMainData, action) {
   switch (action.type) {
     case ADD_LINK:
@@ -45,7 +48,7 @@ function mainData(state = initialStateMainData, action) {
             id: action.id,
             linkUrl: action.linkUrl,
           },
-          ...state.linkList
+          ...state.linkList,
         ],
       });
     case DEL_LINK:
@@ -69,4 +72,5 @@ export default combineReducers({
   mainData,
   auth,
   login: combineForms(loginForm, 'login'),
+  addUrl: combineForms(addUrlForm, 'addUrl'),
 });

@@ -9,6 +9,7 @@ const FormControlAdapter = props => (
     onChange={props.onChange}
     autoFocus={props.autoFocus}
     placeholder={props.placeholder}
+    autoComplete={props.autoComplete}
   />
 );
 FormControlAdapter.propTypes = {
@@ -16,10 +17,12 @@ FormControlAdapter.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   autoFocus: PropTypes.string,
+  autoComplete: PropTypes.string,
   placeholder: PropTypes.string.isRequired,
 };
 FormControlAdapter.defaultProps = {
   autoFocus: '',
+  autoComplete: '',
 };
 
 export default FormControlAdapter;
