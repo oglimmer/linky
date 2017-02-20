@@ -44,7 +44,9 @@ app.set('view engine', 'ejs');
 
 restRoutes(app);
 
-app.use(express.static(path.join(__dirname, '../static')));
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../build')));
+}
 
 if (process.env.NODE_ENV === 'development') {
   const compiler = webpack(config);

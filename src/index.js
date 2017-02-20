@@ -13,9 +13,6 @@ if (window.$REDUX_STATE) {
 
 const store = configureStore(state);
 
-// https://bootswatch.com/united/
-// const  './css/bootstrap-theme.min.css');
-
 /* eslint-disable global-require */
 const rootElement = document.getElementById('root');
 const render = () => {
