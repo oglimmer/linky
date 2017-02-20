@@ -27,9 +27,11 @@ import combinedReducers from '../src/redux/reducer';
 import fetchComponentData from './util/fetchComponentData';
 import preMatchRouteFetchData from './util/preMatchRouteFetchData';
 
-import config from '../build/webpack.dev.config';
-
 import { emptyCache } from './util/reload';
+
+/* eslint-disable import/no-dynamic-require */
+const config = require(`../build/webpack.${process.env.NODE_ENV === 'development' ? 'dev' : 'prod'}.config`);
+/* eslint-enable import/no-dynamic-require */
 
 const app = express();
 
@@ -45,7 +47,7 @@ app.set('view engine', 'ejs');
 restRoutes(app);
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../build')));
+  app.use(express.static(path.join(__dirname, '../dist')));
 }
 
 if (process.env.NODE_ENV === 'development') {
