@@ -69,7 +69,10 @@ module.exports = {
     new ExtractTextPlugin('./css/[name]-[chunkhash].css'),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
-      minChunks: 1,
+      minChunks: function (module) {
+        // this assumes your vendor imports exist in the node_modules directory
+        return module.context && module.context.indexOf('node_modules') !== -1;
+      }
     }),
     new HtmlWebpackPlugin({
       filename: 'index.ejs',
