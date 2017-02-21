@@ -9,30 +9,14 @@ module.exports = {
 
   devtool: 'cheap-module-eval-source-map',
 
-  entry: {
-    main: [
-      'react-hot-loader/patch',
-      'webpack-hot-middleware/client',
-      'babel-polyfill',
-      './src/index.js',
-    ],
-    vendor: [
-      './static/css/bootstrap-theme.min.css',
-      './static/favicon.ico',
-      'lodash',
-      'react',
-      'redux',
-      'react-redux',
-      'react-redux-form',
-      'react-bootstrap',
-      'js-cookie',
-      'redux-thunk',
-      'redux-logger',
-      'isomorphic-fetch',
-      'react-dom',
-      'react-hot-loader',
-    ],
-  },
+  entry: [
+    './static/css/bootstrap-theme.min.css',
+    './static/favicon.ico',
+    'react-hot-loader/patch',
+    'webpack-hot-middleware/client',
+    'babel-polyfill',
+    './src/index.js',
+  ],
 
   output: {
     path: path.join(__dirname, '../static/'),
@@ -46,6 +30,7 @@ module.exports = {
     new ExtractTextPlugin('./css/[name].css'),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
+      minChunks: module => module.context && module.context.indexOf('node_modules') !== -1,
     }),
   ],
 

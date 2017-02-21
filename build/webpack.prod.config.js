@@ -15,28 +15,12 @@ module.exports = {
 
   devtool: 'hidden-source-map',
 
-  entry: {
-    main: [
-      'babel-polyfill',
-      './src/index.js',
-    ],
-    vendor: [
-      './static/css/bootstrap-theme.min.css',
-      './static/favicon.ico',
-      'lodash',
-      'react',
-      'redux',
-      'react-redux',
-      'react-redux-form',
-      'react-bootstrap',
-      'js-cookie',
-      'redux-thunk',
-      'redux-logger',
-      'isomorphic-fetch',
-      'react-dom',
-      'react-hot-loader',
-    ],
-  },
+  entry: [
+    './static/css/bootstrap-theme.min.css',
+    './static/favicon.ico',
+    'babel-polyfill',
+    './src/index.js',
+  ],
 
   output: {
     path: path.join(__dirname, '../dist/'),
@@ -69,10 +53,7 @@ module.exports = {
     new ExtractTextPlugin('./css/[name]-[chunkhash].css'),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
-      minChunks: function (module) {
-        // this assumes your vendor imports exist in the node_modules directory
-        return module.context && module.context.indexOf('node_modules') !== -1;
-      }
+      minChunks: module => module.context && module.context.indexOf('node_modules') !== -1,
     }),
     new HtmlWebpackPlugin({
       filename: 'index.ejs',
