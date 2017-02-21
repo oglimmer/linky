@@ -3,6 +3,7 @@ const path = require('path');
 const webpack = require('webpack');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 console.log('Using webpack.prod.config.js');
 // https://github.com/webpack/webpack/issues/2537
@@ -14,16 +15,32 @@ module.exports = {
 
   devtool: 'hidden-source-map',
 
-  entry: [
-    './static/css/bootstrap-theme.min.css',
-    './static/favicon.ico',
-    'babel-polyfill',
-    './src/index.js',
-  ],
+  entry: {
+    main: [
+      'babel-polyfill',
+      './src/index.js',
+    ],
+    vendor: [
+      './static/css/bootstrap-theme.min.css',
+      './static/favicon.ico',
+      'lodash',
+      'react',
+      'redux',
+      'react-redux',
+      'react-redux-form',
+      'react-bootstrap',
+      'js-cookie',
+      'redux-thunk',
+      'redux-logger',
+      'isomorphic-fetch',
+      'react-dom',
+      'react-hot-loader',
+    ],
+  },
 
   output: {
     path: path.join(__dirname, '../dist/'),
-    filename: 'js/bundle.js',
+    filename: 'js/bundle-[name]-[chunkhash].js',
     publicPath: '/',
   },
 
@@ -49,7 +66,15 @@ module.exports = {
       // https://github.com/webpack/webpack/issues/1385
       sourceMap: true,
     }),
-    new ExtractTextPlugin('./css/[name].css'),
+    new ExtractTextPlugin('./css/[name]-[chunkhash].css'),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks: 1,
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'index.ejs',
+      template: '!!html-loader!static/index_template.html',
+    }),
   ],
 
   module: {
@@ -59,11 +84,11 @@ module.exports = {
         test: /\.jsx?$/,
         exclude: /node_modules/,
         include: path.join(__dirname, '..'),
-        loader: 'eslint-loader',
+        use: 'eslint-loader',
       },
       {
         test: /\.jsx?$/,
-        loader: 'babel-loader',
+        use: 'babel-loader',
         exclude: /node_modules/,
         include: path.join(__dirname, '..'),
       },
@@ -81,7 +106,7 @@ module.exports = {
       {
         test: /\.(jpg|jpeg|gif|png|ico)$/,
         exclude: /node_modules/,
-        loader: 'file-loader?name=[name].[ext]',
+        use: 'file-loader?name=[name].[ext]',
       },
     ],
   },

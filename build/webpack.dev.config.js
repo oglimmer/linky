@@ -9,18 +9,34 @@ module.exports = {
 
   devtool: 'cheap-module-eval-source-map',
 
-  entry: [
-    './static/css/bootstrap-theme.min.css',
-    './static/favicon.ico',
-    'react-hot-loader/patch',
-    'webpack-hot-middleware/client',
-    'babel-polyfill',
-    './src/index.js',
-  ],
+  entry: {
+    main: [
+      'react-hot-loader/patch',
+      'webpack-hot-middleware/client',
+      'babel-polyfill',
+      './src/index.js',
+    ],
+    vendor: [
+      './static/css/bootstrap-theme.min.css',
+      './static/favicon.ico',
+      'lodash',
+      'react',
+      'redux',
+      'react-redux',
+      'react-redux-form',
+      'react-bootstrap',
+      'js-cookie',
+      'redux-thunk',
+      'redux-logger',
+      'isomorphic-fetch',
+      'react-dom',
+      'react-hot-loader',
+    ],
+  },
 
   output: {
     path: path.join(__dirname, '../static/'),
-    filename: 'js/bundle.js',
+    filename: 'js/bundle-[name].js',
     publicPath: '/',
   },
 
@@ -28,6 +44,9 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
     new ExtractTextPlugin('./css/[name].css'),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+    }),
   ],
 
   module: {
@@ -37,11 +56,11 @@ module.exports = {
         test: /\.jsx?$/,
         exclude: /node_modules/,
         include: path.join(__dirname, '..'),
-        loader: 'eslint-loader',
+        use: 'eslint-loader',
       },
       {
         test: /\.jsx?$/,
-        loader: 'babel-loader',
+        use: 'babel-loader',
         exclude: /node_modules/,
         include: path.join(__dirname, '..'),
       },
@@ -59,7 +78,7 @@ module.exports = {
       {
         test: /\.(jpg|jpeg|gif|png|ico)$/,
         exclude: /node_modules/,
-        loader: 'file-loader?name=[name].[ext]',
+        use: 'file-loader?name=[name].[ext]',
       },
     ],
   },

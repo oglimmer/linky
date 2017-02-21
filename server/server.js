@@ -39,15 +39,17 @@ app.use(bodyParser.json());
 app.use(compression());
 app.use(cookieParser());
 
+const serverDirectory = process.env.NODE_ENV === 'production' ? '../dist' : '../static';
+
 // Set view path
 // set up ejs for templating. You can use whatever
-app.set('views', path.join(__dirname, '../static'));
+app.set('views', path.join(__dirname, serverDirectory));
 app.set('view engine', 'ejs');
 
 restRoutes(app);
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../dist')));
+  app.use(express.static(path.join(__dirname, serverDirectory)));
 }
 
 if (process.env.NODE_ENV === 'development') {
