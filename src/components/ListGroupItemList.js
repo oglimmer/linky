@@ -2,6 +2,7 @@
 import React, { PropTypes } from 'react';
 import { ListGroup } from 'react-bootstrap';
 import { connect } from 'react-redux';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 
 import { delLink } from '../redux/actions';
 
@@ -19,16 +20,16 @@ const ListGroupItemList = ({ linkList, onDeleteLink, authToken }) => (
     ) }
   </ListGroup>
 );
-/* eslint-disable react/no-unused-prop-types */
 ListGroupItemList.propTypes = {
-  linkList: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    linkUrl: PropTypes.string.isRequired,
-  }).isRequired).isRequired,
+  linkList: ImmutablePropTypes.listOf(
+    PropTypes.shape({
+      id: React.PropTypes.string.isRequired,
+      linkUrl: React.PropTypes.string.isRequired,
+    }),
+  ).isRequired,
   onDeleteLink: PropTypes.func.isRequired,
   authToken: React.PropTypes.string.isRequired,
 };
-/* eslint-enable react/no-unused-prop-types */
 
 
 const mapStateToProps = state => ({

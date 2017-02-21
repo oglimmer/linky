@@ -1,6 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Immutable from 'immutable';
 
 import { AppContainer } from 'react-hot-loader';
 
@@ -9,6 +10,7 @@ import configureStore from './util/configureStore';
 let state;
 if (window.$REDUX_STATE) {
   state = window.$REDUX_STATE;
+  state.mainData.linkList = Immutable.List(state.mainData.linkList);
 }
 
 const store = configureStore(state);

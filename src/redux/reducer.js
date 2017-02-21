@@ -1,8 +1,8 @@
 
-import _ from 'lodash';
 import { combineForms } from 'react-redux-form';
 import { combineReducers } from 'redux';
 import Cookies from 'js-cookie';
+import Immutable from 'immutable';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE } from './actions';
@@ -16,7 +16,7 @@ const addUrlForm = {
 };
 
 const initialStateMainData = {
-  linkList: [],
+  linkList: Immutable.List(),
   errorMessage: '',
 };
 
@@ -43,21 +43,18 @@ function mainData(state = initialStateMainData, action) {
   switch (action.type) {
     case ADD_LINK:
       return Object.assign({}, state, {
-        linkList: [
-          {
-            id: action.id,
-            linkUrl: action.linkUrl,
-          },
-          ...state.linkList,
-        ],
+        linkList: state.linkList.push({
+          id: action.id,
+          linkUrl: action.linkUrl,
+        }),
       });
     case DEL_LINK:
       return Object.assign({}, state, {
-        linkList: _.filter(state.linkList, ele => ele.id !== action.id),
+        linkList: state.linkList.filter(ele => ele.id !== action.id),
       });
     case SET_LINKS:
       return Object.assign({}, state, {
-        linkList: action.linkList,
+        linkList: Immutable.List(action.linkList),
       });
     case SET_ERROR_MESSAGE:
       return Object.assign({}, state, {
