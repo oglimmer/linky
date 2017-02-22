@@ -31,7 +31,10 @@ const Login = ({ dispatch, router }) => (
         label="Enter your registered email address"
         model="email" placeholder="email" autoFocus="true"
       />
-      <FormGroupAdapter label="Enter password" model="password" placeholder="password" />
+      <FormGroupAdapter
+        label="Enter password"
+        type="password" model="password" placeholder="password"
+      />
       <Button type="submit">Log in</Button>
     </Form>
   </div>

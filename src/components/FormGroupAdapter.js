@@ -5,12 +5,13 @@ import { Control } from 'react-redux-form';
 
 import FormControlAdapter from './FormControlAdapter';
 
-const FormGroupAdapter = ({ label, model, placeholder, autoFocus, autoComplete }) => (
+const FormGroupAdapter = ({ label, type, model, placeholder, autoFocus, autoComplete }) => (
   <FormGroup
-    controlId="email"
+    controlId={model}
   >
     <ControlLabel>{label}</ControlLabel>
-    <Control.text
+    <Control
+      type={type}
       model={`.${model}`}
       component={FormControlAdapter}
       autoFocus={autoFocus}
@@ -20,8 +21,10 @@ const FormGroupAdapter = ({ label, model, placeholder, autoFocus, autoComplete }
     <FormControl.Feedback />
   </FormGroup>
 );
+
 FormGroupAdapter.propTypes = {
   label: PropTypes.string.isRequired,
+  type: PropTypes.string,
   model: PropTypes.string.isRequired,
   placeholder: PropTypes.string.isRequired,
   autoFocus: PropTypes.string,
@@ -30,6 +33,7 @@ FormGroupAdapter.propTypes = {
 FormGroupAdapter.defaultProps = {
   autoFocus: '',
   autoComplete: '',
+  type: 'text',
 };
 
 export default FormGroupAdapter;
