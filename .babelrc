@@ -7,7 +7,7 @@
     },
     "production": {
       "presets": [ ],
-      "plugins": [  "lodash" ]
+      "plugins": [ "lodash" ]
     }
   }
 }

@@ -3,13 +3,18 @@
   "plugins": [
     "react",
     "jsx-a11y",
-    "import"
+    "import",
+    "jest"
   ],
   "rules": {
     "react/jsx-filename-extension": ["error", { "extensions": [".js", ".jsx"] }],
-    "no-console": 0
+    "no-console": 0,
+    "jest/no-disabled-tests": "warn",
+    "jest/no-focused-tests": "error",
+    "jest/no-identical-title": "error"
   },
   "env": {
-    "browser": true
+    "browser": true,
+    "jest/globals": true
   }
 }
