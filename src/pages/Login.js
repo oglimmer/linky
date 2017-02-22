@@ -24,7 +24,7 @@ const Login = ({ dispatch, router }) => (
       onSubmit={(formData) => {
         dispatch(checkAuth(formData.email, formData.password)).then(() => {
           router.replace('/portalPage');
-        });
+        }, () => {});
       }}
     >
       <FormGroupAdapter
