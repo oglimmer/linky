@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const GitRevisionPlugin = require('git-revision-webpack-plugin');
 
 console.log('Using webpack.prod.config.js');
 // https://github.com/webpack/webpack/issues/2537
@@ -29,6 +30,7 @@ module.exports = {
   },
 
   plugins: [
+    new GitRevisionPlugin(),
     new LodashModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       'process.env': {
