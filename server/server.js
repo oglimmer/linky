@@ -16,9 +16,7 @@ import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 
-import webpack from 'webpack';
-import webpackDevMiddleware from 'webpack-dev-middleware';
-import webpackHotMiddleware from 'webpack-hot-middleware';
+import { webpack, webpackDevMiddleware, webpackHotMiddleware, emptyCache } from './debug-mode';
 
 import restRoutes from './util/restRoutesEntry';
 
@@ -26,12 +24,6 @@ import combinedReducers from '../src/redux/reducer';
 
 import fetchComponentData from './util/fetchComponentData';
 import preMatchRouteFetchData from './util/preMatchRouteFetchData';
-
-import { emptyCache } from './util/reload';
-
-/* eslint-disable import/no-dynamic-require */
-const config = require(`../build/webpack.${process.env.NODE_ENV === 'development' ? 'dev' : 'prod'}.config`);
-/* eslint-enable import/no-dynamic-require */
 
 const app = express();
 
@@ -53,6 +45,9 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 if (process.env.NODE_ENV === 'development') {
+  /* eslint-disable global-require */
+  const config = require('../build/webpack.dev.config');
+  /* eslint-enable global-require */
   const compiler = webpack(config);
   app.use(webpackDevMiddleware(compiler, {
     publicPath: config.output.publicPath, stats: { colors: true } }));
