@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === 'development') {
 export const webpack = tryWebpack;
 export const webpackDevMiddleware = tryWebpackDevMiddleware;
 export const webpackHotMiddleware = tryWebpackHotMiddleware;
-export const emptyCache = tryEmptyCache;
+export const { emptyCache } = tryEmptyCache;
 
 export default {
   webpack,

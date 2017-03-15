@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z "$BASE_URL" ]; then
-  BASE_URL=http://locahost:8080
+  BASE_URL=http://localhost:8080
 fi
 REST_URL=$BASE_URL/rest
 

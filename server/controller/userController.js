@@ -69,6 +69,7 @@ class AuthenticateProcessor extends BaseProcessor {
       const user = yield userDao.getByEmail(this.data.email);
       if (user == null) {
         ResponseUtil.sendErrorResponse(401, 'Wrong user or password!', this.res);
+        this.res.end();
       } else {
         const { _id, hash } = user.value;
         const result = yield BcryptUtil.compare(this.data.password, hash);
@@ -76,18 +77,21 @@ class AuthenticateProcessor extends BaseProcessor {
           const claim = {
             userid: _id,
           };
-          const token = JwtUtil.sign(claim);
-          this.res.send({ token });
-          console.log('User id=%s authenticated', _id);
+          JwtUtil.sign(claim).then((token) => {
+            console.log('User id=%s authenticated', _id);
+            this.res.send({ token });
+            this.res.end();
+          });
         } else {
           ResponseUtil.sendErrorResponse(401, 'Wrong user or password!', this.res);
+          this.res.end();
         }
       }
     } catch (err) {
       console.log(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
+      this.res.end();
     }
-    this.res.end();
   }
 
 }
