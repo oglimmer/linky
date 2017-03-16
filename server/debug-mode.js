@@ -4,7 +4,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable global-require */
 
-let tryWebpack, tryWebpackDevMiddleware, tryWebpackHotMiddleware, tryEmptyCache;
+let tryWebpack, tryWebpackDevMiddleware, tryWebpackHotMiddleware, tryEmptyCache = {};
 
 if (process.env.NODE_ENV === 'development') {
   tryWebpack = require('webpack');
