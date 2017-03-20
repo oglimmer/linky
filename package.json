@@ -32,6 +32,7 @@
     "jsonwebtoken": "^7.3.0",
     "lodash": "^4.17.4",
     "nano": "^6.2.0",
+    "properties": "^1.2.1",
     "react": "^15.4.2",
     "react-bootstrap": "^0.30.7",
     "react-dom": "^15.4.2",
