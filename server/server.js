@@ -58,73 +58,77 @@ if (process.env.NODE_ENV === 'development') {
 const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
 
 app.use((req, res) => {
-  const store = finalCreateStore(combinedReducers);
+  if (req.method === 'HEAD') {
+    res.status(200).end();
+  } else {
+    const store = finalCreateStore(combinedReducers);
 
-  preMatchRouteFetchData(store, req)
-  .then(() => {
-    console.log(`Processing match at url = ${req.url}`);
+    preMatchRouteFetchData(store, req)
+    .then(() => {
+      console.log(`Processing match at url = ${req.url}`);
 
-    if (process.env.NODE_ENV === 'development') {
-      emptyCache();
-    }
-    /* eslint-disable global-require */
-    const getRoutes = require('../src/routes/routing').default;
-    /* eslint-enable global-require */
-
-    const routes = getRoutes(store);
-
-    // react-router
-    match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
-      if (error) {
-        // console.log(`error = ${error.message}`);
-        return res.status(500).send(error.message);
+      if (process.env.NODE_ENV === 'development') {
+        emptyCache();
       }
+      /* eslint-disable global-require */
+      const getRoutes = require('../src/routes/routing').default;
+      /* eslint-enable global-require */
 
-      if (redirectLocation) {
-        // console.log(`redirectLocation = ${redirectLocation.pathname}`);
-        return res.redirect(302, redirectLocation.pathname + redirectLocation.search);
-      }
+      const routes = getRoutes(store);
 
-      if (renderProps == null) {
-        // return next('err msg: route not found');
-        // yield control to next middleware to handle the request
-        // console.log('not found!');
-        return res.status(404).send('Not found!!');
-      }
+      // react-router
+      match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
+        if (error) {
+          // console.log(`error = ${error.message}`);
+          return res.status(500).send(error.message);
+        }
 
-      // console.log( '\nserver > renderProps: \n',
-      // require('util').inspect( renderProps, false, 1, true) )
-      // console.log( '\nserver > renderProps: \n',
-      // require('util').inspect( renderProps.components, false, 3, true) )
+        if (redirectLocation) {
+          // console.log(`redirectLocation = ${redirectLocation.pathname}`);
+          return res.redirect(302, redirectLocation.pathname + redirectLocation.search);
+        }
 
-      // this is where universal rendering happens,
-      // fetchComponentData() will trigger actions listed in static "needs" props in each
-      // container component
-      // and wait for all of them to complete before continuing rendering the page,
-      // hence ensuring all data needed was fetched before proceeding
-      //
-      // renderProps: contains all necessary data, e.g: routes, router, history, components...
-      fetchComponentData(store.dispatch, renderProps.components, renderProps.params, store)
-      .then(() => {
-        const reactHtml = ReactDOMServer.renderToString((
-          <Provider store={store}>
-            <RouterContext {...renderProps} />
-          </Provider>
-        ));
+        if (renderProps == null) {
+          // return next('err msg: route not found');
+          // yield control to next middleware to handle the request
+          // console.log('not found!');
+          return res.status(404).send('Not found!!');
+        }
 
-        // console.log('reactHtml:\n', reactHtml);
+        // console.log( '\nserver > renderProps: \n',
+        // require('util').inspect( renderProps, false, 1, true) )
+        // console.log( '\nserver > renderProps: \n',
+        // require('util').inspect( renderProps.components, false, 3, true) )
 
-        const initialState = JSON.stringify(store.getState());
+        // this is where universal rendering happens,
+        // fetchComponentData() will trigger actions listed in static "needs" props in each
+        // container component
+        // and wait for all of them to complete before continuing rendering the page,
+        // hence ensuring all data needed was fetched before proceeding
+        //
+        // renderProps: contains all necessary data, e.g: routes, router, history, components...
+        fetchComponentData(store.dispatch, renderProps.components, renderProps.params, store)
+        .then(() => {
+          const reactHtml = ReactDOMServer.renderToString((
+            <Provider store={store}>
+              <RouterContext {...renderProps} />
+            </Provider>
+          ));
 
-        // console.log('state: ', initialState);
+          // console.log('reactHtml:\n', reactHtml);
 
-        res.render('index.ejs', { reactHtml, initialState });
-      })
-      .catch(err => res.end(err.message));
+          const initialState = JSON.stringify(store.getState());
 
-      return null;
+          // console.log('state: ', initialState);
+
+          res.render('index.ejs', { reactHtml, initialState });
+        })
+        .catch(err => res.end(err.message));
+
+        return null;
+      });
     });
-  });
+  }
 });
 
 // example of handling 404 pages
