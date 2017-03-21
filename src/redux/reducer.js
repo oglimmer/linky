@@ -27,7 +27,10 @@ const initialStateAuth = {
 function auth(state = initialStateAuth, action) {
   switch (action.type) {
     case SET_AUTH_TOKEN:
-      Cookies.set('authToken', action.authToken);
+      Cookies.set('authToken', action.authToken, {
+        secure: true,
+        expires: 365,
+      });
       return Object.assign({}, state, {
         token: action.authToken,
       });
