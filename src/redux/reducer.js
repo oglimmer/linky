@@ -28,7 +28,7 @@ function auth(state = initialStateAuth, action) {
   switch (action.type) {
     case SET_AUTH_TOKEN:
       Cookies.set('authToken', action.authToken, {
-        secure: true,
+        secure: /* CONSTANT_START COOKIE_SECURE */ true /* CONSTANT_END */,
         expires: 365,
       });
       return Object.assign({}, state, {
