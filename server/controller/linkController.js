@@ -1,5 +1,6 @@
 
 import _ from 'lodash';
+import winston from 'winston';
 import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
@@ -26,9 +27,9 @@ class CreateLinkProcessor extends BaseProcessor {
     try {
       const { id } = yield linkDao.insert(this.data);
       this.res.send({ id });
-      console.log('Create link id=%s to db: %j', id, this.data);
+      winston.loggers.get('application').debug('Create link id=%s to db: %j', id, this.data);
     } catch (err) {
-      console.log(err);
+      winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();
@@ -49,9 +50,9 @@ class GetLinkProcessor extends BaseProcessor {
       const responseArr = _.map(rows, row => ({ id: row.value._id, linkUrl: row.value.linkUrl }));
       /* eslint-enable no-underscore-dangle */
       this.res.send(responseArr);
-      console.log('Get all links from db for user %s resulted in %d rows', this.data.userid, responseArr.length);
+      winston.loggers.get('application').debug('Get all links from db for user %s resulted in %d rows', this.data.userid, responseArr.length);
     } catch (err) {
-      console.log(err);
+      winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();
@@ -75,9 +76,9 @@ class DeleteProcessor extends BaseProcessor {
     try {
       yield linkDao.deleteLatest(this.data.linkid);
       this.res.send();
-      console.log('Deleted link with id=%s', this.data.linkid);
+      winston.loggers.get('application').debug('Deleted link with id=%s', this.data.linkid);
     } catch (err) {
-      console.log(err);
+      winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();

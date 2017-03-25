@@ -6,6 +6,7 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 
 import path from 'path';
+import fs from 'fs';
 
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
@@ -16,6 +17,9 @@ import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 
+import winstonConf from 'winston-config';
+import expressWinston from 'express-winston';
+
 import { webpack, webpackDevMiddleware, webpackHotMiddleware, emptyCache } from './debug-mode';
 
 import restRoutes from './util/restRoutesEntry';
@@ -25,11 +29,21 @@ import combinedReducers from '../src/redux/reducer';
 import fetchComponentData from './util/fetchComponentData';
 import preMatchRouteFetchData from './util/preMatchRouteFetchData';
 
+const winston = winstonConf.fromFileSync(path.join(__dirname, './winston-config.json'));
+const logDirectory = path.join(__dirname, '../logs');
+if (!fs.existsSync(logDirectory)) {
+  fs.mkdirSync(logDirectory);
+}
+
 const app = express();
 
 app.use(bodyParser.json());
 app.use(compression());
 app.use(cookieParser());
+
+app.use(expressWinston.logger({
+  winstonInstance: winston.loggers.get('http'),
+}));
 
 const serverDirectory = process.env.NODE_ENV === 'production' ? '../dist' : '../static';
 
@@ -52,7 +66,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(webpackDevMiddleware(compiler, {
     publicPath: config.output.publicPath, stats: { colors: true } }));
   app.use(webpackHotMiddleware(compiler));
-  console.log('Server running with dynamic bundle.js generation');
+  winston.loggers.get('application').info('Server running with dynamic bundle.js generation');
 }
 
 const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
@@ -66,7 +80,7 @@ app.use((req, res) => {
 
   preMatchRouteFetchData(store, req)
   .then(() => {
-    console.log(`Processing match at url = ${req.url}`);
+    winston.loggers.get('application').debug(`Processing match at url = ${req.url}`);
 
     if (process.env.NODE_ENV === 'development') {
       emptyCache();
@@ -133,25 +147,29 @@ app.use((req, res) => {
 
 // example of handling 404 pages
 app.get('*', (req, res) => {
-  console.log('Server.js > 404 - Page Not Found');
+  winston.loggers.get('application').error('Server.js > 404 - Page Not Found');
   res.status(404).send('Server.js > 404 - Page Not Found');
 });
 
 // global error catcher, need four arguments
 /* eslint-disable no-unused-vars */
 app.use((err, req, res, next) => {
-  console.log('Error on request %s %s', req.method, req.url);
-  console.log(err.stack);
+  winston.loggers.get('application').error('Error on request %s %s', req.method, req.url);
+  winston.loggers.get('application').error(err.stack);
   res.status(500).send('Server error');
 });
 /* eslint-enable no-unused-vars */
 
+app.use(expressWinston.errorLogger({
+  winstonInstance: winston.loggers.get('http-errors'),
+}));
+
 process.on('uncaughtException', (evt) => {
-  console.log('uncaughtException: ', evt);
+  winston.loggers.get('application').error('uncaughtException: ', evt);
 });
 
 const port = process.env.PORT || '8080';
 const bind = process.env.BIND || '127.0.0.1';
 app.listen(port, bind);
 
-console.log(`Server started at ${bind}:${port}....`);
+winston.loggers.get('application').info(`Server started at ${bind}:${port}....`);

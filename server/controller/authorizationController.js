@@ -2,6 +2,8 @@
 import assert from 'assert';
 import bluebird from 'bluebird';
 
+import winston from 'winston';
+
 import JwtUtil from '../util/JwtUtil';
 import ResponseUtil from '../../src/util/ResponseUtil';
 
@@ -59,7 +61,7 @@ export default {
         const user = yield v.getUserForAuthToken(authToken);
         v.succeed(user);
       } catch (err) {
-        console.log(err);
+        winston.loggers.get('application').error('Failed to checkAuthorization: ', err);
         v.fail(err);
       }
     })();

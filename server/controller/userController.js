@@ -1,4 +1,6 @@
 
+import winston from 'winston';
+
 import userDao from '../dao/userDao';
 import BcryptUtil from '../util/BcryptUtil';
 import JwtUtil from '../util/JwtUtil';
@@ -32,10 +34,10 @@ class CreateUserProcessor extends BaseProcessor {
         const dbObject = { type: 'user', email: this.data.email, hash };
         const { id } = yield userDao.insert(dbObject);
         this.res.send({ id });
-        console.log('Create user id=%s to db: %j', id, dbObject);
+        winston.loggers.get('application').debug('Create user id=%s to db: %j', id, dbObject);
       }
     } catch (err) {
-      console.log(err);
+      winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();
@@ -78,7 +80,7 @@ class AuthenticateProcessor extends BaseProcessor {
             userid: _id,
           };
           JwtUtil.sign(claim).then((token) => {
-            console.log('User id=%s authenticated', _id);
+            winston.loggers.get('application').debug('User id=%s authenticated', _id);
             this.res.send({ token });
             this.res.end();
           });
@@ -88,7 +90,7 @@ class AuthenticateProcessor extends BaseProcessor {
         }
       }
     } catch (err) {
-      console.log(err);
+      winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
       this.res.end();
     }
