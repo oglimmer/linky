@@ -72,7 +72,7 @@ module.exports = {
         loader: StringReplacePlugin.replace({
           replacements: [
             {
-              pattern: /\/\* CONSTANT_START [\w\d_]* \*\/[\s\w\d]*\/\* CONSTANT_END \*\//ig,
+              pattern: /\/\* CONSTANT_START [\w\d_]* \*\/["'\s\w\d]*\/\* CONSTANT_END \*\//ig,
               replacement: (match) => {
                 const tmp1 = match.substring(match.indexOf('CONSTANT_START') + 14);
                 const tmp2 = tmp1.trim();
