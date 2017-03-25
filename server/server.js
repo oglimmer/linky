@@ -6,7 +6,6 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 
 import path from 'path';
-import fs from 'fs';
 
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
@@ -29,11 +28,11 @@ import combinedReducers from '../src/redux/reducer';
 import fetchComponentData from './util/fetchComponentData';
 import preMatchRouteFetchData from './util/preMatchRouteFetchData';
 
-const winston = winstonConf.fromFileSync(path.join(__dirname, './winston-config.json'));
-const logDirectory = path.join(__dirname, '../logs');
-if (!fs.existsSync(logDirectory)) {
-  fs.mkdirSync(logDirectory);
-}
+import properties from './util/linkyproperties';
+
+const logConfig = path.resolve(__dirname, properties.server.log.path);
+console.log(`Using logConfig from ${logConfig}`);
+const winston = winstonConf.fromFileSync(logConfig);
 
 const app = express();
 
