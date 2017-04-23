@@ -23,6 +23,6 @@ export default (server) => {
 
   // const routes_path = config.root + '/app/route';
   const rootPath = path.normalize(path.join(__dirname, '..'));
-  const routesPath = `${rootPath}/restRoutes`;
+  const routesPath = `${rootPath}/httpRoutes`;
   walk(routesPath);
 };

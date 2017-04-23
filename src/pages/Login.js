@@ -1,47 +1,42 @@
 
 // https://react-bootstrap.github.io/components.html#forms
 
-import React, { PropTypes } from 'react';
-import { withRouter } from 'react-router';
-import { Button, Jumbotron } from 'react-bootstrap';
-import { Form } from 'react-redux-form';
-import { connect } from 'react-redux';
+import React from 'react';
+import { Button } from 'react-bootstrap';
 
-import { checkAuth } from '../redux/actions';
-
-import AlertAdapter from '../components/AlertAdapter';
-import FormGroupAdapter from '../components/FormGroupAdapter';
-
-const Login = ({ dispatch, router }) => (
-  <div>
-    <Jumbotron>
-      <h1>Linky</h1>
-      <p>world&#39;s best link management system</p>
-    </Jumbotron>
-    <AlertAdapter />
-    <Form
-      model="login"
-      onSubmit={(formData) => {
-        dispatch(checkAuth(formData.email, formData.password)).then(() => {
-          router.replace('/portalPage');
-        }, () => {});
-      }}
-    >
-      <FormGroupAdapter
-        label="Enter your registered email address"
-        model="email" placeholder="email" autoFocus="true"
-      />
-      <FormGroupAdapter
-        label="Enter password"
-        type="password" model="password" placeholder="password"
-      />
-      <Button type="submit">Log in</Button>
-    </Form>
-  </div>
-);
-Login.propTypes = {
-  dispatch: PropTypes.func.isRequired,
-  router: PropTypes.shape().isRequired,
+const click = (target) => {
+  document.location.href = `/auth/${target}`;
 };
 
-export default withRouter(connect()(Login));
+const Login = () => (
+  <div className="row">
+    <div className="center-form panel">
+      <div className="panel-body">
+        <h2 className="text-center">Log in</h2>
+        <Button className="btn btn-block btn-facebook" onClick={() => click('facebook')}>
+          <i className="ion-logo-facebook" /> Sign in with Facebook
+        </Button>
+        <Button className="btn btn-block btn-google-plus" onClick={() => click('google')}>
+          <i className="ion-logo-googleplus" /> Sign in with Google
+        </Button>
+        <Button className="btn btn-block btn-github" onClick={() => click('github')}>
+          <i className="ion-logo-github" /> Sign in with GitHub
+        </Button>
+        <button className="btn btn-block btn-linkedin" onClick={() => click('linkedin')}>
+          <i className="ion-logo-linkedin" /> Sign in with LinkedIn
+        </button>
+        <button className="btn btn-block btn-twitter" onClick={() => click('twitter')}>
+          <i className="ion-logo-twitter" /> Sign in with Twitter
+        </button>
+        <button className="btn btn-block btn-bitbucket" onClick={() => click('bitbucket')}>
+          <i className="fa fa-bitbucket" /> Sign in with Bitbucket
+        </button>
+        <button className="btn btn-block btn-live" onClick={() => click('windowslive')}>
+          <i className="ion-logo-windows" /> Sign in with Windows Live
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
+export default Login;

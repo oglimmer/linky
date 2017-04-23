@@ -21,7 +21,7 @@ import expressWinston from 'express-winston';
 
 import { webpack, webpackDevMiddleware, webpackHotMiddleware, emptyCache } from './debug-mode';
 
-import restRoutes from './util/restRoutesEntry';
+import httpRoutes from './util/httpRoutesEntry';
 
 import combinedReducers from '../src/redux/reducer';
 
@@ -51,7 +51,7 @@ const serverDirectory = process.env.NODE_ENV === 'production' ? '../dist' : '../
 app.set('views', path.join(__dirname, serverDirectory));
 app.set('view engine', 'ejs');
 
-restRoutes(app);
+httpRoutes(app);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, serverDirectory)));
@@ -69,10 +69,6 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
-
-app.head('*', (req, res) => {
-  res.status(200).end();
-});
 
 app.use((req, res) => {
   const store = finalCreateStore(combinedReducers);

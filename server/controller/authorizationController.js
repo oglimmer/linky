@@ -21,6 +21,7 @@ class Verification {
   }
 
   succeed(user) {
+    winston.loggers.get('application').debug('authorization found for %j', user);
     assert(user.userid, 'No user.userid found');
     this.req.user = user;
     this.next();

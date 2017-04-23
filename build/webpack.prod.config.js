@@ -20,6 +20,8 @@ module.exports = {
 
   entry: [
     './static/css/bootstrap-theme.min.css',
+    './static/css/styles.css',
+    'ionicons/dist/css/ionicons.min.css',
     './static/favicon.ico',
     'babel-polyfill',
     './src/index.js',
