@@ -34,6 +34,9 @@ const Login = () => (
         <button className="btn btn-block btn-live" onClick={() => click('windowslive')}>
           <i className="ion-logo-windows" /> Sign in with Windows Live
         </button>
+        <button className="btn btn-block btn-blizzard" onClick={() => click('blizzard-eu')}>
+          <i className="ion-ios-game-controller-a" /> Sign in with EU Battle.net
+        </button>
       </div>
     </div>
   </div>

@@ -232,3 +232,14 @@
   color: #fff;
   background-color: #0d2c4a;
 }
+
+.btn-blizzard {
+  color: #fff;
+  background-color: #1B2023;
+}
+
+.btn-blizzard:hover,
+.btn-blizzard:focus {
+  color: #fff;
+  background-color: #215D83;
+}
