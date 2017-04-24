@@ -114,9 +114,6 @@ module.exports = {
                 const tmp4 = tmp2.substring(tmp2.indexOf('*/') + 2);
                 const defaultValue = tmp4.substring(0, tmp4.indexOf('/*'));
 
-                if (varName === 'COOKIE_SECURE') {
-                  return 'true';
-                }
                 if (varName === 'GIT_COMMIT_HASH') {
                   const hash = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim().substring(0, 7);
                   return `'${hash}'`;

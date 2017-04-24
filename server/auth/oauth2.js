@@ -81,7 +81,7 @@ const back = (req, res) => {
       .then(accessToken => getRemoteUserJson(type, accessToken))
       .then(remoteUserJson => authHelper.getLocalUserObject(type, remoteUserJson))
       .then(localUserObj => authHelper.generateJwtToken(res, localUserObj.id))
-      .then(token => authHelper.addCookieAndForward(res, token))
+      .then(token => authHelper.addCookieAndForward(req, res, token, type))
       .catch((error) => {
         winston.loggers.get('application').error('Failed to oauth2Back');
         winston.loggers.get('application').error(error);

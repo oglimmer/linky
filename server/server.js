@@ -73,7 +73,7 @@ const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
 app.use((req, res) => {
   const store = finalCreateStore(combinedReducers);
 
-  preMatchRouteFetchData(store, req)
+  preMatchRouteFetchData(store, req, res)
   .then(() => {
     winston.loggers.get('application').debug(`Processing match at url = ${req.url}`);
 
@@ -137,6 +137,11 @@ app.use((req, res) => {
 
       return null;
     });
+  })
+  .catch((err) => {
+    if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
+      console.log(err);
+    }
   });
 });
 

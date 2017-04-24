@@ -2,6 +2,7 @@
 import winston from 'winston';
 
 import userDao from '../dao/userDao';
+import visitorDao from '../dao/visitorDao';
 import BcryptUtil from '../util/BcryptUtil';
 import JwtUtil from '../util/JwtUtil';
 import ResponseUtil from '../../src/util/ResponseUtil';
@@ -108,6 +109,22 @@ export default {
   createUser: function createUser(req, res, next) {
     const cup = new CreateUserProcessor(req, res, next);
     cup.doProcess();
+  },
+
+  logout: function logout(req, res) {
+    const { vistorToken } = req.cookies;
+    visitorDao.getByVisitorId(vistorToken)
+      .then((vistorRec) => {
+        if (vistorRec) {
+          /* eslint-disable no-underscore-dangle */
+          visitorDao.delete(vistorRec.value._id, vistorRec.value._rev);
+          /* eslint-enable no-underscore-dangle */
+        }
+      });
+    res.clearCookie('vistorToken');
+    res.clearCookie('authToken');
+    res.send('ok');
+    res.end();
   },
 
 };

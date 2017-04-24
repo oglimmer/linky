@@ -25,11 +25,12 @@ export function clearAuthToken() {
 }
 
 export function logout() {
-  return (dispatch) => {
-    dispatch(clearAuthToken());
-    dispatch(setLinks([]));
-    return Promise.resolve();
-  };
+  return dispatch => fetch.postCredentials('/rest/logout')
+    .then(() => {
+      dispatch(clearAuthToken());
+      dispatch(setLinks([]));
+      return Promise.resolve();
+    });
 }
 
 export function setAuthToken(authToken) {

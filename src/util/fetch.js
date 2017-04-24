@@ -18,6 +18,16 @@ export default {
     });
   },
 
+  postCredentials: function postCredentials(url) {
+    return fetch(baseUrl + url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+  },
+
   post: function post(url, obj, authToken) {
     return fetch(baseUrl + url, {
       method: 'POST',
