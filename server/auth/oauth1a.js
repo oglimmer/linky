@@ -45,6 +45,16 @@ const init = (req, res) => {
   });
 };
 
+const verifyToken = (req, res, oauthToken) => {
+  const decipher = crypto.createDecipher('aes192', properties.server.jwt.secret);
+  const encrypted = req.cookies.stateClaim;
+  res.clearCookie('stateClaim');
+  const decrypted = (decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8'));
+  if (decrypted !== oauthToken) {
+    throw Error('Failed to verify oauthToken');
+  }
+};
+
 const back = (req, res) => {
   const { denied } = req.query;
   if (denied) {
@@ -53,15 +63,7 @@ const back = (req, res) => {
   } else {
     const oauthToken = req.query.oauth_token;
     const oauthVerifier = req.query.oauth_verifier;
-
-    const decipher = crypto.createDecipher('aes192', properties.server.jwt.secret);
-    const encrypted = req.cookies.stateClaim;
-    const decrypted = (decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8'));
-
-    if (decrypted !== oauthToken) {
-      throw Error('Failed to verify oauthToken');
-    }
-
+    verifyToken(req, res, oauthToken);
     const type = req.params.type;
     const oauth = createOAuth(type);
     const reqData = {
