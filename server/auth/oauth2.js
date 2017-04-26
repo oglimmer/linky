@@ -3,9 +3,11 @@ import request from 'request-promise';
 import crypto from 'crypto';
 import assert from 'assert';
 import winston from 'winston';
+import randomstring from 'randomstring';
 
 import properties from '../util/linkyproperties';
 import authHelper from './authHelper';
+import jwt from '../util/JwtUtil';
 
 const redirectTarget = properties.server.auth.redirectUri;
 
@@ -14,11 +16,15 @@ const init = (req, res) => {
   const responseType = 'response_type=code';
   const scope = `scope=${encodeURIComponent(properties.server.auth[type].scope)}`;
   const clientId = `client_id=${encodeURIComponent(properties.server.auth[type].clientId)}`;
-  const redirectUri = `redirect_uri=${encodeURIComponent(redirectTarget)}`;
-  const state = `state=${encodeURIComponent(type)}`;
-  const url = `${properties.server.auth[type].authUri}?${responseType}&${clientId}&${scope}&${redirectUri}&${state}`;
-  winston.loggers.get('application').debug(`redirect to ${url}`);
-  res.redirect(url);
+  const redirectUri = `redirect_uri=${encodeURIComponent(`${redirectTarget}/${type}`)}`;
+  const randomToken = randomstring.generate();
+  jwt.sign({ randomToken }, '15m').then((claim) => {
+    const state = `state=${encodeURIComponent(claim)}`;
+    const url = `${properties.server.auth[type].authUri}?${responseType}&${clientId}&${scope}&${redirectUri}&${state}`;
+    winston.loggers.get('application').debug(`redirect to ${url}`);
+    res.cookie('stateClaim', claim, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
+    res.redirect(url);
+  });
 };
 
 const getAuthToken = (code, type) => {
@@ -27,7 +33,7 @@ const getAuthToken = (code, type) => {
     client_id: properties.server.auth[type].clientId,
     client_secret: properties.server.auth[type].clientSecret,
     grant_type: 'authorization_code',
-    redirect_uri: redirectTarget,
+    redirect_uri: `${redirectTarget}/${type}`,
   };
   return request.post({ url: properties.server.auth[type].tokenUri,
     form,
@@ -70,14 +76,26 @@ const getRemoteUserJson = (type, accessToken) => {
   });
 };
 
+const verifyState = (req, res, fromState) => {
+  const fromCookie = jwt.decode(req.cookies.stateClaim);
+  res.clearCookie('stateClaim');
+  if (fromState.randomToken !== fromCookie.randomToken) {
+    throw Error(`Failed to validate state. ${fromState} != ${fromCookie}`);
+  }
+};
+
 const back = (req, res) => {
   if (req.query.error || !req.query.code) {
     winston.loggers.get('application').debug('error: %j', req.query);
     res.redirect('/');
   } else {
-    const type = req.query.state;
-    assert(type, 'Failed to get type from query.state');
-    getAuthToken(req.query.code, type)
+    const { type } = req.params;
+    assert(type, 'Failed to get type from path');
+    const { state } = req.query;
+    assert(state, 'Failed to get state from path');
+    jwt.verify(state)
+      .then(fromState => verifyState(req, res, fromState))
+      .then(() => getAuthToken(req.query.code, type))
       .then(accessToken => getRemoteUserJson(type, accessToken))
       .then(remoteUserJson => authHelper.getLocalUserObject(type, remoteUserJson))
       .then(localUserObj => authHelper.generateJwtToken(res, localUserObj.id))

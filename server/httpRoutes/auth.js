@@ -18,7 +18,7 @@ const init = (req, res) => {
 };
 
 const back = (req, res) => {
-  const type = req.query.state;
+  const type = req.params.type;
   if (properties.server.auth[type].oauth === 1) {
     oauth1a.back(req, res);
   } else if (properties.server.auth[type].oauth === 2) {
@@ -30,5 +30,5 @@ const back = (req, res) => {
 
 export default (app) => {
   app.get('/auth/:type', init);
-  app.get('/authback', back);
+  app.get('/authback/:type', back);
 };
