@@ -30,7 +30,7 @@
     "immutable": "^3.8.1",
     "ionicons": "^3.0.0",
     "isomorphic-fetch": "^2.2.1",
-    "jsonwebtoken": "^7.3.0",
+    "jsonwebtoken": "^7.4.0",
     "lodash": "^4.17.4",
     "nano": "^6.2.0",
     "oauth-1.0a": "^2.1.0",
