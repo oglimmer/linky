@@ -33,6 +33,7 @@
     "jsonwebtoken": "^7.4.0",
     "lodash": "^4.17.4",
     "nano": "^6.2.0",
+    "node-jose": "^0.9.4",
     "oauth-1.0a": "^2.1.0",
     "properties": "^1.2.1",
     "randomstring": "^1.1.5",

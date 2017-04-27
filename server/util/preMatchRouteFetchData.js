@@ -23,9 +23,10 @@ export default (store, req, res) => {
     return visitorDao.getByVisitorId(vistorToken)
       .then((vistorRec) => {
         if (vistorRec) {
-          const { authType } = vistorRec.value;
+          const { authType, hint } = vistorRec.value;
+          const hintParam = hint ? `hint=${hint}` : '';
           winston.loggers.get('application').debug(`Found authType = ${authType}`);
-          res.redirect(`/auth/${authType}`);
+          res.redirect(`/auth/${authType}?${hintParam}`);
           throw new Error('forward');
         }
         return null;
