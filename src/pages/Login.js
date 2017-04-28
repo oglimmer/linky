@@ -37,6 +37,9 @@ const Login = () => (
         <button className="btn btn-block btn-blizzard" onClick={() => click('blizzard-eu')}>
           <i className="ion-ios-game-controller-a" /> Sign in with EU Battle.net
         </button>
+        <button className="btn btn-block btn-yahoo" onClick={() => click('yahoo')}>
+          <i className="ion-logo-yahoo" /> Sign in with Yahoo
+        </button>
       </div>
     </div>
   </div>

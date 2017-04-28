@@ -20,13 +20,16 @@ const init = (req, res) => {
   const redirectUri = `redirect_uri=${encodeURIComponent(`${redirectTarget}/${type}`)}`;
   const loginHint = hint ? `login_hint=${encodeURIComponent(hint)}` : '';
   const randomToken = randomstring.generate();
-  JwtUtil.sign({ randomToken }, '15m').then((claim) => {
-    const state = `state=${encodeURIComponent(claim)}`;
-    const url = `${properties.server.auth[type].authUri}?${responseType}&${clientId}&${scope}&${redirectUri}&${state}&${loginHint}`;
-    winston.loggers.get('application').debug(`redirect to ${url}`);
-    res.cookie('stateClaim', claim, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
-    res.redirect(url);
-  });
+  request.get({ url: properties.server.auth[type].openIdConfigUri })
+    .then(response => JSON.parse(response))
+    .then(openIdConfig => JwtUtil.sign({ randomToken }, '15m')
+    .then((claim) => {
+      const state = `state=${encodeURIComponent(claim)}`;
+      const url = `${openIdConfig.authorization_endpoint}?${responseType}&${clientId}&${scope}&${redirectUri}&${state}&${loginHint}`;
+      winston.loggers.get('application').debug(`redirect to ${url}`);
+      res.cookie('stateClaim', claim, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
+      res.redirect(url);
+    }));
 };
 
 const getIdToken = (code, type) => {
@@ -37,15 +40,18 @@ const getIdToken = (code, type) => {
     grant_type: 'authorization_code',
     redirect_uri: `${redirectTarget}/${type}`,
   };
-  return request.post({ url: properties.server.auth[type].tokenUri,
-    form,
-    headers: {
-      Accept: 'application/json',
-      'User-Agent': 'linky.oglimmer.de',
-    },
-  })
-  .then(body => JSON.parse(body))
-  .then(jsonBody => jsonBody.id_token);
+  return request.get({ url: properties.server.auth[type].openIdConfigUri })
+    .then(response => JSON.parse(response))
+    .then(openIdConfig => request.post({
+      url: openIdConfig.token_endpoint,
+      form,
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'linky.oglimmer.de',
+      },
+    }))
+    .then(body => JSON.parse(body))
+    .then(jsonBody => jsonBody.id_token);
 };
 
 const decodeIdToken = (type, idToken) =>
