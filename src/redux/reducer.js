@@ -4,11 +4,11 @@ import { combineReducers } from 'redux';
 import Immutable from 'immutable';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS,
-  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE } from './actions';
+  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, CHANGE_SORTING_LINKS } from './actions';
 
 const loginForm = {
-  email: 'foo@test.com',
-  password: 'foo',
+  email: '',
+  password: '',
 };
 const addUrlForm = {
   url: '',
@@ -17,6 +17,7 @@ const addUrlForm = {
 const initialStateMainData = {
   linkList: Immutable.List(),
   errorMessage: '',
+  sortingByColumn: 'mostUsed',
 };
 
 const initialStateAuth = {
@@ -56,6 +57,10 @@ function mainData(state = initialStateMainData, action) {
     case SET_ERROR_MESSAGE:
       return Object.assign({}, state, {
         errorMessage: action.errorMessage,
+      });
+    case CHANGE_SORTING_LINKS:
+      return Object.assign({}, state, {
+        sortingByColumn: action.byColumn,
       });
     default:
       return state;

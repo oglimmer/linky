@@ -11,10 +11,15 @@ export const SET_LINKS = 'SET_LINKS';
 export const SET_AUTH_TOKEN = 'SET_AUTH_TOKEN';
 export const CLEAR_AUTH_TOKEN = 'CLEAR_AUTH_TOKEN';
 export const SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE';
+export const CHANGE_SORTING_LINKS = 'CHANGE_SORTING_LINKS';
 
 /*
  * action creators
  */
+
+export function changeSortingLink(byColumn) {
+  return { type: CHANGE_SORTING_LINKS, byColumn };
+}
 
 export function setLinks(linkList) {
   return { type: SET_LINKS, linkList };

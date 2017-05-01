@@ -58,7 +58,13 @@ class GetLinkProcessor extends BaseProcessor {
     try {
       const rows = yield linkDao.listByUserid(this.data.userid);
       /* eslint-disable no-underscore-dangle */
-      const responseArr = _.map(rows, row => ({ id: row.value._id, linkUrl: row.value.linkUrl }));
+      const responseArr = _.map(rows, row => ({
+        id: row.value._id,
+        linkUrl: row.value.linkUrl,
+        callCounter: row.value.callCounter,
+        lastCalled: row.value.lastCalled,
+        createdDate: row.value.createdDate,
+      }));
       /* eslint-enable no-underscore-dangle */
       this.res.send(responseArr);
       winston.loggers.get('application').debug('Get all links from db for user %s resulted in %d rows', this.data.userid, responseArr.length);
