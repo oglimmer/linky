@@ -39,13 +39,13 @@ const getAuthToken = (code, type) => {
     redirect_uri: `${redirectTarget}/${type}`,
   };
   return request.post({ url: properties.server.auth[type].tokenUri,
+    json: true,
     form,
     headers: {
       Accept: 'application/json',
       'User-Agent': 'linky.oglimmer.de',
     },
   })
-  .then(body => JSON.parse(body))
   .then(jsonBody => jsonBody.access_token);
 };
 
@@ -68,15 +68,13 @@ const getRemoteUserJson = (type, accessToken) => {
   }
   return request.get({
     url: userUri,
+    json: true,
     headers: {
       authorization: `Bearer ${accessToken}`,
       Accept: 'application/json',
       'User-Agent': 'linky.oglimmer.de',
     },
-  }).then((bodyUser) => {
-    const remoteUserJson = JSON.parse(bodyUser);
-    return addIdIfMissing(remoteUserJson, type);
-  });
+  }).then(bodyUser => addIdIfMissing(bodyUser, type));
 };
 
 const back = (req, res) => {

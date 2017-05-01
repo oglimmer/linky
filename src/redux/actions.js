@@ -46,13 +46,9 @@ export function addLinkPost(id, linkUrl) {
 }
 
 export function addLink(url, authToken) {
-  let linkUrl = url;
-  if (!linkUrl.startsWith('http')) {
-    linkUrl = `http://${linkUrl}`;
-  }
-  return dispatch => fetch.post('/rest/links', { linkUrl }, authToken)
+  return dispatch => fetch.post('/rest/links', { url }, authToken)
     .then(response => response.json())
-    .then(newLink => dispatch(addLinkPost(newLink.id, linkUrl)))
+    .then(newLink => dispatch(addLinkPost(newLink.id, newLink.linkUrl)))
     .catch((error) => {
       console.log(error);
     });

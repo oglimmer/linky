@@ -1,6 +1,8 @@
 
 import _ from 'lodash';
 import winston from 'winston';
+import request from 'request-promise';
+
 import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
@@ -13,9 +15,16 @@ class CreateLinkProcessor extends BaseProcessor {
   }
 
   collectBodyParameters() {
-    const { linkUrl } = this.req.body;
-    const createdDate = new Date();
-    this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl };
+    let { url } = this.req.body;
+    if (!url.startsWith('http')) {
+      url = `http://${url}`;
+    }
+    return request.get({ url, resolveWithFullResponse: true, followAllRedirects: true })
+      .then((response) => {
+        const createdDate = new Date();
+        const linkUrl = response.request.href.substring(0, response.request.href.length - 1);
+        this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl };
+      });
   }
 
   /* eslint-disable class-methods-use-this */
@@ -27,7 +36,8 @@ class CreateLinkProcessor extends BaseProcessor {
   * process() {
     try {
       const { id } = yield linkDao.insert(this.data);
-      this.res.send({ id });
+      this.data.id = id;
+      this.res.send(this.data);
       winston.loggers.get('application').debug('Create link id=%s to db: %j', id, this.data);
     } catch (err) {
       winston.loggers.get('application').error(err);

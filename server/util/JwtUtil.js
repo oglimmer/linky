@@ -16,13 +16,12 @@ class JwtUtil {
   }
 
   static verifyOpenId(authToken, openIdConfigUrl) {
-    return request.get({ url: openIdConfigUrl })
-    .then(response => JSON.parse(response))
-    .then(openIdConfig => request.get({ url: openIdConfig.jwks_uri }))
-    .then(response => jose.JWK.asKeyStore(JSON.parse(response)))
-    .then((keyStoreJson) => {
+    return request.get({ url: openIdConfigUrl, json: true })
+    .then(openIdConfig => request.get({ url: openIdConfig.jwks_uri, json: true }))
+    .then(response => jose.JWK.asKeyStore(response))
+    .then((keyStore) => {
       const decodedToken = jwt.decode(authToken, { complete: true });
-      return keyStoreJson.get(decodedToken.header.kid);
+      return keyStore.get(decodedToken.header.kid);
     })
     .then(key => jose.JWS.createVerify(key).verify(authToken))
     .then(claim => JSON.parse(claim.payload.toString()));

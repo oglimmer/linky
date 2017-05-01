@@ -2,6 +2,7 @@
 import assert from 'assert';
 import bluebird from 'bluebird';
 import _ from 'lodash';
+import winston from 'winston';
 
 import ResponseUtil from '../../src/util/ResponseUtil';
 
@@ -58,14 +59,25 @@ import ResponseUtil from '../../src/util/ResponseUtil';
   /** must be overwritten */
   /* *process(); */
 
-  /* public*/ doProcess() {
-    this.collectBodyParameters();
+  /* private*/ doProcessPart2() {
     this.collectRouteParameter();
     if (this.securePath) {
       this.collectSecureParameter();
     }
     if (this.isValid()) {
       bluebird.coroutine(this.process).bind(this)();
+    }
+  }
+
+  /* public*/ doProcess() {
+    const promise = this.collectBodyParameters();
+    if (promise) {
+      promise.then(() => this.doProcessPart2())
+      .catch((err) => {
+        winston.loggers.get('application').debug(err);
+      });
+    } else {
+      this.doProcessPart2();
     }
   }
 
