@@ -3,7 +3,7 @@ import React, { PropTypes } from 'react';
 import { Button, ListGroupItem } from 'react-bootstrap';
 
 const ListGroupItemButton = ({ id, linkUrl, onDeleteLink }) => (
-  <ListGroupItem href={linkUrl}>
+  <ListGroupItem href={`/leave?target=${id}`} target="_blank">
     {linkUrl}
     <Button
       className="pull-right btn-xs"

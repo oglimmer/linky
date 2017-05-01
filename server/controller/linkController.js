@@ -14,7 +14,8 @@ class CreateLinkProcessor extends BaseProcessor {
 
   collectBodyParameters() {
     const { linkUrl } = this.req.body;
-    this.data = { type: 'link', linkUrl };
+    const createdDate = new Date();
+    this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl };
   }
 
   /* eslint-disable class-methods-use-this */
@@ -74,6 +75,7 @@ class DeleteProcessor extends BaseProcessor {
 
   * process() {
     try {
+      // SECURITY: CHECK match of userid
       yield linkDao.deleteLatest(this.data.linkid);
       this.res.send();
       winston.loggers.get('application').debug('Deleted link with id=%s', this.data.linkid);
