@@ -11,7 +11,7 @@ const updateLinkAndForward = (loadedLinkObj, claim, res) => {
   updatedLink.callCounter += 1;
   updatedLink.lastCalled = lastCalled;
   // MIGRATION CODE
-  if (updatedLink.createdDate) {
+  if (!updatedLink.createdDate) {
     updatedLink.createdDate = lastCalled;
   }
   return linkDao.insert(updatedLink).then(() => res.redirect(loadedLinkObj.linkUrl));
