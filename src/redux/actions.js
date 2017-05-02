@@ -12,10 +12,15 @@ export const SET_AUTH_TOKEN = 'SET_AUTH_TOKEN';
 export const CLEAR_AUTH_TOKEN = 'CLEAR_AUTH_TOKEN';
 export const SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE';
 export const CHANGE_SORTING_LINKS = 'CHANGE_SORTING_LINKS';
+export const CLICK_LINK = 'CLICK_LINK';
 
 /*
  * action creators
  */
+
+export function clickLink(id) {
+  return { type: CLICK_LINK, id };
+}
 
 export function changeSortingLink(byColumn) {
   return { type: CHANGE_SORTING_LINKS, byColumn };

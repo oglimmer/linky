@@ -4,7 +4,7 @@ import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 
-import { delLink } from '../redux/actions';
+import { delLink, clickLink } from '../redux/actions';
 
 import ListGroupItemButton from './ListGroupItemButton';
 import SortButton from './SortButton';
@@ -20,7 +20,7 @@ const getSortingInfo = (sortingByColumn, obj) => {
   return null;
 };
 
-const ListGroupItemList = ({ linkList, onDeleteLink, authToken, sortingByColumn }) => (
+const ListGroupItemList = ({ linkList, onDeleteLink, authToken, sortingByColumn, onClickLink }) => (
   <ListGroup>
     <ListGroupItem>
       <SortButton byColumn="mostUsed" text="Most used" />{' '}
@@ -42,6 +42,7 @@ const ListGroupItemList = ({ linkList, onDeleteLink, authToken, sortingByColumn 
         id={link.id}
         linkUrl={`${link.linkUrl} [${getSortingInfo(sortingByColumn, link)}]`}
         onDeleteLink={() => onDeleteLink(link.id, authToken)}
+        onClickLink={onClickLink}
       />,
     ) }
   </ListGroup>
@@ -55,6 +56,7 @@ ListGroupItemList.propTypes = {
     }),
   ).isRequired,
   onDeleteLink: PropTypes.func.isRequired,
+  onClickLink: PropTypes.func.isRequired,
   authToken: React.PropTypes.string.isRequired,
   sortingByColumn: React.PropTypes.string.isRequired,
 };
@@ -67,9 +69,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onDeleteLink: (id, authToken) => {
-    dispatch(delLink(id, authToken));
-  },
+  onDeleteLink: (id, authToken) => dispatch(delLink(id, authToken)),
+  onClickLink: id => dispatch(clickLink(id)),
 });
 
 export default connect(

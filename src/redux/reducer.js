@@ -4,7 +4,7 @@ import { combineReducers } from 'redux';
 import Immutable from 'immutable';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS,
-  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, CHANGE_SORTING_LINKS } from './actions';
+  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, CHANGE_SORTING_LINKS, CLICK_LINK } from './actions';
 
 const loginForm = {
   email: '',
@@ -44,6 +44,9 @@ function mainData(state = initialStateMainData, action) {
         linkList: state.linkList.push({
           id: action.id,
           linkUrl: action.linkUrl,
+          callCounter: 0,
+          lastCalled: new Date(),
+          createdDate: new Date(),
         }),
       });
     case DEL_LINK:
@@ -61,6 +64,17 @@ function mainData(state = initialStateMainData, action) {
     case CHANGE_SORTING_LINKS:
       return Object.assign({}, state, {
         sortingByColumn: action.byColumn,
+      });
+    case CLICK_LINK:
+      return Object.assign({}, state, {
+        linkList: state.linkList.update(
+          state.linkList.findIndex(ele => ele.id === action.id), val => ({
+            id: val.id,
+            linkUrl: val.linkUrl,
+            callCounter: val.callCounter + 1,
+            lastCalled: new Date(),
+            createdDate: val.createdDate,
+          })),
       });
     default:
       return state;

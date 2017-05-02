@@ -22,7 +22,10 @@ class CreateLinkProcessor extends BaseProcessor {
     return request.get({ url, resolveWithFullResponse: true, followAllRedirects: true })
       .then((response) => {
         const createdDate = new Date();
-        const linkUrl = response.request.href.substring(0, response.request.href.length - 1);
+        let linkUrl = response.request.href;
+        if (new RegExp('\\/$').test(linkUrl)) {
+          linkUrl = linkUrl.substring(0, linkUrl.length - 1);
+        }
         this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl };
       });
   }
