@@ -8,14 +8,15 @@ import { delLink, clickLink } from '../redux/actions';
 
 import ListGroupItemButton from './ListGroupItemButton';
 import SortButton from './SortButton';
+import dateFormat from '../util/DateFormat';
 
 const getSortingInfo = (sortingByColumn, obj) => {
   if (sortingByColumn === 'mostUsed') {
     return obj.callCounter;
   } else if (sortingByColumn === 'lastUsed') {
-    return new Date(obj.lastCalled);
+    return dateFormat.makeDateHumanreadble(obj.lastCalled);
   } else if (sortingByColumn === 'lastAdded') {
-    return new Date(obj.createdDate);
+    return dateFormat.makeDateHumanreadble(obj.createdDate);
   }
   return null;
 };
