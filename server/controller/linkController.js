@@ -1,7 +1,7 @@
 
 import _ from 'lodash';
 import winston from 'winston';
-import request from 'request-promise';
+import requestRaw from 'request';
 
 import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
@@ -19,15 +19,28 @@ class CreateLinkProcessor extends BaseProcessor {
     if (!url.startsWith('http')) {
       url = `http://${url}`;
     }
-    return request.get({ url, resolveWithFullResponse: true, followAllRedirects: true })
-      .then((response) => {
-        const createdDate = new Date();
+    const createdDate = new Date();
+    return new Promise((resolve) => {
+      const httpGetCall = requestRaw.get({
+        url,
+        followAllRedirects: true,
+        timeout: 500,
+      });
+      httpGetCall.on('response', (response) => {
+        httpGetCall.abort();
         let linkUrl = response.request.href;
         if (new RegExp('\\/$').test(linkUrl)) {
           linkUrl = linkUrl.substring(0, linkUrl.length - 1);
         }
         this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl };
+        resolve();
       });
+      httpGetCall.on('error', () => {
+        httpGetCall.abort();
+        this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl: url };
+        resolve();
+      });
+    });
   }
 
   /* eslint-disable class-methods-use-this */
@@ -43,7 +56,7 @@ class CreateLinkProcessor extends BaseProcessor {
       this.res.send(this.data);
       winston.loggers.get('application').debug('Create link id=%s to db: %j', id, this.data);
     } catch (err) {
-      winston.loggers.get('application').error(err);
+      winston.loggers.get('application').error('Failed to create link. Error = %j', err);
       ResponseUtil.sendErrorResponse500(err, this.res);
     }
     this.res.end();
