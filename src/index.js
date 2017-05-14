@@ -11,6 +11,7 @@ let state;
 if (window.$REDUX_STATE) {
   state = window.$REDUX_STATE;
   state.mainData.linkList = Immutable.List(state.mainData.linkList);
+  state.mainData.tagList = Immutable.List(state.mainData.tagList);
 }
 
 const store = configureStore(state);

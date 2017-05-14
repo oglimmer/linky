@@ -140,7 +140,7 @@ app.use((req, res) => {
   })
   .catch((err) => {
     if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
-      console.log(err);
+      winston.loggers.get('application').error(err);
     }
   });
 });
@@ -154,9 +154,9 @@ app.get('*', (req, res) => {
 // global error catcher, need four arguments
 /* eslint-disable no-unused-vars */
 app.use((err, req, res, next) => {
-  winston.loggers.get('application').error('Error on request %s %s', req.method, req.url);
-  winston.loggers.get('application').error(err.stack);
-  res.status(500).send('Server error');
+  // winston.loggers.get('application').error('Error on request %s %s', req.method, req.url);
+  // winston.loggers.get('application').error(err.stack);
+  // DO NOT: res.status(500).send('Server error');
 });
 /* eslint-enable no-unused-vars */
 

@@ -9,7 +9,6 @@ const view = Promise.promisify(linkyDb.view);
 const get = Promise.promisify(linkyDb.get);
 const destroy = Promise.promisify(linkyDb.destroy);
 
-/* eslint-disable no-underscore-dangle */
 class BaseDataAccessObject {
 
   /* eslint-disable class-methods-use-this */
@@ -28,6 +27,13 @@ class BaseDataAccessObject {
     return insert(obj);
   }
 
+  listByViewMultiParams(ddoc, viewName, start, end, params) {
+    const allParams = Object.assign({}, params);
+    allParams.startkey = start;
+    allParams.endkey = end;
+    return view(ddoc, viewName, allParams).then(body => body.rows);
+  }
+
   listByView(ddoc, viewName, key) {
     return view(ddoc, viewName, { keys: [key] }).then(body => body.rows);
   }
@@ -41,11 +47,12 @@ class BaseDataAccessObject {
   }
 
   deleteLatest(id) {
+    /* eslint-disable no-underscore-dangle */
     return this.getById(id).then(obj => this.delete(id, obj._rev));
+    /* eslint-disable no-underscore-dangle */
   }
   /* eslint-enable class-methods-use-this */
 
 }
-/* eslint-disable no-underscore-dangle */
 
 export default BaseDataAccessObject;

@@ -7,6 +7,10 @@ class LinkDao extends BaseDataAccessObject {
     return this.listByView('links', 'byUserid', userid);
   }
 
+  listByUseridAndTag(userid, tag) {
+    return this.listByViewMultiParams('links', 'byUseridAndTag', [userid, tag], [userid, tag], {});
+  }
+
 }
 
 export default new LinkDao();

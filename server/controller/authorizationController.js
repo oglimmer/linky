@@ -62,7 +62,7 @@ export default {
         const user = yield v.getUserForAuthToken(authToken);
         v.succeed(user);
       } catch (err) {
-        winston.loggers.get('application').error('Failed to checkAuthorization: ', err);
+        // winston.loggers.get('application').error('Failed to checkAuthorization: ', err);
         v.fail(err);
       }
     })();

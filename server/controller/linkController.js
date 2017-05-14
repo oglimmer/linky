@@ -7,6 +7,8 @@ import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 
+const simpleWordRegex = new RegExp('^[a-z0-9]*$');
+const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
 
 class CreateLinkProcessor extends BaseProcessor {
 
@@ -16,6 +18,7 @@ class CreateLinkProcessor extends BaseProcessor {
 
   collectBodyParameters() {
     let { url } = this.req.body;
+    const tags = split(this.req.body.tags);
     if (!url.startsWith('http')) {
       url = `http://${url}`;
     }
@@ -32,12 +35,12 @@ class CreateLinkProcessor extends BaseProcessor {
         if (new RegExp('\\/$').test(linkUrl)) {
           linkUrl = linkUrl.substring(0, linkUrl.length - 1);
         }
-        this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl };
+        this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl, tags };
         resolve();
       });
       httpGetCall.on('error', () => {
         httpGetCall.abort();
-        this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl: url };
+        this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl: url, tags };
         resolve();
       });
     });
@@ -70,9 +73,15 @@ class GetLinkProcessor extends BaseProcessor {
     super(req, res, next, true);
   }
 
+  collectBodyParameters() {
+    const tags = this.req.params.tags;
+    // const tags = tagsStr.split(',');
+    this.data = { tags };
+  }
+
   * process() {
     try {
-      const rows = yield linkDao.listByUserid(this.data.userid);
+      const rows = yield linkDao.listByUseridAndTag(this.data.userid, this.data.tags);
       /* eslint-disable no-underscore-dangle */
       const responseArr = _.map(rows, row => ({
         id: row.value._id,
@@ -80,10 +89,11 @@ class GetLinkProcessor extends BaseProcessor {
         callCounter: row.value.callCounter,
         lastCalled: row.value.lastCalled,
         createdDate: row.value.createdDate,
+        tags: row.value.tags,
       }));
       /* eslint-enable no-underscore-dangle */
       this.res.send(responseArr);
-      winston.loggers.get('application').debug('Get all links from db for user %s resulted in %d rows', this.data.userid, responseArr.length);
+      winston.loggers.get('application').debug('Get all links from db for user %s and tags %s resulted in %d rows', this.data.userid, this.data.tags, responseArr.length);
     } catch (err) {
       winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);

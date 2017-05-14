@@ -8,11 +8,13 @@ import fetch from '../util/fetch';
 export const ADD_LINK = 'ADD_LINK';
 export const DEL_LINK = 'DEL_LINK';
 export const SET_LINKS = 'SET_LINKS';
+export const SET_TAGS = 'SET_TAGS';
 export const SET_AUTH_TOKEN = 'SET_AUTH_TOKEN';
 export const CLEAR_AUTH_TOKEN = 'CLEAR_AUTH_TOKEN';
 export const SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE';
 export const CHANGE_SORTING_LINKS = 'CHANGE_SORTING_LINKS';
 export const CLICK_LINK = 'CLICK_LINK';
+export const SELECT_TAG = 'SELECT_TAG';
 
 /*
  * action creators
@@ -26,8 +28,16 @@ export function changeSortingLink(byColumn) {
   return { type: CHANGE_SORTING_LINKS, byColumn };
 }
 
+export function selectTag(tag) {
+  return { type: SELECT_TAG, tag };
+}
+
 export function setLinks(linkList) {
   return { type: SET_LINKS, linkList };
+}
+
+export function setTags(tagList) {
+  return { type: SET_TAGS, tagList };
 }
 
 export function clearAuthToken() {
@@ -39,7 +49,7 @@ export function logout() {
     .then(() => {
       dispatch(clearAuthToken());
       dispatch(setLinks([]));
-      return Promise.resolve();
+      dispatch(setTags([]));
     });
 }
 
@@ -55,13 +65,11 @@ export function addLinkPost(id, linkUrl) {
   return { type: ADD_LINK, id, linkUrl };
 }
 
-export function addLink(url, authToken) {
-  return dispatch => fetch.post('/rest/links', { url }, authToken)
+export function addLink(url, tags, authToken) {
+  return dispatch => fetch.post('/rest/links', { url, tags }, authToken)
     .then(response => response.json())
     .then(newLink => dispatch(addLinkPost(newLink.id, newLink.linkUrl)))
-    .catch((error) => {
-      console.log(error);
-    });
+    .catch(error => console.log(error));
 }
 
 export function delLinkPost(id) {
@@ -71,20 +79,30 @@ export function delLinkPost(id) {
 export function delLink(id, authToken) {
   return dispatch => fetch.delete(`/rest/links/${id}`, authToken)
     .then(() => dispatch(delLinkPost(id)))
-    .catch((error) => {
-      console.log(error);
-    });
+    .catch(error => console.log(error));
+}
+
+function fetchLinks(authToken, tag) {
+  return dispatch => fetch.get(`/rest/links/${tag}`, authToken)
+    .then(response => response.json())
+    .then(linkList => dispatch(setLinks(linkList)));
+}
+
+export function fetchLinksAndSelectTag(authToken, tag) {
+  return dispatch => Promise.all([
+    dispatch(fetchLinks(authToken, tag, dispatch)),
+    dispatch(selectTag(tag)),
+  ]);
 }
 
 export function initialLoad(authToken) {
-  return dispatch => fetch.get('/rest/links', authToken)
-    .then(response => response.json())
-    .then((linkList) => {
-      dispatch(setLinks(linkList));
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+  return dispatch => Promise.all([
+    dispatch(fetchLinks(authToken, 'portal', dispatch)),
+    fetch.get('/rest/tags', authToken)
+      .then(response => response.json())
+      .then(tagList => dispatch(setTags(tagList)))
+      .catch(error => console.log(error)),
+  ]);
 }
 
 export function checkAuth(email, password) {

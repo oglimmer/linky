@@ -5,11 +5,12 @@ import React from 'react';
 
 import AddLinkInputBox from '../components/AddLinkInputBox';
 import ListGroupItemList from '../components/ListGroupItemList';
+import TagList from '../components/TagList';
 
 const PortalPage = () => (
   <div>
     <AddLinkInputBox />
-    <hr />
+    <TagList />
     <ListGroupItemList />
   </div>
 );
