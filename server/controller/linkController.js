@@ -67,6 +67,47 @@ class CreateLinkProcessor extends BaseProcessor {
 
 }
 
+class UpdateLinkProcessor extends BaseProcessor {
+
+  constructor(req, res, next) {
+    super(req, res, next, true);
+  }
+
+  collectBodyParameters() {
+    let { url } = this.req.body;
+    const { linkid } = this.req.params;
+    const tags = split(this.req.body.tags);
+    if (!url.startsWith('http')) {
+      url = `http://${url}`;
+    }
+    return linkDao.getById(linkid).then((rec) => {
+      this.data = Object.assign({}, rec, {
+        tags,
+        linkUrl: url,
+      });
+    });
+  }
+
+  /* eslint-disable class-methods-use-this */
+  propertiesToValidate() {
+    return ['linkUrl', 'linkid'];
+  }
+  /* eslint-enable class-methods-use-this */
+
+  * process() {
+    try {
+      yield linkDao.insert(this.data);
+      this.res.send(this.data);
+      winston.loggers.get('application').debug('Update link: %j', this.data);
+    } catch (err) {
+      winston.loggers.get('application').error('Failed to create link. Error = %j', err);
+      ResponseUtil.sendErrorResponse500(err, this.res);
+    }
+    this.res.end();
+  }
+
+}
+
 class GetLinkProcessor extends BaseProcessor {
 
   constructor(req, res, next) {
@@ -134,6 +175,11 @@ export default {
 
   createLink: function createLink(req, res, next) {
     const crp = new CreateLinkProcessor(req, res, next);
+    crp.doProcess();
+  },
+
+  updateLink: function updateLink(req, res, next) {
+    const crp = new UpdateLinkProcessor(req, res, next);
     crp.doProcess();
   },
 

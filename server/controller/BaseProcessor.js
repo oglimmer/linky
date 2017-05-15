@@ -67,15 +67,17 @@ import ResponseUtil from '../../src/util/ResponseUtil';
     if (this.isValid()) {
       bluebird.coroutine(this.process).bind(this)();
     }
+    // this could be used as the return for the .then() and we want to avoid:
+    // `Warning: a promise was created in a handler but was not returned from import`
+    return null;
   }
 
   /* public*/ doProcess() {
     const promise = this.collectBodyParameters();
     if (promise) {
-      promise.then(() => this.doProcessPart2())
-      .catch((err) => {
-        winston.loggers.get('application').debug(err);
-      });
+      promise
+        .then(() => this.doProcessPart2())
+        .catch(err => winston.loggers.get('application').debug(err));
     } else {
       this.doProcessPart2();
     }

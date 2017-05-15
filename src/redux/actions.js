@@ -1,4 +1,6 @@
 
+import { actions } from 'react-redux-form';
+
 import fetch from '../util/fetch';
 
 /*
@@ -15,6 +17,7 @@ export const SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE';
 export const CHANGE_SORTING_LINKS = 'CHANGE_SORTING_LINKS';
 export const CLICK_LINK = 'CLICK_LINK';
 export const SELECT_TAG = 'SELECT_TAG';
+export const EDIT_LINK = 'EDIT_LINK';
 
 /*
  * action creators
@@ -61,14 +64,20 @@ export function setErrorMessage(errorMessage) {
   return { type: SET_ERROR_MESSAGE, errorMessage };
 }
 
-export function addLinkPost(id, linkUrl) {
-  return { type: ADD_LINK, id, linkUrl };
+export function addLinkPost(id, linkUrl, tags) {
+  return { type: ADD_LINK, id, linkUrl, tags };
 }
 
-export function addLink(url, tags, authToken) {
+export function addLink(linkId, url, tags, authToken) {
+  if (linkId) {
+    return dispatch => fetch.put(`/rest/links/${linkId}`, { url, tags }, authToken)
+      .then(response => response.json())
+      .then(newLink => dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags)))
+      .catch(error => console.log(error));
+  }
   return dispatch => fetch.post('/rest/links', { url, tags }, authToken)
     .then(response => response.json())
-    .then(newLink => dispatch(addLinkPost(newLink.id, newLink.linkUrl)))
+    .then(newLink => dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags)))
     .catch(error => console.log(error));
 }
 
@@ -80,6 +89,15 @@ export function delLink(id, authToken) {
   return dispatch => fetch.delete(`/rest/links/${id}`, authToken)
     .then(() => dispatch(delLinkPost(id)))
     .catch(error => console.log(error));
+}
+
+export function editLink(id, url, tags) {
+  return (dispatch) => {
+    dispatch(actions.change('addUrl.id', id));
+    dispatch(actions.change('addUrl.url', url));
+    dispatch(actions.change('addUrl.tags', tags));
+  };
+  // { type: EDIT_LINK, id };
 }
 
 function fetchLinks(authToken, tag) {

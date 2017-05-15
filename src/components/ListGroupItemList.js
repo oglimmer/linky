@@ -4,7 +4,7 @@ import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 
-import { delLink, clickLink } from '../redux/actions';
+import { editLink, clickLink } from '../redux/actions';
 
 import ListGroupItemButton from './ListGroupItemButton';
 import SortButton from './SortButton';
@@ -21,7 +21,7 @@ const getSortingInfo = (sortingByColumn, obj) => {
   return null;
 };
 
-const ListGroupItemList = ({ linkList, onDeleteLink, authToken, sortingByColumn, onClickLink }) => (
+const ListGroupItemList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink }) => (
   <ListGroup>
     <ListGroupItem>
       <SortButton byColumn="mostUsed" text="Most used" />{' '}
@@ -42,10 +42,10 @@ const ListGroupItemList = ({ linkList, onDeleteLink, authToken, sortingByColumn,
         key={link.id}
         id={link.id}
         linkUrl={`${link.linkUrl} [${getSortingInfo(sortingByColumn, link)}]`}
-        onDeleteLink={() => onDeleteLink(link.id, authToken)}
+        onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '))}
         onClickLink={onClickLink}
       />,
-    ) }
+    )}
   </ListGroup>
 );
 ListGroupItemList.propTypes = {
@@ -54,11 +54,13 @@ ListGroupItemList.propTypes = {
       id: React.PropTypes.string.isRequired,
       linkUrl: React.PropTypes.string.isRequired,
       callCounter: React.PropTypes.number.isRequired,
+      lastCalled: React.PropTypes.string.isRequired,
+      createdDate: React.PropTypes.string.isRequired,
+      tags: React.PropTypes.array.isRequired,
     }),
   ).isRequired,
-  onDeleteLink: PropTypes.func.isRequired,
+  onUpdateLink: PropTypes.func.isRequired,
   onClickLink: PropTypes.func.isRequired,
-  authToken: React.PropTypes.string.isRequired,
   sortingByColumn: React.PropTypes.string.isRequired,
 };
 
@@ -70,7 +72,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onDeleteLink: (id, authToken) => dispatch(delLink(id, authToken)),
+  onUpdateLink: (id, url, tags) => dispatch(editLink(id, url, tags)),
   onClickLink: id => dispatch(clickLink(id)),
 });
 

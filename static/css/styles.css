@@ -1,4 +1,8 @@
-
+::-webkit-input-placeholder 
+{
+  /* safari doesn't clear the placeholder when setting the value via javascript */
+  color: transparent!important;
+}
 
 .panel {
   border-color: #cfd9D7;

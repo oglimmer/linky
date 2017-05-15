@@ -12,6 +12,7 @@ const loginForm = {
   password: '',
 };
 const addUrlForm = {
+  id: null,
   url: '',
   tags: '',
 };
@@ -49,8 +50,9 @@ function mainData(state = initialStateMainData, action) {
           id: action.id,
           linkUrl: action.linkUrl,
           callCounter: 0,
-          lastCalled: new Date(),
-          createdDate: new Date(),
+          lastCalled: new Date().toString(),
+          createdDate: new Date().toString(),
+          tags: action.tags,
         }),
       });
     case DEL_LINK:
@@ -84,8 +86,9 @@ function mainData(state = initialStateMainData, action) {
             id: val.id,
             linkUrl: val.linkUrl,
             callCounter: val.callCounter + 1,
-            lastCalled: new Date(),
+            lastCalled: new Date().toString(),
             createdDate: val.createdDate,
+            tags: val.tags,
           })),
       });
     default:
