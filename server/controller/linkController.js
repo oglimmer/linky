@@ -9,6 +9,7 @@ import BaseProcessor from './BaseProcessor';
 
 const simpleWordRegex = new RegExp('^[a-z0-9]*$');
 const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
+const getTags = (rawTags) => { if (!rawTags) return ['untagged']; return split(rawTags); };
 
 class CreateLinkProcessor extends BaseProcessor {
 
@@ -18,7 +19,7 @@ class CreateLinkProcessor extends BaseProcessor {
 
   collectBodyParameters() {
     let { url } = this.req.body;
-    const tags = split(this.req.body.tags);
+    const tags = getTags(this.req.body.tags);
     if (!url.startsWith('http')) {
       url = `http://${url}`;
     }
@@ -76,15 +77,18 @@ class UpdateLinkProcessor extends BaseProcessor {
   collectBodyParameters() {
     let { url } = this.req.body;
     const { linkid } = this.req.params;
-    const tags = split(this.req.body.tags);
+    const tags = getTags(this.req.body.tags);
     if (!url.startsWith('http')) {
       url = `http://${url}`;
     }
     return linkDao.getById(linkid).then((rec) => {
+      /* eslint-disable no-underscore-dangle */
       this.data = Object.assign({}, rec, {
+        id: rec._id,
         tags,
         linkUrl: url,
       });
+      /* eslint-enable no-underscore-dangle */
     });
   }
 

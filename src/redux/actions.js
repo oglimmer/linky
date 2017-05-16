@@ -18,6 +18,7 @@ export const CHANGE_SORTING_LINKS = 'CHANGE_SORTING_LINKS';
 export const CLICK_LINK = 'CLICK_LINK';
 export const SELECT_TAG = 'SELECT_TAG';
 export const EDIT_LINK = 'EDIT_LINK';
+export const CHECK_SELECTED_TAG = 'CHECK_SELECTED_TAG';
 
 /*
  * action creators
@@ -68,16 +69,16 @@ export function addLinkPost(id, linkUrl, tags) {
   return { type: ADD_LINK, id, linkUrl, tags };
 }
 
-export function addLink(linkId, url, tags, authToken) {
-  if (linkId) {
-    return dispatch => fetch.put(`/rest/links/${linkId}`, { url, tags }, authToken)
-      .then(response => response.json())
-      .then(newLink => dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags)))
-      .catch(error => console.log(error));
-  }
-  return dispatch => fetch.post('/rest/links', { url, tags }, authToken)
+export function addLink(linkId, url, tags, authToken, selectedTag) {
+  const restPromise = linkId ? fetch.put(`/rest/links/${linkId}`, { url, tags }, authToken)
+    : fetch.post('/rest/links', { url, tags }, authToken);
+  return dispatch => restPromise
     .then(response => response.json())
-    .then(newLink => dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags)))
+    .then((newLink) => {
+      if (!linkId && newLink.tags.find(e => e === selectedTag)) {
+        dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags));
+      }
+    })
     .catch(error => console.log(error));
 }
 
@@ -97,7 +98,6 @@ export function editLink(id, url, tags) {
     dispatch(actions.change('addUrl.url', url));
     dispatch(actions.change('addUrl.tags', tags));
   };
-  // { type: EDIT_LINK, id };
 }
 
 function fetchLinks(authToken, tag) {
@@ -113,13 +113,21 @@ export function fetchLinksAndSelectTag(authToken, tag) {
   ]);
 }
 
+export function reloadTags(authToken) {
+  return dispatch => fetch.get('/rest/tags', authToken)
+    .then(response => response.json())
+    .then(tagList => dispatch(setTags(tagList)))
+    .catch(error => console.log(error));
+}
+
+export function checkSelectedTag() {
+  return { type: CHECK_SELECTED_TAG };
+}
+
 export function initialLoad(authToken) {
   return dispatch => Promise.all([
     dispatch(fetchLinks(authToken, 'portal', dispatch)),
-    fetch.get('/rest/tags', authToken)
-      .then(response => response.json())
-      .then(tagList => dispatch(setTags(tagList)))
-      .catch(error => console.log(error)),
+    dispatch(reloadTags(authToken)),
   ]);
 }
 

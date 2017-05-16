@@ -14,6 +14,9 @@ class GetTagProcessor extends BaseProcessor {
   * process() {
     try {
       const rows = yield tagDao.listAllTags(this.data.userid);
+      if (!rows.find(e => e[0].toLowerCase() === 'portal')) {
+        rows.push(['portal', 0]);
+      }
       this.res.send(rows);
       winston.loggers.get('application').debug('Get all tags from db for user %s resulted in %d rows', this.data.userid, rows.length);
     } catch (err) {

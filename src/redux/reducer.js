@@ -5,7 +5,7 @@ import Immutable from 'immutable';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE,
-  CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG } from './actions';
+  CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG, CHECK_SELECTED_TAG } from './actions';
 
 const loginForm = {
   email: '',
@@ -71,6 +71,13 @@ function mainData(state = initialStateMainData, action) {
       return Object.assign({}, state, {
         selectedTag: action.tag,
       });
+    case CHECK_SELECTED_TAG:
+      if (!state.tagList.find(e => e[0] === state.selectedTag)) {
+        return Object.assign({}, state, {
+          selectedTag: 'portal',
+        });
+      }
+      return state;
     case SET_ERROR_MESSAGE:
       return Object.assign({}, state, {
         errorMessage: action.errorMessage,
