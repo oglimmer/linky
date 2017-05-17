@@ -1,5 +1,6 @@
 
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
@@ -51,17 +52,17 @@ const ListGroupItemList = ({ linkList, onUpdateLink, sortingByColumn, onClickLin
 ListGroupItemList.propTypes = {
   linkList: ImmutablePropTypes.listOf(
     PropTypes.shape({
-      id: React.PropTypes.string.isRequired,
-      linkUrl: React.PropTypes.string.isRequired,
-      callCounter: React.PropTypes.number.isRequired,
-      lastCalled: React.PropTypes.string.isRequired,
-      createdDate: React.PropTypes.string.isRequired,
-      tags: React.PropTypes.array.isRequired,
+      id: PropTypes.string.isRequired,
+      linkUrl: PropTypes.string.isRequired,
+      callCounter: PropTypes.number.isRequired,
+      lastCalled: PropTypes.string.isRequired,
+      createdDate: PropTypes.string.isRequired,
+      tags: PropTypes.array.isRequired,
     }),
   ).isRequired,
   onUpdateLink: PropTypes.func.isRequired,
   onClickLink: PropTypes.func.isRequired,
-  sortingByColumn: React.PropTypes.string.isRequired,
+  sortingByColumn: PropTypes.string.isRequired,
 };
 
 

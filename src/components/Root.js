@@ -1,22 +1,22 @@
 
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 import { Provider } from 'react-redux';
 
-import { Router, browserHistory } from 'react-router';
+import { BrowserRouter } from 'react-router-dom';
 
-import getRoutes from '../routes/routing';
+import App from '../routes/routing';
 
 // key={Math.random()} is needed for react-hot-loading
 
-const Root = ({ store }) => {
-  const routes = getRoutes(store);
-  return (
-    <Provider store={store}>
-      <Router history={browserHistory} routes={routes} key={Math.random()} />
-    </Provider>
-  );
-};
+const Root = ({ store }) => (
+  <Provider store={store}>
+    <BrowserRouter>
+      <App store={store} />
+    </BrowserRouter>
+  </Provider>
+);
 Root.propTypes = {
   store: PropTypes.shape().isRequired,
 };

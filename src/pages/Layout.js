@@ -1,5 +1,6 @@
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -15,7 +16,7 @@ const Layout = props => (
 );
 
 Layout.propTypes = {
-  children: React.PropTypes.element.isRequired,
+  children: PropTypes.arrayOf(PropTypes.element).isRequired,
 };
 
 export default Layout;

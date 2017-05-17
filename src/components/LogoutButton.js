@@ -1,12 +1,13 @@
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { NavItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
 import { logout } from '../redux/actions';
 
-const LogoutButton = ({ dispatch, router, authToken }) => {
+const LogoutButton = ({ dispatch, history, authToken }) => {
   if (!authToken) {
     return null;
   }
@@ -14,16 +15,16 @@ const LogoutButton = ({ dispatch, router, authToken }) => {
     <NavItem
       eventKey={1}
       onClick={() => {
-        dispatch(logout()).then(() => { router.replace('/'); });
+        dispatch(logout()).then(() => { history.replace('/'); });
       }}
     >Log out</NavItem>
   );
 };
 
 LogoutButton.propTypes = {
-  dispatch: React.PropTypes.func.isRequired,
-  router: React.PropTypes.shape().isRequired,
-  authToken: React.PropTypes.string.isRequired,
+  dispatch: PropTypes.func.isRequired,
+  history: PropTypes.shape().isRequired,
+  authToken: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = state => ({

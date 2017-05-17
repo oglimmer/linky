@@ -10,7 +10,7 @@ import path from 'path';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-import { RouterContext, match } from 'react-router';
+import { StaticRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 
 import { applyMiddleware, createStore } from 'redux';
@@ -29,6 +29,8 @@ import fetchComponentData from './util/fetchComponentData';
 import preMatchRouteFetchData from './util/preMatchRouteFetchData';
 
 import properties from './util/linkyproperties';
+
+import App from '../src/routes/routing';
 
 const logConfig = path.resolve(__dirname, properties.server.log.path);
 console.log(`Using logConfig from ${logConfig}`);
@@ -80,63 +82,31 @@ app.use((req, res) => {
     if (process.env.NODE_ENV === 'development') {
       emptyCache();
     }
-    /* eslint-disable global-require */
-    const getRoutes = require('../src/routes/routing').default;
-    /* eslint-enable global-require */
 
-    const routes = getRoutes(store);
-
-    // react-router
-    match({ routes, location: req.url }, (error, redirectLocation, renderProps) => {
-      if (error) {
-        // console.log(`error = ${error.message}`);
-        return res.status(500).send(error.message);
-      }
-
-      if (redirectLocation) {
-        // console.log(`redirectLocation = ${redirectLocation.pathname}`);
-        return res.redirect(302, redirectLocation.pathname + redirectLocation.search);
-      }
-
-      if (renderProps == null) {
-        // return next('err msg: route not found');
-        // yield control to next middleware to handle the request
-        // console.log('not found!');
-        return res.status(404).send('Not found!!');
-      }
-
-      // console.log( '\nserver > renderProps: \n',
-      // require('util').inspect( renderProps, false, 1, true) )
-      // console.log( '\nserver > renderProps: \n',
-      // require('util').inspect( renderProps.components, false, 3, true) )
-
-      // this is where universal rendering happens,
-      // fetchComponentData() will trigger actions listed in static "needs" props in each
-      // container component
-      // and wait for all of them to complete before continuing rendering the page,
-      // hence ensuring all data needed was fetched before proceeding
-      //
-      // renderProps: contains all necessary data, e.g: routes, router, history, components...
-      fetchComponentData(store.dispatch, renderProps.components, renderProps.params, store)
-      .then(() => {
-        const reactHtml = ReactDOMServer.renderToString((
+    fetchComponentData(store.dispatch, null, null, store)
+    .then(() => {
+      const context = {};
+      const reactHtml = ReactDOMServer.renderToString(
+        <StaticRouter location={req.url} context={context}>
           <Provider store={store}>
-            <RouterContext {...renderProps} />
+            <App store={store} />
           </Provider>
-        ));
+        </StaticRouter>,
+      );
 
-        // console.log('reactHtml:\n', reactHtml);
-
+      if (context.url) {
+        res.writeHead(301, {
+          Location: context.url,
+        });
+        res.end();
+      } else {
         const initialState = JSON.stringify(store.getState());
-
-        // console.log('state: ', initialState);
-
         res.render('index.ejs', { reactHtml, initialState });
-      })
-      .catch(err => res.end(err.message));
+      }
+    })
+    .catch(err => res.end(err.message));
 
-      return null;
-    });
+    return null;
   })
   .catch((err) => {
     if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
