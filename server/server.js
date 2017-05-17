@@ -170,6 +170,10 @@ process.on('uncaughtException', (evt) => {
 
 const port = process.env.PORT || '8080';
 const bind = process.env.BIND || '127.0.0.1';
-app.listen(port, bind);
-
-winston.loggers.get('application').info(`Server started at ${bind}:${port}....`);
+app.listen(port, bind, (err) => {
+  if (err) {
+    winston.loggers.get('application').error(err);
+  } else {
+    winston.loggers.get('application').info(`Server started at ${bind}:${port}....`);
+  }
+});
