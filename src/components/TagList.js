@@ -9,7 +9,7 @@ const divStyle = { marginTop: 9, marginBottom: 9 };
 
 const TagList = ({ tagList, onClick, selectedTag, authToken }) => (
   <div style={divStyle}>
-    { tagList.map(tag =>
+    { tagList.map(tag => (
       <span key={Math.random()}>
         <textbox
           onClick={() => onClick(authToken, tag[0])}
@@ -18,7 +18,7 @@ const TagList = ({ tagList, onClick, selectedTag, authToken }) => (
           {tag[0]} ({tag[1]})
         </textbox>
         {' '}
-      </span>,
+      </span>),
     ) }
   </div>
 );

@@ -14,11 +14,16 @@ const AddLinkInputBox = ({ onSubmit, authToken, linkId, onClose, onDelete, selec
   >
     <FormGroupAdapter
       label="Add a new link"
-      model="url" placeholder="url to add (with or without http://)" autoFocus="true" autoComplete="off"
+      model="url"
+      placeholder="url to add (with or without http://)"
+      autoFocus="true"
+      autoComplete="off"
     />
     <FormGroupAdapter
       label="Add some tags"
-      model="tags" placeholder="a tag is one word [a-z0-9]" autoComplete="off"
+      model="tags"
+      placeholder="a tag is one word [a-z0-9]"
+      autoComplete="off"
     />
     <Button type="submit">{ linkId === null ? 'Create' : 'Update' } Link</Button>
 

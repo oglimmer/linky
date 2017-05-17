@@ -37,14 +37,14 @@ const ListGroupItemList = ({ linkList, onUpdateLink, sortingByColumn, onClickLin
         return new Date(b.createdDate) - new Date(a.createdDate);
       }
       return 0;
-    }).map(link =>
+    }).map(link => (
       <ListGroupItemButton
         key={link.id}
         id={link.id}
         linkUrl={`${link.linkUrl} [${getSortingInfo(sortingByColumn, link)}]`}
         onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '))}
         onClickLink={onClickLink}
-      />,
+      />),
     )}
   </ListGroup>
 );
