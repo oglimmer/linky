@@ -10,6 +10,12 @@ import BaseProcessor from './BaseProcessor';
 const simpleWordRegex = new RegExp('^[a-z0-9]*$');
 const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
 const getTags = (rawTags) => { if (!rawTags) return ['untagged']; return split(rawTags); };
+const ensureAllTag = (tagsArr) => {
+  if (!tagsArr.find(e => e.toLowerCase() === 'all')) {
+    tagsArr.push('all');
+  }
+  return tagsArr;
+};
 
 class CreateLinkProcessor extends BaseProcessor {
 
@@ -19,7 +25,7 @@ class CreateLinkProcessor extends BaseProcessor {
 
   collectBodyParameters() {
     let { url } = this.req.body;
-    const tags = getTags(this.req.body.tags);
+    const tags = ensureAllTag(getTags(this.req.body.tags));
     if (!url.startsWith('http')) {
       url = `http://${url}`;
     }
@@ -77,7 +83,7 @@ class UpdateLinkProcessor extends BaseProcessor {
   collectBodyParameters() {
     let { url } = this.req.body;
     const { linkid } = this.req.params;
-    const tags = getTags(this.req.body.tags);
+    const tags = ensureAllTag(getTags(this.req.body.tags));
     if (!url.startsWith('http')) {
       url = `http://${url}`;
     }
