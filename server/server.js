@@ -26,11 +26,10 @@ import httpRoutes from './util/httpRoutesEntry';
 import combinedReducers from '../src/redux/reducer';
 
 import fetchComponentData from './util/fetchComponentData';
-import preMatchRouteFetchData from './util/preMatchRouteFetchData';
 
 import properties from './util/linkyproperties';
 
-import App from '../src/routes/routing';
+import Routing from '../src/routes/Routing';
 
 const logConfig = path.resolve(__dirname, properties.server.log.path);
 console.log(`Using logConfig from ${logConfig}`);
@@ -75,38 +74,32 @@ const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
 app.use((req, res) => {
   const store = finalCreateStore(combinedReducers);
 
-  preMatchRouteFetchData(store, req, res)
+  winston.loggers.get('application').debug(`Processing match at url = ${req.url}`);
+
+  if (process.env.NODE_ENV === 'development') {
+    emptyCache();
+  }
+
+  fetchComponentData(store.dispatch, req, res)
   .then(() => {
-    winston.loggers.get('application').debug(`Processing match at url = ${req.url}`);
+    const context = {};
+    const reactHtml = ReactDOMServer.renderToString(
+      <StaticRouter location={req.url} context={context}>
+        <Provider store={store}>
+          <Routing store={store} />
+        </Provider>
+      </StaticRouter>,
+    );
 
-    if (process.env.NODE_ENV === 'development') {
-      emptyCache();
+    if (context.url) {
+      res.writeHead(301, {
+        Location: context.url,
+      });
+      res.end();
+    } else {
+      const initialState = JSON.stringify(store.getState());
+      res.render('index.ejs', { reactHtml, initialState });
     }
-
-    fetchComponentData(store.dispatch, null, null, store)
-    .then(() => {
-      const context = {};
-      const reactHtml = ReactDOMServer.renderToString(
-        <StaticRouter location={req.url} context={context}>
-          <Provider store={store}>
-            <App store={store} />
-          </Provider>
-        </StaticRouter>,
-      );
-
-      if (context.url) {
-        res.writeHead(301, {
-          Location: context.url,
-        });
-        res.end();
-      } else {
-        const initialState = JSON.stringify(store.getState());
-        res.render('index.ejs', { reactHtml, initialState });
-      }
-    })
-    .catch(err => res.end(err.message));
-
-    return null;
   })
   .catch((err) => {
     if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {

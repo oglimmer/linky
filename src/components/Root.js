@@ -6,14 +6,14 @@ import { Provider } from 'react-redux';
 
 import { BrowserRouter } from 'react-router-dom';
 
-import App from '../routes/routing';
+import Routing from '../routes/Routing';
 
 // key={Math.random()} is needed for react-hot-loading
 
 const Root = ({ store }) => (
   <Provider store={store}>
     <BrowserRouter>
-      <App store={store} />
+      <Routing store={store} />
     </BrowserRouter>
   </Provider>
 );

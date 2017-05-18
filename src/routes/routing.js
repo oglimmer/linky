@@ -42,7 +42,7 @@ CategorizedRoute.defaultProps = {
   authReq: true,
 };
 
-const App = ({ store }) => (
+const Routing = ({ store }) => (
   <Layout>
     <CategorizedRoute
       store={store}
@@ -61,8 +61,8 @@ const App = ({ store }) => (
     />
   </Layout>
 );
-App.propTypes = {
+Routing.propTypes = {
   store: PropTypes.shape().isRequired,
 };
 
-export default App;
+export default Routing;
