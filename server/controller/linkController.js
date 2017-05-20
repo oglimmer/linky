@@ -7,6 +7,10 @@ import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 
+import { DEFAULT_LINK } from '../../src/redux/DataModels';
+
+// TAGS
+
 const simpleWordRegex = new RegExp('^[a-z0-9]*$');
 const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
 const getTags = (rawTags) => { if (!rawTags) return ['untagged']; return split(rawTags); };
@@ -17,6 +21,10 @@ const ensureAllTag = (tagsArr) => {
   return tagsArr;
 };
 
+// URL
+const fixUrl = url => (!url.startsWith('http') ? `http://${url}` : url);
+const removeTrailingSlash = linkUrl => (new RegExp('\\/$').test(linkUrl) ? linkUrl.substring(0, linkUrl.length - 1) : linkUrl);
+
 class CreateLinkProcessor extends BaseProcessor {
 
   constructor(req, res, next) {
@@ -24,12 +32,8 @@ class CreateLinkProcessor extends BaseProcessor {
   }
 
   collectBodyParameters() {
-    let { url } = this.req.body;
+    const url = fixUrl(this.req.body.url);
     const tags = ensureAllTag(getTags(this.req.body.tags));
-    if (!url.startsWith('http')) {
-      url = `http://${url}`;
-    }
-    const createdDate = new Date();
     return new Promise((resolve) => {
       const httpGetCall = requestRaw.get({
         url,
@@ -38,16 +42,21 @@ class CreateLinkProcessor extends BaseProcessor {
       });
       httpGetCall.on('response', (response) => {
         httpGetCall.abort();
-        let linkUrl = response.request.href;
-        if (new RegExp('\\/$').test(linkUrl)) {
-          linkUrl = linkUrl.substring(0, linkUrl.length - 1);
-        }
-        this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl, tags };
+        const linkUrl = removeTrailingSlash(response.request.href);
+        this.data = Object.assign({}, DEFAULT_LINK, {
+          type: 'link',
+          tags,
+          linkUrl,
+        });
         resolve();
       });
       httpGetCall.on('error', () => {
         httpGetCall.abort();
-        this.data = { type: 'link', callCounter: 0, createdDate, lastCalled: createdDate, linkUrl: url, tags };
+        this.data = Object.assign({}, DEFAULT_LINK, {
+          type: 'link',
+          tags,
+          linkUrl: url,
+        });
         resolve();
       });
     });
@@ -81,20 +90,14 @@ class UpdateLinkProcessor extends BaseProcessor {
   }
 
   collectBodyParameters() {
-    let { url } = this.req.body;
     const { linkid } = this.req.params;
+    const linkUrl = fixUrl(this.req.body.url);
     const tags = ensureAllTag(getTags(this.req.body.tags));
-    if (!url.startsWith('http')) {
-      url = `http://${url}`;
-    }
     return linkDao.getById(linkid).then((rec) => {
-      /* eslint-disable no-underscore-dangle */
       this.data = Object.assign({}, rec, {
-        id: rec._id,
         tags,
-        linkUrl: url,
+        linkUrl,
       });
-      /* eslint-enable no-underscore-dangle */
     });
   }
 
@@ -107,6 +110,9 @@ class UpdateLinkProcessor extends BaseProcessor {
   * process() {
     try {
       yield linkDao.insert(this.data);
+      /* eslint-disable no-underscore-dangle */
+      this.data.id = this.data._id;
+      /* eslint-enable no-underscore-dangle */
       this.res.send(this.data);
       winston.loggers.get('application').debug('Update link: %j', this.data);
     } catch (err) {
@@ -133,16 +139,11 @@ class GetLinkProcessor extends BaseProcessor {
   * process() {
     try {
       const rows = yield linkDao.listByUseridAndTag(this.data.userid, this.data.tags);
-      /* eslint-disable no-underscore-dangle */
-      const responseArr = _.map(rows, row => ({
-        id: row.value._id,
-        linkUrl: row.value.linkUrl,
-        callCounter: row.value.callCounter,
-        lastCalled: row.value.lastCalled,
-        createdDate: row.value.createdDate,
-        tags: row.value.tags,
-      }));
-      /* eslint-enable no-underscore-dangle */
+      const responseArr = _.map(rows, (row) => {
+        const { _id, _rev, ...mappedRow } = row.value;
+        mappedRow.id = _id;
+        return mappedRow;
+      });
       this.res.send(responseArr);
       winston.loggers.get('application').debug('Get all links from db for user %s and tags %s resulted in %d rows', this.data.userid, this.data.tags, responseArr.length);
     } catch (err) {

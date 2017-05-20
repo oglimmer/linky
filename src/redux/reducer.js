@@ -7,27 +7,8 @@ import { ADD_LINK, DEL_LINK, SET_LINKS,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE,
   CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG, CHECK_SELECTED_TAG } from './actions';
 
-const loginForm = {
-  email: '',
-  password: '',
-};
-const addUrlForm = {
-  id: null,
-  url: '',
-  tags: '',
-};
+import { initialStateAuth, initialStateMainData, loginForm, addUrlForm, DEFAULT_LINK } from './DataModels';
 
-const initialStateMainData = {
-  linkList: Immutable.List(),
-  tagList: Immutable.List(),
-  errorMessage: '',
-  sortingByColumn: 'mostUsed',
-  selectedTag: 'portal',
-};
-
-const initialStateAuth = {
-  token: '',
-};
 
 function auth(state = initialStateAuth, action) {
   switch (action.type) {
@@ -46,14 +27,11 @@ function mainData(state = initialStateMainData, action) {
   switch (action.type) {
     case ADD_LINK:
       return Object.assign({}, state, {
-        linkList: state.linkList.push({
+        linkList: state.linkList.push(Object.assign({}, DEFAULT_LINK, {
           id: action.id,
           linkUrl: action.linkUrl,
-          callCounter: 0,
-          lastCalled: new Date().toString(),
-          createdDate: new Date().toString(),
           tags: action.tags,
-        }),
+        })),
       });
     case DEL_LINK:
       return Object.assign({}, state, {
@@ -89,14 +67,12 @@ function mainData(state = initialStateMainData, action) {
     case CLICK_LINK:
       return Object.assign({}, state, {
         linkList: state.linkList.update(
-          state.linkList.findIndex(ele => ele.id === action.id), val => ({
-            id: val.id,
-            linkUrl: val.linkUrl,
+          state.linkList.findIndex(ele => ele.id === action.id),
+          val => Object.assign({}, val, {
             callCounter: val.callCounter + 1,
             lastCalled: new Date().toString(),
-            createdDate: val.createdDate,
-            tags: val.tags,
-          })),
+          }),
+        ),
       });
     default:
       return state;
