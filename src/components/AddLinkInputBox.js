@@ -2,10 +2,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
-import { Form, actions } from 'react-redux-form';
+import { Form } from 'react-redux-form';
 import { connect } from 'react-redux';
 
-import { addLink, delLink, reloadTags, checkSelectedTag } from '../redux/actions';
+import { addLink, delLink, reloadTags, checkSelectedTag, resetAddLinkFields } from '../redux/actions';
 import FormGroupAdapter from '../components/FormGroupAdapter';
 
 const AddLinkInputBox = ({ onSubmit, authToken, linkId, onClose, onDelete, selectedTag }) => (
@@ -62,22 +62,14 @@ const mapDispatchToProps = dispatch => ({
   onSubmit: (formData, authToken, linkId, selectedTag) => {
     if (formData.url.trim()) {
       dispatch(addLink(linkId, formData.url.trim(), formData.tags.trim(), authToken, selectedTag))
-        .then(() => dispatch(actions.reset('addUrl.url')))
-        .then(() => dispatch(actions.reset('addUrl.tags')))
-        .then(() => dispatch(actions.reset('addUrl.id')))
+        .then(() => dispatch(resetAddLinkFields()))
         .then(() => dispatch(reloadTags(authToken)));
     }
   },
-  onClose: () => {
-    dispatch(actions.reset('addUrl.url'));
-    dispatch(actions.reset('addUrl.tags'));
-    dispatch(actions.reset('addUrl.id'));
-  },
+  onClose: () => dispatch(resetAddLinkFields()),
   onDelete: (linkId, authToken) => {
     dispatch(delLink(linkId, authToken))
-        .then(() => dispatch(actions.reset('addUrl.url')))
-        .then(() => dispatch(actions.reset('addUrl.tags')))
-        .then(() => dispatch(actions.reset('addUrl.id')))
+        .then(() => dispatch(resetAddLinkFields()))
         .then(() => dispatch(reloadTags(authToken)))
         .then(() => dispatch(checkSelectedTag()));
   },

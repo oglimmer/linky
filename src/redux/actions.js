@@ -24,6 +24,14 @@ export const CHECK_SELECTED_TAG = 'CHECK_SELECTED_TAG';
  * action creators
  */
 
+export function resetAddLinkFields() {
+  return (dispatch) => {
+    dispatch(actions.reset('addUrl.url'));
+    dispatch(actions.reset('addUrl.tags'));
+    dispatch(actions.reset('addUrl.id'));
+  };
+}
+
 export function clickLink(id) {
   return { type: CLICK_LINK, id };
 }
