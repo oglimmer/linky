@@ -133,10 +133,10 @@ function decreaseTagCounter(tagNamesToDecrease) {
   };
 }
 
-export function persistLink(linkId, url, tags, selectedTag) {
+export function persistLink(linkId, url, tags) {
   return (dispatch, getState) => {
-    console.log(getState().mainData.linkList);
-    const oldElement = getState().mainData.linkList.find(e => e.id === linkId);
+    const { linkList, selectedTag } = getState().mainData;
+    const oldElement = linkList.find(e => e.id === linkId);
     const oldTags = oldElement ? oldElement.tags : [];
     return (linkId ?
       fetch.put(`/rest/links/${linkId}`, { url, tags }, getState().auth.token) :

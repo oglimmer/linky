@@ -8,10 +8,10 @@ import { connect } from 'react-redux';
 import { persistLink, delLink, resetAddLinkFields } from '../redux/actions';
 import FormGroupAdapter from '../components/FormGroupAdapter';
 
-const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, selectedTag }) => (
+const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete }) => (
   <Form
     model="addUrl"
-    onSubmit={formData => onSubmit(formData, linkId, selectedTag)}
+    onSubmit={formData => onSubmit(formData, linkId)}
   >
     <FormGroupAdapter
       label="Add a new link"
@@ -48,7 +48,6 @@ AddLinkInputBox.propTypes = {
   onClose: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   linkId: PropTypes.string,
-  selectedTag: PropTypes.string.isRequired,
 };
 AddLinkInputBox.defaultProps = {
   linkId: null,
@@ -58,17 +57,14 @@ AddLinkInputBox.defaultProps = {
 
 const mapStateToPropsAddLinkInputBox = state => ({
   linkId: state.addUrl.id,
-  selectedTag: state.mainData.selectedTag,
-  tagList: state.mainData.tagList,
-  relatedTags: state.mainData.linkList,
 });
 
 
 const mapDispatchToProps = dispatch => ({
-  onSubmit: (formData, linkId, selectedTag) => {
+  onSubmit: (formData, linkId) => {
     if (formData.url.trim()) {
-      dispatch(persistLink(linkId, formData.url.trim(), formData.tags.trim(), selectedTag))
-        .then(() => dispatch(resetAddLinkFields()));
+      dispatch(persistLink(linkId, formData.url.trim(), formData.tags.trim()));
+      dispatch(resetAddLinkFields());
     }
   },
   onClose: () => dispatch(resetAddLinkFields()),
@@ -78,5 +74,4 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-export default connect(mapStateToPropsAddLinkInputBox,
-    mapDispatchToProps)(AddLinkInputBox);
+export default connect(mapStateToPropsAddLinkInputBox, mapDispatchToProps)(AddLinkInputBox);
