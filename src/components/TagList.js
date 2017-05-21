@@ -8,12 +8,12 @@ import { fetchLinksAndSelectTag } from '../redux/actions';
 
 const divStyle = { marginTop: 9, marginBottom: 9 };
 
-const TagList = ({ tagList, onClick, selectedTag, authToken }) => (
+const TagList = ({ tagList, onClick, selectedTag }) => (
   <div style={divStyle}>
     { tagList.map(tag => (
       <span key={Math.random()}>
         <textbox
-          onClick={() => onClick(authToken, tag[0])}
+          onClick={() => onClick(tag[0])}
           className={tag[0] === selectedTag ? 'label label-primary' : 'label label-default'}
         >
           {tag[0]} ({tag[1]})
@@ -27,7 +27,6 @@ TagList.propTypes = {
   tagList: ImmutablePropTypes.listOf(PropTypes.array).isRequired,
   onClick: PropTypes.func.isRequired,
   selectedTag: PropTypes.string.isRequired,
-  authToken: PropTypes.string.isRequired,
 };
 
 // ---------------------------------------------------------------------------------
@@ -39,9 +38,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onClick: (authToken, tag) => {
-    dispatch(fetchLinksAndSelectTag(authToken, tag));
-  },
+  onClick: tag => dispatch(fetchLinksAndSelectTag(tag)),
 });
 
 export default connect(

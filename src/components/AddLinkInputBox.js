@@ -5,13 +5,13 @@ import { Button } from 'react-bootstrap';
 import { Form } from 'react-redux-form';
 import { connect } from 'react-redux';
 
-import { addLink, delLink, reloadTags, checkSelectedTag, resetAddLinkFields } from '../redux/actions';
+import { persistLink, delLink, resetAddLinkFields } from '../redux/actions';
 import FormGroupAdapter from '../components/FormGroupAdapter';
 
-const AddLinkInputBox = ({ onSubmit, authToken, linkId, onClose, onDelete, selectedTag }) => (
+const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, selectedTag }) => (
   <Form
     model="addUrl"
-    onSubmit={formData => onSubmit(formData, authToken, linkId, selectedTag)}
+    onSubmit={formData => onSubmit(formData, linkId, selectedTag)}
   >
     <FormGroupAdapter
       label="Add a new link"
@@ -31,7 +31,12 @@ const AddLinkInputBox = ({ onSubmit, authToken, linkId, onClose, onDelete, selec
     { linkId !== null ?
       <span>
         {' '}
-        <Button onClick={() => onDelete(linkId, authToken)} type="button">Del</Button>
+        <Button
+          onClick={() => onDelete(linkId)}
+          type="button"
+        >
+          Del
+        </Button>
         {' '}
         <Button onClick={onClose} type="button">Done</Button>
       </span> : '' }
@@ -42,7 +47,6 @@ AddLinkInputBox.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
-  authToken: PropTypes.string.isRequired,
   linkId: PropTypes.string,
   selectedTag: PropTypes.string.isRequired,
 };
@@ -53,26 +57,26 @@ AddLinkInputBox.defaultProps = {
 // ----------------------------------------------------------------
 
 const mapStateToPropsAddLinkInputBox = state => ({
-  authToken: state.auth.token,
   linkId: state.addUrl.id,
   selectedTag: state.mainData.selectedTag,
+  tagList: state.mainData.tagList,
+  relatedTags: state.mainData.linkList,
 });
 
+
 const mapDispatchToProps = dispatch => ({
-  onSubmit: (formData, authToken, linkId, selectedTag) => {
+  onSubmit: (formData, linkId, selectedTag) => {
     if (formData.url.trim()) {
-      dispatch(addLink(linkId, formData.url.trim(), formData.tags.trim(), authToken, selectedTag))
-        .then(() => dispatch(resetAddLinkFields()))
-        .then(() => dispatch(reloadTags(authToken)));
+      dispatch(persistLink(linkId, formData.url.trim(), formData.tags.trim(), selectedTag))
+        .then(() => dispatch(resetAddLinkFields()));
     }
   },
   onClose: () => dispatch(resetAddLinkFields()),
-  onDelete: (linkId, authToken) => {
-    dispatch(delLink(linkId, authToken))
-        .then(() => dispatch(resetAddLinkFields()))
-        .then(() => dispatch(reloadTags(authToken)))
-        .then(() => dispatch(checkSelectedTag()));
+  onDelete: (linkId) => {
+    dispatch(delLink(linkId));
+    dispatch(resetAddLinkFields());
   },
 });
 
-export default connect(mapStateToPropsAddLinkInputBox, mapDispatchToProps)(AddLinkInputBox);
+export default connect(mapStateToPropsAddLinkInputBox,
+    mapDispatchToProps)(AddLinkInputBox);

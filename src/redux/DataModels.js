@@ -1,5 +1,6 @@
 
 import Immutable from 'immutable';
+import PropTypes from 'prop-types';
 
 export const loginForm = {
   email: '',
@@ -31,4 +32,13 @@ export const DEFAULT_LINK = {
   lastCalled: new Date().toString(),
   createdDate: new Date().toString(),
   tags: ['all'],
+};
+
+export const DEFAULT_LINK_PROP_TYPES = {
+  id: PropTypes.string.isRequired,
+  linkUrl: PropTypes.string.isRequired,
+  callCounter: PropTypes.number.isRequired,
+  lastCalled: PropTypes.string.isRequired,
+  createdDate: PropTypes.string.isRequired,
+  tags: PropTypes.array.isRequired,
 };

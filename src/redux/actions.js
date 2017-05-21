@@ -1,7 +1,10 @@
 
 import { actions } from 'react-redux-form';
 
+import assert from 'assert';
+
 import fetch from '../util/fetch';
+import { diff } from '../util/ArrayUtil';
 
 /*
  * action types
@@ -18,19 +21,12 @@ export const CHANGE_SORTING_LINKS = 'CHANGE_SORTING_LINKS';
 export const CLICK_LINK = 'CLICK_LINK';
 export const SELECT_TAG = 'SELECT_TAG';
 export const EDIT_LINK = 'EDIT_LINK';
-export const CHECK_SELECTED_TAG = 'CHECK_SELECTED_TAG';
+export const DEL_TAG = 'DEL_TAG';
+export const MANIPULATE_TAG = 'MANIPULATE_TAG';
 
 /*
  * action creators
  */
-
-export function resetAddLinkFields() {
-  return (dispatch) => {
-    dispatch(actions.reset('addUrl.url'));
-    dispatch(actions.reset('addUrl.tags'));
-    dispatch(actions.reset('addUrl.id'));
-  };
-}
 
 export function clickLink(id) {
   return { type: CLICK_LINK, id };
@@ -40,20 +36,54 @@ export function changeSortingLink(byColumn) {
   return { type: CHANGE_SORTING_LINKS, byColumn };
 }
 
-export function selectTag(tag) {
+function selectTag(tag) {
   return { type: SELECT_TAG, tag };
 }
 
-export function setLinks(linkList) {
+export function setAuthToken(authToken) {
+  return { type: SET_AUTH_TOKEN, authToken };
+}
+
+function setLinks(linkList) {
   return { type: SET_LINKS, linkList };
 }
 
-export function setTags(tagList) {
+function setTags(tagList) {
   return { type: SET_TAGS, tagList };
 }
 
-export function clearAuthToken() {
+function removeTag(tagName) {
+  return { type: DEL_TAG, tagName };
+}
+
+function manipulateTagCounter(tagName, val) {
+  return { type: MANIPULATE_TAG, tagName, val };
+}
+
+function clearAuthToken() {
   return { type: CLEAR_AUTH_TOKEN };
+}
+
+function setErrorMessage(errorMessage) {
+  return { type: SET_ERROR_MESSAGE, errorMessage };
+}
+
+function addLinkPost(id, linkUrl, tags) {
+  return { type: ADD_LINK, id, linkUrl, tags };
+}
+
+function delLinkPost(id) {
+  return { type: DEL_LINK, id };
+}
+
+// ---------------------------
+
+export function resetAddLinkFields() {
+  return (dispatch) => {
+    dispatch(actions.reset('addUrl.url'));
+    dispatch(actions.reset('addUrl.tags'));
+    dispatch(actions.reset('addUrl.id'));
+  };
 }
 
 export function logout() {
@@ -65,39 +95,79 @@ export function logout() {
     });
 }
 
-export function setAuthToken(authToken) {
-  return { type: SET_AUTH_TOKEN, authToken };
-}
-
-export function setErrorMessage(errorMessage) {
-  return { type: SET_ERROR_MESSAGE, errorMessage };
-}
-
-export function addLinkPost(id, linkUrl, tags) {
-  return { type: ADD_LINK, id, linkUrl, tags };
-}
-
-export function addLink(linkId, url, tags, authToken, selectedTag) {
-  const restPromise = linkId ? fetch.put(`/rest/links/${linkId}`, { url, tags }, authToken)
-    : fetch.post('/rest/links', { url, tags }, authToken);
-  return dispatch => restPromise
+function loadTags() {
+  return (dispatch, getState) => fetch.get('/rest/tags', getState().auth.token)
     .then(response => response.json())
-    .then((newLink) => {
-      if (!linkId && newLink.tags.find(e => e === selectedTag)) {
-        dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags));
+    .then(tagList => dispatch(setTags(tagList)))
+    .catch(error => console.log(error));
+}
+
+function fetchLinks(tag) {
+  return (dispatch, getState) => fetch.get(`/rest/links/${tag}`, getState().auth.token)
+    .then(response => response.json())
+    .then(linkList => dispatch(setLinks(linkList)));
+}
+
+function changeTag(tag) {
+  return (dispatch) => {
+    dispatch(selectTag(tag));
+    dispatch(fetchLinks(tag));
+  };
+}
+
+function decreaseTagCounter(tagNamesToDecrease) {
+  return (dispatch, getState) => {
+    tagNamesToDecrease.forEach((tagName) => {
+      const { tagList, selectedTag } = getState().mainData;
+      const tagElement = tagList.find(e => e[0] === tagName);
+      assert(tagName === tagElement[0] && tagElement[1] !== 0);
+      if (tagElement[1] > 1 || tagName === 'portal') {
+        dispatch(manipulateTagCounter(tagName, -1));
+      } else {
+        dispatch(removeTag(tagName));
+        if (selectedTag === tagName) {
+          dispatch(changeTag('portal'));
+        }
       }
+    });
+  };
+}
+
+export function persistLink(linkId, url, tags, selectedTag) {
+  return (dispatch, getState) => {
+    console.log(getState().mainData.linkList);
+    const oldElement = getState().mainData.linkList.find(e => e.id === linkId);
+    const oldTags = oldElement ? oldElement.tags : [];
+    return (linkId ?
+      fetch.put(`/rest/links/${linkId}`, { url, tags }, getState().auth.token) :
+      fetch.post('/rest/links', { url, tags }, getState().auth.token))
+      .then(response => response.json())
+      .then((newLink) => {
+        if (!linkId && newLink.tags.find(e => e === selectedTag)) {
+          dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags));
+        } else if (!newLink.tags.find(e => e === selectedTag)) {
+          dispatch(delLinkPost(newLink.id));
+        }
+        // in old but not in news => deleted
+        dispatch(decreaseTagCounter(diff(oldTags, newLink.tags)));
+        // in new but not in old => add
+        diff(newLink.tags, oldTags).forEach(tagName => dispatch(manipulateTagCounter(tagName, 1)));
+      })
+      .catch(error => console.log(error));
+  };
+}
+
+export function delLink(id) {
+  return (dispatch, getState) => {
+    const linkToDelete = getState().mainData.linkList.find(e => e.id === id);
+    assert(linkToDelete && linkToDelete.id && linkToDelete.tags);
+    return fetch.delete(`/rest/links/${id}`, getState().auth.token)
+    .then(() => {
+      dispatch(delLinkPost(id));
+      dispatch(decreaseTagCounter(linkToDelete.tags));
     })
     .catch(error => console.log(error));
-}
-
-export function delLinkPost(id) {
-  return { type: DEL_LINK, id };
-}
-
-export function delLink(id, authToken) {
-  return dispatch => fetch.delete(`/rest/links/${id}`, authToken)
-    .then(() => dispatch(delLinkPost(id)))
-    .catch(error => console.log(error));
+  };
 }
 
 export function editLink(id, url, tags) {
@@ -108,34 +178,14 @@ export function editLink(id, url, tags) {
   };
 }
 
-function fetchLinks(authToken, tag) {
-  return dispatch => fetch.get(`/rest/links/${tag}`, authToken)
-    .then(response => response.json())
-    .then(linkList => dispatch(setLinks(linkList)));
+export function fetchLinksAndSelectTag(tag) {
+  return dispatch => dispatch(changeTag(tag));
 }
 
-export function fetchLinksAndSelectTag(authToken, tag) {
+export function initialLoad() {
   return dispatch => Promise.all([
-    dispatch(fetchLinks(authToken, tag, dispatch)),
-    dispatch(selectTag(tag)),
-  ]);
-}
-
-export function reloadTags(authToken) {
-  return dispatch => fetch.get('/rest/tags', authToken)
-    .then(response => response.json())
-    .then(tagList => dispatch(setTags(tagList)))
-    .catch(error => console.log(error));
-}
-
-export function checkSelectedTag() {
-  return { type: CHECK_SELECTED_TAG };
-}
-
-export function initialLoad(authToken) {
-  return dispatch => Promise.all([
-    dispatch(fetchLinks(authToken, 'portal', dispatch)),
-    dispatch(reloadTags(authToken)),
+    dispatch(fetchLinks('portal', dispatch)),
+    dispatch(loadTags()),
   ]);
 }
 
@@ -153,10 +203,7 @@ export function checkAuth(email, password) {
     })
     .then((json) => {
       if (responseCode === 200) {
-        return Promise.all([
-          dispatch(setAuthToken(json.token)),
-          dispatch(initialLoad(json.token)),
-        ]);
+        return dispatch(setAuthToken(json.token)).then(() => dispatch(initialLoad()));
       }
       throw json.message;
     })

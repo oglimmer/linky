@@ -7,9 +7,10 @@ import ImmutablePropTypes from 'react-immutable-proptypes';
 
 import { editLink, clickLink } from '../redux/actions';
 
-import ListGroupItemButton from './ListGroupItemButton';
+import UILinkListElement from './UILinkListElement';
 import SortButton from './SortButton';
 import dateFormat from '../util/DateFormat';
+import { DEFAULT_LINK_PROP_TYPES } from '../redux/DataModels';
 
 const getSortingInfo = (sortingByColumn, obj) => {
   if (sortingByColumn === 'mostUsed') {
@@ -22,7 +23,7 @@ const getSortingInfo = (sortingByColumn, obj) => {
   return null;
 };
 
-const ListGroupItemList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink }) => (
+const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink }) => (
   <ListGroup>
     <ListGroupItem>
       <SortButton byColumn="mostUsed" text="Most used" />{' '}
@@ -39,7 +40,7 @@ const ListGroupItemList = ({ linkList, onUpdateLink, sortingByColumn, onClickLin
       }
       return 0;
     }).map(link => (
-      <ListGroupItemButton
+      <UILinkListElement
         key={link.id}
         id={link.id}
         linkUrl={`${link.linkUrl} [${getSortingInfo(sortingByColumn, link)}]`}
@@ -49,17 +50,8 @@ const ListGroupItemList = ({ linkList, onUpdateLink, sortingByColumn, onClickLin
     )}
   </ListGroup>
 );
-ListGroupItemList.propTypes = {
-  linkList: ImmutablePropTypes.listOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      linkUrl: PropTypes.string.isRequired,
-      callCounter: PropTypes.number.isRequired,
-      lastCalled: PropTypes.string.isRequired,
-      createdDate: PropTypes.string.isRequired,
-      tags: PropTypes.array.isRequired,
-    }),
-  ).isRequired,
+UILinkList.propTypes = {
+  linkList: ImmutablePropTypes.listOf(PropTypes.shape(DEFAULT_LINK_PROP_TYPES)).isRequired,
   onUpdateLink: PropTypes.func.isRequired,
   onClickLink: PropTypes.func.isRequired,
   sortingByColumn: PropTypes.string.isRequired,
@@ -80,4 +72,4 @@ const mapDispatchToProps = dispatch => ({
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(ListGroupItemList);
+)(UILinkList);

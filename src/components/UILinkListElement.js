@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, ListGroupItem } from 'react-bootstrap';
 
-const ListGroupItemButton = ({ id, linkUrl, onUpdateLink, onClickLink }) => (
+const UILinkListElement = ({ id, linkUrl, onUpdateLink, onClickLink }) => (
   <ListGroupItem onClick={() => onClickLink(id)} href={`/leave?target=${id}`} target="_blank">
     {linkUrl}
     <Button
@@ -12,11 +12,11 @@ const ListGroupItemButton = ({ id, linkUrl, onUpdateLink, onClickLink }) => (
     >E</Button>
   </ListGroupItem>
 );
-ListGroupItemButton.propTypes = {
+UILinkListElement.propTypes = {
   id: PropTypes.string.isRequired,
   linkUrl: PropTypes.string.isRequired,
   onUpdateLink: PropTypes.func.isRequired,
   onClickLink: PropTypes.func.isRequired,
 };
 
-export default ListGroupItemButton;
+export default UILinkListElement;
