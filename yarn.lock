@@ -2457,6 +2457,12 @@ fastparse@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/fastparse/-/fastparse-1.1.1.tgz#d1e2643b38a94d7583b479060e6c4affc94071f8"
 
+favicon@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/favicon/-/favicon-0.0.2.tgz#5a650d1e6684d300822ea8fe1f1f2eefcb4d3f91"
+  dependencies:
+    request "2.x.x"
+
 fb-watchman@^1.8.0:
   version "1.9.2"
   resolved "https://registry.yarnpkg.com/fb-watchman/-/fb-watchman-1.9.2.tgz#a24cf47827f82d38fb59a69ad70b76e3b6ae7383"
@@ -5342,7 +5348,7 @@ request-promise@^4.2.0:
     stealthy-require "^1.1.0"
     tough-cookie ">=2.3.0"
 
-request@^2.53.0, request@^2.79.0, request@^2.81.0:
+request@2.x.x, request@^2.53.0, request@^2.79.0, request@^2.81.0:
   version "2.81.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.81.0.tgz#c6928946a0e06c5f8d6f8a9333469ffda46298a0"
   dependencies:

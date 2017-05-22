@@ -60,6 +60,7 @@ function mainData(state = initialStateMainData, action) {
           id: action.id,
           linkUrl: action.linkUrl,
           tags: action.tags,
+          faviconUrl: action.faviconUrl,
         })),
       });
     case UPDATE_LINK:

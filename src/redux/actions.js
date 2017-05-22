@@ -69,8 +69,8 @@ function setErrorMessage(errorMessage) {
   return { type: SET_ERROR_MESSAGE, errorMessage };
 }
 
-function addLinkPost(id, linkUrl, tags) {
-  return { type: ADD_LINK, id, linkUrl, tags };
+function addLinkPost(attr) {
+  return Object.assign({}, attr, { type: ADD_LINK });
 }
 
 function updateLinkPost(id, linkUrl, tags) {
@@ -143,7 +143,7 @@ function handlingLinkListChange(linkId, newLink, selectedTag) {
     if (!linkId) {
       // a new item: add to current list if it has the selectedTag
       if (newLink.tags.find(e => e === selectedTag)) {
-        dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags));
+        dispatch(addLinkPost(newLink));
       }
     } else if (!newLink.tags.find(e => e === selectedTag)) {
       // not new, so delete if it doesn't have the selected tag anymore

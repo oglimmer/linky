@@ -1,6 +1,7 @@
 
 import winston from 'winston';
 import requestRaw from 'request';
+import favicon from 'favicon';
 
 import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
@@ -34,29 +35,33 @@ class CreateLinkProcessor extends BaseProcessor {
     const url = fixUrl(this.req.body.url);
     const tags = ensureAllTag(getTags(this.req.body.tags));
     return new Promise((resolve) => {
-      const httpGetCall = requestRaw.get({
-        url,
-        followAllRedirects: true,
-        timeout: 500,
-      });
-      httpGetCall.on('response', (response) => {
-        httpGetCall.abort();
-        const linkUrl = removeTrailingSlash(response.request.href);
-        this.data = Object.assign({}, DEFAULT_LINK, {
-          type: 'link',
-          tags,
-          linkUrl,
+      favicon(url, (err, faviconUrl) => {
+        const httpGetCall = requestRaw.get({
+          url,
+          followAllRedirects: true,
+          timeout: 500,
         });
-        resolve();
-      });
-      httpGetCall.on('error', () => {
-        httpGetCall.abort();
-        this.data = Object.assign({}, DEFAULT_LINK, {
-          type: 'link',
-          tags,
-          linkUrl: url,
+        httpGetCall.on('response', (response) => {
+          httpGetCall.abort();
+          const linkUrl = removeTrailingSlash(response.request.href);
+          this.data = Object.assign({}, DEFAULT_LINK, {
+            type: 'link',
+            tags,
+            linkUrl,
+            faviconUrl,
+          });
+          resolve();
         });
-        resolve();
+        httpGetCall.on('error', () => {
+          httpGetCall.abort();
+          this.data = Object.assign({}, DEFAULT_LINK, {
+            type: 'link',
+            tags,
+            linkUrl: url,
+            faviconUrl,
+          });
+          resolve();
+        });
       });
     });
   }

@@ -46,6 +46,7 @@ const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink }) =>
         linkUrl={`${link.linkUrl} [${getSortingInfo(sortingByColumn, link)}]`}
         onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '))}
         onClickLink={onClickLink}
+        faviconUrl={link.faviconUrl}
       />),
     )}
   </ListGroup>
