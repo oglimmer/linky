@@ -11,6 +11,7 @@ import { diff } from '../util/ArrayUtil';
  */
 
 export const ADD_LINK = 'ADD_LINK';
+export const UPDATE_LINK = 'UPDATE_LINK';
 export const DEL_LINK = 'DEL_LINK';
 export const SET_LINKS = 'SET_LINKS';
 export const SET_TAGS = 'SET_TAGS';
@@ -70,6 +71,10 @@ function setErrorMessage(errorMessage) {
 
 function addLinkPost(id, linkUrl, tags) {
   return { type: ADD_LINK, id, linkUrl, tags };
+}
+
+function updateLinkPost(id, linkUrl, tags) {
+  return { type: UPDATE_LINK, id, linkUrl, tags };
 }
 
 function delLinkPost(id) {
@@ -133,25 +138,43 @@ function decreaseTagCounter(tagNamesToDecrease) {
   };
 }
 
+function handlingLinkListChange(linkId, newLink, selectedTag) {
+  return (dispatch) => {
+    if (!linkId) {
+      // a new item: add to current list if it has the selectedTag
+      if (newLink.tags.find(e => e === selectedTag)) {
+        dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags));
+      }
+    } else if (!newLink.tags.find(e => e === selectedTag)) {
+      // not new, so delete if it doesn't have the selected tag anymore
+      dispatch(delLinkPost(newLink.id));
+    } else {
+      // not new and not deleted from the selectedTag, so update
+      dispatch(updateLinkPost(newLink.id, newLink.linkUrl, newLink.tags));
+    }
+  };
+}
+
+function handlingTagListChange(newLink, oldTags) {
+  return (dispatch) => {
+    // in old but not in new => deleted
+    dispatch(decreaseTagCounter(diff(oldTags, newLink.tags)));
+    // in new but not in old => add
+    diff(newLink.tags, oldTags).forEach(tagName => dispatch(manipulateTagCounter(tagName, 1)));
+  };
+}
+
 export function persistLink(linkId, url, tags) {
   return (dispatch, getState) => {
     const { linkList, selectedTag } = getState().mainData;
-    const oldElement = linkList.find(e => e.id === linkId);
-    const oldTags = oldElement ? oldElement.tags : [];
     return (linkId ?
       fetch.put(`/rest/links/${linkId}`, { url, tags }, getState().auth.token) :
       fetch.post('/rest/links', { url, tags }, getState().auth.token))
       .then(response => response.json())
       .then((newLink) => {
-        if (!linkId && newLink.tags.find(e => e === selectedTag)) {
-          dispatch(addLinkPost(newLink.id, newLink.linkUrl, newLink.tags));
-        } else if (!newLink.tags.find(e => e === selectedTag)) {
-          dispatch(delLinkPost(newLink.id));
-        }
-        // in old but not in news => deleted
-        dispatch(decreaseTagCounter(diff(oldTags, newLink.tags)));
-        // in new but not in old => add
-        diff(newLink.tags, oldTags).forEach(tagName => dispatch(manipulateTagCounter(tagName, 1)));
+        dispatch(handlingLinkListChange(linkId, newLink, selectedTag, dispatch));
+        const oldElement = linkList.find(e => e.id === linkId);
+        dispatch(handlingTagListChange(newLink, oldElement ? oldElement.tags : []));
       })
       .catch(error => console.log(error));
   };

@@ -4,7 +4,7 @@ import { combineReducers } from 'redux';
 import Immutable from 'immutable';
 import assert from 'assert';
 
-import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG,
+import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE,
   CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG } from './actions';
 
@@ -61,6 +61,16 @@ function mainData(state = initialStateMainData, action) {
           linkUrl: action.linkUrl,
           tags: action.tags,
         })),
+      });
+    case UPDATE_LINK:
+      return Object.assign({}, state, {
+        linkList: state.linkList.update(
+          state.linkList.findIndex(ele => ele.id === action.id),
+          val => Object.assign({}, val, {
+            linkUrl: action.linkUrl,
+            tags: action.tags,
+          }),
+        ),
       });
     case DEL_LINK:
       return Object.assign({}, state, {
