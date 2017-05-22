@@ -1,5 +1,8 @@
 
-import _ from 'lodash';
+function isObject(value) {
+  const type = typeof value;
+  return !!value && (type === 'object' || type === 'function');
+}
 
 class ResponseUtil {
 
@@ -9,7 +12,7 @@ class ResponseUtil {
 
   static sendErrorResponse(code, err, res) {
     let responseOutput;
-    if (_.isObject(err)) {
+    if (isObject(err)) {
       const { message, reason } = err;
       responseOutput = { message, reason };
     } else {

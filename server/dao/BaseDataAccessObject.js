@@ -2,6 +2,7 @@
 import assert from 'assert';
 import nano from 'nano';
 import { Promise } from 'bluebird';
+import winston from 'winston';
 
 const linkyDb = nano('http://localhost:5984/linky');
 const insert = Promise.promisify(linkyDb.insert);
@@ -46,9 +47,17 @@ class BaseDataAccessObject {
     return destroy(id, rev);
   }
 
-  deleteLatest(id) {
+  deleteLatest(id, userid) {
     /* eslint-disable no-underscore-dangle */
-    return this.getById(id).then(obj => this.delete(id, obj._rev));
+    return this.getById(id)
+      .then((obj) => {
+        if (userid !== obj.userid) {
+          winston.loggers.get('application').debug(`DB entry has user=${obj.userid} but change was initiated by=${userid}`);
+          throw Error('Wrong user!');
+        }
+        return obj;
+      })
+      .then(obj => this.delete(id, obj._rev));
     /* eslint-disable no-underscore-dangle */
   }
   /* eslint-enable class-methods-use-this */

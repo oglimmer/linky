@@ -1,7 +1,6 @@
 
 import assert from 'assert';
 import bluebird from 'bluebird';
-import _ from 'lodash';
 import winston from 'winston';
 
 import ResponseUtil from '../../src/util/ResponseUtil';
@@ -19,7 +18,11 @@ import ResponseUtil from '../../src/util/ResponseUtil';
   /* final*/ collectSecureParameter() {
     assert(this.req.user, 'No user object. This should be prevented by `AuthorizationController.checkAuthorization`');
     const { userid } = this.req.user;
-    this.data = _.merge(this.data, { userid });
+    if (this.data.userid && this.data.userid !== userid) {
+      winston.loggers.get('application').debug(`DB entry has user=${this.data.userid} but change was initiated by=${userid}`);
+      throw Error('Wrong user');
+    }
+    Object.assign(this.data, { userid });
   }
 
   /** maybe overwritten */
@@ -40,7 +43,7 @@ import ResponseUtil from '../../src/util/ResponseUtil';
   /* eslint-enable class-methods-use-this */
 
   /* final*/ collectRouteParameter() {
-    this.data = _.merge(this.data, this.req.params);
+    Object.assign(this.data, this.req.params);
   }
 
   /* final*/ isValid() {
@@ -75,9 +78,7 @@ import ResponseUtil from '../../src/util/ResponseUtil';
   /* public*/ doProcess() {
     const promise = this.collectBodyParameters();
     if (promise) {
-      promise
-        .then(() => this.doProcessPart2())
-        .catch(err => winston.loggers.get('application').debug(err));
+      promise.then(() => this.doProcessPart2()).catch(err => this.res.status(500).send(err));
     } else {
       this.doProcessPart2();
     }

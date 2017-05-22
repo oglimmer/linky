@@ -29,7 +29,7 @@ fi
 
 if [ "$1" == "getlinks" ]; then
 
-	curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/links
+	curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/links/all
 
 fi
 

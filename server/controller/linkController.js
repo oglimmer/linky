@@ -1,5 +1,4 @@
 
-import _ from 'lodash';
 import winston from 'winston';
 import requestRaw from 'request';
 
@@ -139,7 +138,7 @@ class GetLinkProcessor extends BaseProcessor {
   * process() {
     try {
       const rows = yield linkDao.listByUseridAndTag(this.data.userid, this.data.tags);
-      const responseArr = _.map(rows, (row) => {
+      const responseArr = rows.map((row) => {
         const { _id, _rev, ...mappedRow } = row.value;
         mappedRow.id = _id;
         return mappedRow;
@@ -169,8 +168,7 @@ class DeleteProcessor extends BaseProcessor {
 
   * process() {
     try {
-      // SECURITY: CHECK match of userid
-      yield linkDao.deleteLatest(this.data.linkid);
+      yield linkDao.deleteLatest(this.data.linkid, this.data.userid);
       this.res.send();
       winston.loggers.get('application').debug('Deleted link with id=%s', this.data.linkid);
     } catch (err) {
