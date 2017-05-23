@@ -88,6 +88,7 @@ export function resetAddLinkFields() {
     dispatch(actions.reset('addUrl.url'));
     dispatch(actions.reset('addUrl.tags'));
     dispatch(actions.reset('addUrl.id'));
+    dispatch(actions.reset('addUrl.rssUrl'));
   };
 }
 
@@ -164,12 +165,12 @@ function handlingTagListChange(newLink, oldTags) {
   };
 }
 
-export function persistLink(linkId, url, tags) {
+export function persistLink(linkId, url, tags, rssUrl) {
   return (dispatch, getState) => {
     const { linkList, selectedTag } = getState().mainData;
     return (linkId ?
-      fetch.put(`/rest/links/${linkId}`, { url, tags }, getState().auth.token) :
-      fetch.post('/rest/links', { url, tags }, getState().auth.token))
+      fetch.put(`/rest/links/${linkId}`, { url, tags, rssUrl }, getState().auth.token) :
+      fetch.post('/rest/links', { url, tags, rssUrl }, getState().auth.token))
       .then(response => response.json())
       .then((newLink) => {
         dispatch(handlingLinkListChange(linkId, newLink, selectedTag, dispatch));
@@ -193,11 +194,12 @@ export function delLink(id) {
   };
 }
 
-export function editLink(id, url, tags) {
+export function editLink(id, url, tags, rssUrl) {
   return (dispatch) => {
     dispatch(actions.change('addUrl.id', id));
     dispatch(actions.change('addUrl.url', url));
     dispatch(actions.change('addUrl.tags', tags));
+    dispatch(actions.change('addUrl.rssUrl', rssUrl));
   };
 }
 

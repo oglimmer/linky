@@ -26,6 +26,12 @@ const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete }) => (
       placeholder="a tag is one word [a-z0-9]"
       autoComplete="off"
     />
+    <FormGroupAdapter
+      label="Add a RSS url if available"
+      model="rssUrl"
+      placeholder="url to RSS feed for this page"
+      autoComplete="off"
+    />
     <Button type="submit">{ linkId === null ? 'Create' : 'Update' } Link</Button>
 
     { linkId !== null ?
@@ -63,7 +69,8 @@ const mapStateToPropsAddLinkInputBox = state => ({
 const mapDispatchToProps = dispatch => ({
   onSubmit: (formData, linkId) => {
     if (formData.url.trim()) {
-      dispatch(persistLink(linkId, formData.url.trim(), formData.tags.trim()));
+      dispatch(
+        persistLink(linkId, formData.url.trim(), formData.tags.trim(), formData.rssUrl.trim()));
       dispatch(resetAddLinkFields());
     }
   },
