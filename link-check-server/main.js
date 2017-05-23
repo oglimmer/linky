@@ -1,5 +1,6 @@
 
 import request from 'request';
+import favicon from 'favicon';
 
 import linkDao from '../server/dao/linkDao';
 import { removeTrailingSlash } from '../server/util/StringUtil';
@@ -11,14 +12,25 @@ const hasTag = (arr, tagName) => arr.find(e => e === tagName);
 const process200 = (response, httpGetCall, url, rec) => {
   httpGetCall.abort();
   const linkUrl = removeTrailingSlash(response.request.href);
-  if (linkUrl !== url) {
-    console.log(`${new Date()}: link ${url} changed to ${linkUrl}`);
-    rec.linkUrl = linkUrl;
-    if (!hasTag(rec.tags, 'urlupdated')) {
-      rec.tags.push('urlupdated');
+  favicon(linkUrl, (err, faviconUrl) => {
+    let changed = false;
+    if (linkUrl !== url) {
+      console.log(`${new Date()}: link ${url} changed to ${linkUrl}`);
+      rec.linkUrl = linkUrl;
+      if (!hasTag(rec.tags, 'urlupdated')) {
+        rec.tags.push('urlupdated');
+      }
+      changed = true;
     }
-    linkDao.insert(rec);
-  }
+    if (faviconUrl !== rec.faviconUrl) {
+      console.log(`${new Date()}: favicon ${rec.faviconUrl} changed to ${faviconUrl}`);
+      rec.faviconUrl = faviconUrl;
+      changed = true;
+    }
+    if (changed) {
+      linkDao.insert(rec);
+    }
+  });
 };
 
 const processError = (httpGetCall, url, rec) => {
@@ -29,7 +41,7 @@ const processError = (httpGetCall, url, rec) => {
 };
 
 const processRow = (rec) => {
-  if (!hasTag(rec.tags, 'broken')) {
+  if (!hasTag(rec.tags, 'broken') && !hasTag(rec.tags, 'locked')) {
     const url = rec.linkUrl;
     const httpGetCall = request.get({
       url,
