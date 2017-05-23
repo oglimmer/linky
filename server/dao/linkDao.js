@@ -1,7 +1,20 @@
 
+import nano from 'nano';
+import { Promise } from 'bluebird';
+
 import BaseDataAccessObject from './BaseDataAccessObject';
 
+const linkyDb = nano('http://localhost:5984/linky');
+const view = Promise.promisify(linkyDb.view);
+
+
 class LinkDao extends BaseDataAccessObject {
+
+  /* eslint-disable class-methods-use-this */
+  listAll() {
+    return view('links', 'byUserid').then(body => body.rows.map(e => e.value));
+  }
+  /* eslint-enable class-methods-use-this */
 
   listByUserid(userid) {
     return this.listByView('links', 'byUserid', userid);

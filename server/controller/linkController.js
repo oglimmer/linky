@@ -8,6 +8,7 @@ import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 
 import { DEFAULT_LINK } from '../../src/redux/DataModels';
+import { removeTrailingSlash } from '../util/StringUtil';
 
 // TAGS
 
@@ -23,7 +24,6 @@ const ensureAllTag = (tagsArr) => {
 
 // URL
 const fixUrl = url => (!url.startsWith('http') ? `http://${url}` : url);
-const removeTrailingSlash = linkUrl => (new RegExp('\\/$').test(linkUrl) ? linkUrl.substring(0, linkUrl.length - 1) : linkUrl);
 
 class CreateLinkProcessor extends BaseProcessor {
 
