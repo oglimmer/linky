@@ -86,6 +86,7 @@
     "nodemon": "NODE_ENV=development nodemon server/",
     "start": "NODE_ENV=production node server/",
     "build": "rm -rf dist && webpack -p --progress --colors --config build/webpack.prod.config.js",
-    "test": "eslint server src && jest"
+    "test": "eslint server src && jest",
+    "integrationtest": "NODE_ENV=integrationtest jest"
   }
 }
