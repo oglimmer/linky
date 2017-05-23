@@ -4,16 +4,16 @@ import request from 'request';
 import linkDao from '../server/dao/linkDao';
 import { removeTrailingSlash } from '../server/util/StringUtil';
 
-const hasTag = (rec, tagName) => rec.tags.find(e => e === tagName);
+/* eslint-disable no-param-reassign */
+
+const hasTag = (arr, tagName) => arr.find(e => e === tagName);
 
 const process200 = (response, httpGetCall, url, rec) => {
   httpGetCall.abort();
   const linkUrl = removeTrailingSlash(response.request.href);
   if (linkUrl !== url) {
     console.log(`${new Date()}: link ${url} changed to ${linkUrl}`);
-    /* eslint-disable no-param-reassign */
     rec.linkUrl = linkUrl;
-    /* eslint-enable no-param-reassign */
     if (!hasTag(rec.tags, 'urlupdated')) {
       rec.tags.push('urlupdated');
     }
@@ -29,12 +29,12 @@ const processError = (httpGetCall, url, rec) => {
 };
 
 const processRow = (rec) => {
-  if (!hasTag(rec, 'broken')) {
+  if (!hasTag(rec.tags, 'broken')) {
     const url = rec.linkUrl;
     const httpGetCall = request.get({
       url,
       followAllRedirects: true,
-      timeout: 500,
+      // timeout: 500,
     });
     httpGetCall.on('response', response => process200(response, httpGetCall, url, rec));
     httpGetCall.on('error', () => processError(httpGetCall, url, rec));
