@@ -104,6 +104,7 @@ app.use((req, res) => {
   .catch((err) => {
     if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
       winston.loggers.get('application').error(err);
+      res.status(500).send('Server error');
     }
   });
 });

@@ -11,12 +11,13 @@ export default (dispatch, req, res) => {
     winston.loggers.get('application').debug(`authToken = ${authToken}`);
     return jwt.verify(authToken)
       .then(() => dispatch(setAuthToken(authToken)))
-      .then(() => dispatch(initialLoad(authToken))
+      .then(() => dispatch(initialLoad(authToken)))
       .catch((e) => {
-        if (e.name !== 'TokenExpiredError') {
+        if (e.name !== 'TokenExpiredError' && e.name !== 'JsonWebTokenError') {
           winston.loggers.get('application').error(e);
+          res.status(500).send('Server error');
         }
-      }));
+      });
   }
   if (req.cookies.vistorToken) {
     const { vistorToken } = req.cookies;
