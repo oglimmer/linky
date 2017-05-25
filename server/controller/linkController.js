@@ -16,14 +16,14 @@ const simpleWordRegex = new RegExp('^[a-z0-9]*$');
 const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
 const getTags = (rawTags) => { if (!rawTags) return ['untagged']; return split(rawTags); };
 const ensureAllTag = (tagsArr) => {
-  if (!tagsArr.find(e => e.toLowerCase() === 'all')) {
+  if (tagsArr && !tagsArr.find(e => e.toLowerCase() === 'all')) {
     tagsArr.push('all');
   }
   return tagsArr;
 };
 
 // URL
-const fixUrl = url => (!url.startsWith('http') ? `http://${url}` : url);
+const fixUrl = url => (url && !url.startsWith('http') ? `http://${url}` : url);
 
 class CreateLinkProcessor extends BaseProcessor {
 
@@ -33,6 +33,7 @@ class CreateLinkProcessor extends BaseProcessor {
 
   collectBodyParameters() {
     const url = fixUrl(this.req.body.url);
+    const rssUrl = fixUrl(this.req.body.rssUrl);
     const tags = ensureAllTag(getTags(this.req.body.tags));
     return new Promise((resolve) => {
       favicon(url, (err, faviconUrl) => {
@@ -49,6 +50,7 @@ class CreateLinkProcessor extends BaseProcessor {
             tags,
             linkUrl,
             faviconUrl,
+            rssUrl,
           });
           resolve();
         });
@@ -59,6 +61,7 @@ class CreateLinkProcessor extends BaseProcessor {
             tags,
             linkUrl: url,
             faviconUrl,
+            rssUrl,
           });
           resolve();
         });

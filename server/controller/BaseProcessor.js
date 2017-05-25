@@ -50,7 +50,7 @@ import ResponseUtil from '../../src/util/ResponseUtil';
     const propertiesToValidate = this.propertiesToValidate();
     for (let i = 0; i < propertiesToValidate.length; i += 1) {
       const prop = propertiesToValidate[i];
-      if (!this.data[prop]) {
+      if (!this.data[prop] || (typeof this.data[prop] === 'string' && !this.data[prop].trim())) {
         ResponseUtil.sendErrorResponseNotEmpty(this.errorCodeWhenInvalid(), prop, this.res);
         this.res.end();
         return false;

@@ -27,7 +27,7 @@ export const initialStateAuth = {
 };
 
 export const DEFAULT_LINK = {
-  id: -1,
+  // id: -1,
   linkUrl: '',
   callCounter: 0,
   lastCalled: new Date().toString(),
@@ -43,5 +43,5 @@ export const DEFAULT_LINK_PROP_TYPES = {
   lastCalled: PropTypes.string.isRequired,
   createdDate: PropTypes.string.isRequired,
   tags: PropTypes.array.isRequired,
-  rssUrl: PropTypes.array.isRequired,
+  rssUrl: PropTypes.string.isRequired,
 };

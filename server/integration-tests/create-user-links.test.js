@@ -2,6 +2,20 @@
 import request from 'request-promise';
 import randomstring from 'randomstring';
 
+const names = ['sophia', 'emma', 'olivia', 'ava', 'mia', 'isabella', 'riley', 'aria', 'zoe', 'charlotte', 'lily', 'layla', 'amelia', 'emily', 'madelyn', 'aubrey', 'adalyn', 'madison', 'chloe', 'harper', 'abigail', 'aaliyah', 'avery', 'evelyn', 'kaylee', 'ella', 'ellie', 'scarlett', 'arianna', 'hailey', 'nora', 'addison', 'brooklyn', 'hannah', 'mila', 'leah', 'elizabeth', 'sarah', 'eliana', 'mackenzie', 'peyton', 'maria', 'grace', 'adeline', 'elena', 'anna', 'victoria', 'camilla', 'lillian', 'natalie', 'jackson', 'aiden', 'lucas', 'liam', 'noah', 'ethan', 'mason', 'caden', 'oliver', 'elijah', 'grayson', 'jacob', 'michael', 'benjamin', 'carter', 'james', 'jayden', 'logan', 'alexander', 'caleb', 'ryan', 'luke', 'daniel', 'jack', 'william', 'owen', 'gabriel', 'matthew', 'connor', 'jayce', 'isaac', 'sebastian', 'henry', 'muhammad', 'cameron', 'wyatt', 'dylan', 'nathan', 'nicholas', 'julian', 'eli', 'levi', 'isaiah', 'landon', 'david', 'christian', 'andrew', 'brayden', 'john', 'lincoln'];
+const tagStr = () => {
+  let tagStrRes = '';
+  for (let i = 0; i < 5; i += 1) {
+    tagStrRes += names[parseInt(Math.random() * names.length, 10)];
+    tagStrRes += ' ';
+  }
+  return tagStrRes.trim();
+};
+
+beforeEach(() => {
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000;
+});
+
 if (process.env.NODE_ENV === 'integrationtest') {
   const email = `${randomstring.generate()}@foo.com`;
   const password = randomstring.generate();
@@ -10,7 +24,7 @@ if (process.env.NODE_ENV === 'integrationtest') {
 
   test('create user', (done) => {
     request.post({
-      url: 'http://localhost:8080/rest/users',
+      url: 'https://linky.oglimmer.de/rest/users',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -31,7 +45,7 @@ if (process.env.NODE_ENV === 'integrationtest') {
 
   test('authenticate user', (done) => {
     request.post({
-      url: 'http://localhost:8080/rest/authenticate',
+      url: 'https://linky.oglimmer.de/rest/authenticate',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -51,18 +65,17 @@ if (process.env.NODE_ENV === 'integrationtest') {
   });
 
   test('create links', (done) => {
-    let i = 0;
-    while (i < 5) {
-      i += 1;
+    const call = (i) => {
       request.post({
-        url: 'http://localhost:8080/rest/links',
+        url: 'https://linky.oglimmer.de/rest/links',
         headers: {
           'Content-Type': 'application/json',
           authorization: `Bearer ${token}`,
         },
         body: {
           url: randomstring.generate(),
-          tags: 'nix',
+          tags: tagStr(),
+          rssUrl: '',
         },
         json: true,
       })
@@ -75,14 +88,25 @@ if (process.env.NODE_ENV === 'integrationtest') {
         expect(result.createdDate).toBeDefined();
         expect(result.rssUrl).toBeDefined();
       })
-      .then(() => done())
+      .then(() => {
+        if (i < 10) {
+          call(i + 1);
+        } else {
+          done();
+        }
+      })
       .catch(err => done.fail(err));
+    };
+    let j = 0;
+    while (j < 5) {
+      j += 1;
+      call(0);
     }
   });
 
   test('get links', (done) => {
     request.get({
-      url: 'http://localhost:8080/rest/links/all',
+      url: 'https://linky.oglimmer.de/rest/links/all',
       headers: {
         'Content-Type': 'application/json',
         authorization: `Bearer ${token}`,
