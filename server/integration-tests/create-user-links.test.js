@@ -22,9 +22,11 @@ if (process.env.NODE_ENV === 'integrationtest') {
 
   let token;
 
+  const server = process.env.LINKY_SERVER ? process.env.LINKY_SERVER : 'http://localhost:8080';
+
   test('create user', (done) => {
     request.post({
-      url: 'https://linky.oglimmer.de/rest/users',
+      url: `${server}/rest/users`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -45,7 +47,7 @@ if (process.env.NODE_ENV === 'integrationtest') {
 
   test('authenticate user', (done) => {
     request.post({
-      url: 'https://linky.oglimmer.de/rest/authenticate',
+      url: `${server}/rest/authenticate`,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -67,7 +69,7 @@ if (process.env.NODE_ENV === 'integrationtest') {
   test('create links', (done) => {
     const call = (i) => {
       request.post({
-        url: 'https://linky.oglimmer.de/rest/links',
+        url: `${server}/rest/links`,
         headers: {
           'Content-Type': 'application/json',
           authorization: `Bearer ${token}`,
@@ -106,7 +108,7 @@ if (process.env.NODE_ENV === 'integrationtest') {
 
   test('get links', (done) => {
     request.get({
-      url: 'https://linky.oglimmer.de/rest/links/all',
+      url: `${server}/rest/links/all`,
       headers: {
         'Content-Type': 'application/json',
         authorization: `Bearer ${token}`,

@@ -3,8 +3,9 @@ import nano from 'nano';
 import { Promise } from 'bluebird';
 
 import BaseDataAccessObject from './BaseDataAccessObject';
+import properties from '../util/linkyproperties';
 
-const linkyDb = nano('http://localhost:5984/linky');
+const linkyDb = nano(`${properties.server.db.protocol}://${properties.server.db.host}:${properties.server.db.port}/${properties.server.db.name}`);
 const view = Promise.promisify(linkyDb.view);
 
 

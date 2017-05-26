@@ -4,7 +4,9 @@ import nano from 'nano';
 import { Promise } from 'bluebird';
 import winston from 'winston';
 
-const linkyDb = nano('http://localhost:5984/linky');
+import properties from '../util/linkyproperties';
+
+const linkyDb = nano(`${properties.server.db.protocol}://${properties.server.db.host}:${properties.server.db.port}/${properties.server.db.name}`);
 const insert = Promise.promisify(linkyDb.insert);
 const view = Promise.promisify(linkyDb.view);
 const get = Promise.promisify(linkyDb.get);

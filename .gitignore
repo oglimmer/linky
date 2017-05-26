@@ -7,3 +7,6 @@ client.sublime-project
 client.sublime-workspace
 static/js/
 /.idea/
+build/docker/from_local
+build/docker/from_git
+build/docker/sources

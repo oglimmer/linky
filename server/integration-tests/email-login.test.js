@@ -3,7 +3,7 @@ import request from 'request-promise';
 import randomstring from 'randomstring';
 
 if (process.env.NODE_ENV === 'integrationtest') {
-  const baseUrl = 'https://linky.oglimmer.de';
+  const baseUrl = process.env.LINKY_SERVER ? process.env.LINKY_SERVER : 'http://localhost:8080';
   const createRequest = (body, method) => ({
     url: `${baseUrl}/rest/${method}`,
     headers: {
