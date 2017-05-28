@@ -8,6 +8,8 @@ import JwtUtil from '../util/JwtUtil';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 
+import properties from '../util/linkyproperties';
+
 class CreateUserProcessor extends BaseProcessor {
 
   constructor(req, res, next) {
@@ -82,6 +84,7 @@ class AuthenticateProcessor extends BaseProcessor {
           };
           JwtUtil.sign(claim).then((token) => {
             winston.loggers.get('application').debug('User id=%s authenticated', _id);
+            this.res.cookie('authToken', token, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
             this.res.send({ token });
             this.res.end();
           });

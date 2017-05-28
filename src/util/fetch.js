@@ -18,14 +18,19 @@ export default {
     });
   },
 
-  postCredentials: function postCredentials(url) {
-    return fetch(baseUrl + url, {
+  postCredentials: function postCredentials(url, body) {
+    const param = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      credentials: 'include',
-    });
+      credentials: 'same-origin',
+    };
+    if (body) {
+      param.body = JSON.stringify(body);
+    }
+    console.log(param);
+    return fetch(baseUrl + url, param);
   },
 
   post: function post(url, obj, authToken) {

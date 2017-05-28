@@ -218,7 +218,7 @@ export function checkAuth(email, password) {
   return (dispatch) => {
     dispatch(setErrorMessage(''));
     let responseCode;
-    return fetch.post('/rest/authenticate', {
+    return fetch.postCredentials('/rest/authenticate', {
       email,
       password,
     })
@@ -228,7 +228,10 @@ export function checkAuth(email, password) {
     })
     .then((json) => {
       if (responseCode === 200) {
-        return dispatch(setAuthToken(json.token)).then(() => dispatch(initialLoad()));
+        return Promise.all([
+          dispatch(setAuthToken(json.token)),
+          dispatch(initialLoad()),
+        ]);
       }
       throw json.message;
     })

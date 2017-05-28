@@ -26,6 +26,8 @@
 .center-form {
   width: 300px;
   margin: 12% auto;
+  margin-bottom: 25px;
+  margin-top: 0px;
 }
 
 .signup-or-separator {

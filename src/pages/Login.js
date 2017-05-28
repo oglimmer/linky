@@ -2,13 +2,25 @@
 // https://react-bootstrap.github.io/components.html#forms
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
+
+import { withRouter } from 'react-router';
+import { Form } from 'react-redux-form';
+import { connect } from 'react-redux';
+
+import { checkAuth } from '../redux/actions';
+
+import AlertAdapter from '../components/AlertAdapter';
+import FormGroupAdapter from '../components/FormGroupAdapter';
 
 const click = (target) => {
   document.location.href = `/auth/${target}`;
 };
 
-const Login = () => (
+const showUserPasswordLogin = /* CONSTANT_START SHOW_USER_PASSWORD_FORM */false/* CONSTANT_END */;
+
+const Login = ({ dispatch, history }) => (
   <div className="row">
     <div className="center-form panel">
       <div className="panel-body">
@@ -42,7 +54,38 @@ const Login = () => (
         </button>
       </div>
     </div>
+    { showUserPasswordLogin ? (<div className="center-form panel">
+      <div className="panel-body">
+        <AlertAdapter />
+        <Form
+          model="login"
+          onSubmit={(formData) => {
+            dispatch(checkAuth(formData.email, formData.password)).then(() => {
+              history.replace('/portalPage');
+            }, () => {});
+          }}
+        >
+          <FormGroupAdapter
+            label="Enter your registered email address"
+            model="email"
+            placeholder="email"
+            autoFocus="true"
+          />
+          <FormGroupAdapter
+            label="Enter password"
+            type="password"
+            model="password"
+            placeholder="password"
+          />
+          <Button type="submit">Log in</Button>
+        </Form>
+      </div>
+    </div>) : '' }
   </div>
 );
+Login.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  history: PropTypes.shape().isRequired,
+};
 
-export default Login;
+export default withRouter(connect()(Login));
