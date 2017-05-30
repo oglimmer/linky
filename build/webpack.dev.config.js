@@ -11,10 +11,10 @@ module.exports = {
   devtool: 'cheap-module-eval-source-map',
 
   entry: [
-    './static/css/bootstrap-theme.min.css',
-    './static/css/styles.css',
+    './dynamic-resources/css/bootstrap-theme.min.css',
+    './dynamic-resources/css/styles.css',
     'ionicons/dist/css/ionicons.min.css',
-    './static/favicon.ico',
+    './dynamic-resources/favicon.ico',
     'react-hot-loader/patch',
     'webpack-hot-middleware/client',
     'babel-polyfill',
@@ -22,7 +22,7 @@ module.exports = {
   ],
 
   output: {
-    path: path.join(__dirname, '../static/'),
+    path: path.join(__dirname, '../static-resources/'),
     filename: 'js/bundle-[name].js',
     publicPath: '/',
   },

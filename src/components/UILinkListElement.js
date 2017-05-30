@@ -3,11 +3,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, ListGroupItem } from 'react-bootstrap';
 
-import defaultIcon from '../../static/images/default.png';
-
 const UILinkListElement = ({ id, linkUrl, onUpdateLink, onClickLink, faviconUrl }) => (
   <ListGroupItem onClick={() => onClickLink(id)} href={`/leave?target=${id}`} target="_blank">
-    <img width="16" src={faviconUrl || defaultIcon} alt="favicon" />
+    <img width="16" src={faviconUrl || '/images/default.png'} alt="favicon" />
     {' '}
     {linkUrl}
     <Button

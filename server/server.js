@@ -45,7 +45,7 @@ app.use(expressWinston.logger({
   winstonInstance: winston.loggers.get('http'),
 }));
 
-const serverDirectory = process.env.NODE_ENV === 'production' ? '../dist' : '../static';
+const serverDirectory = process.env.NODE_ENV === 'production' ? '../dist' : '../dynamic-resources';
 
 // Set view path
 // set up ejs for templating. You can use whatever
@@ -57,6 +57,8 @@ httpRoutes(app);
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, serverDirectory)));
 }
+
+app.use(express.static(path.join(__dirname, '../static-resources')));
 
 if (process.env.NODE_ENV === 'development') {
   /* eslint-disable global-require */

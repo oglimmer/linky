@@ -19,10 +19,10 @@ module.exports = {
   devtool: 'hidden-source-map',
 
   entry: [
-    './static/css/bootstrap-theme.min.css',
-    './static/css/styles.css',
+    './dynamic-resources/css/bootstrap-theme.min.css',
+    './dynamic-resources/css/styles.css',
     'ionicons/dist/css/ionicons.min.css',
-    './static/favicon.ico',
+    './dynamic-resources/favicon.ico',
     'babel-polyfill',
     './src/index.js',
   ],
@@ -63,7 +63,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       filename: 'index.ejs',
-      template: '!!html-loader!static/index_template.html',
+      template: '!!html-loader!dynamic-resources/index_template.html',
     }),
     new StringReplacePlugin(),
   ],
