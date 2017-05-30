@@ -1,8 +1,8 @@
 
 import winston from 'winston';
 import requestRaw from 'request';
-import favicon from 'favicon';
 
+import favicon from '../util/favicon';
 import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
@@ -36,7 +36,7 @@ class CreateLinkProcessor extends BaseProcessor {
     const rssUrl = fixUrl(this.req.body.rssUrl);
     const tags = ensureAllTag(getTags(this.req.body.tags));
     return new Promise((resolve) => {
-      favicon(url, (err, faviconUrl) => {
+      favicon(url).then((faviconUrl) => {
         const httpGetCall = requestRaw.get({
           url,
           followAllRedirects: true,

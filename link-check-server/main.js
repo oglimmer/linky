@@ -1,7 +1,7 @@
 
 import request from 'request';
-import favicon from 'favicon';
 
+import favicon from '../server/util/favicon';
 import linkDao from '../server/dao/linkDao';
 import { removeTrailingSlash } from '../server/util/StringUtil';
 
@@ -12,7 +12,7 @@ const hasTag = (arr, tagName) => arr.find(e => e === tagName);
 const process200 = (response, httpGetCall, url, rec) => {
   httpGetCall.abort();
   const linkUrl = removeTrailingSlash(response.request.href);
-  favicon(linkUrl, (err, faviconUrl) => {
+  favicon(linkUrl).then((faviconUrl) => {
     let changed = false;
     if (linkUrl !== url) {
       console.log(`${new Date()}: link ${url} changed to ${linkUrl}`);
