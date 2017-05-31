@@ -32,13 +32,11 @@ const resolveUrl = url => new Promise((resolve) => {
     timeout: 500,
   });
   httpGetCall.on('response', (response) => {
-    console.log('response');
     httpGetCall.abort();
     const linkUrl = removeTrailingSlash(response.request.href);
     resolve(linkUrl);
   });
   httpGetCall.on('error', () => {
-    console.log('error');
     httpGetCall.abort();
     resolve(url);
   });
