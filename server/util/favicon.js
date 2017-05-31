@@ -14,5 +14,5 @@ export default url => promisedFavicon(url).then((faviconUrl) => {
       return faviconUrl;
     }
     return null;
-  });
-});
+  }).catch(() => null);
+}).catch(() => null);
