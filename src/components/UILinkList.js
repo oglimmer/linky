@@ -44,7 +44,7 @@ const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink }) =>
         key={link.id}
         id={link.id}
         linkUrl={`${link.linkUrl} [${getSortingInfo(sortingByColumn, link)}]`}
-        onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '))}
+        onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '), link.rssUrl)}
         onClickLink={onClickLink}
         faviconUrl={link.faviconUrl}
       />),
@@ -66,7 +66,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onUpdateLink: (id, url, tags) => dispatch(editLink(id, url, tags)),
+  onUpdateLink: (id, url, tags, rssUrl) => dispatch(editLink(id, url, tags, rssUrl)),
   onClickLink: id => dispatch(clickLink(id)),
 });
 

@@ -70,6 +70,7 @@ function mainData(state = initialStateMainData, action) {
           val => Object.assign({}, val, {
             linkUrl: action.linkUrl,
             tags: action.tags,
+            rssUrl: action.rssUrl,
           }),
         ),
       });

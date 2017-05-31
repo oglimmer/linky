@@ -73,8 +73,8 @@ function addLinkPost(attr) {
   return Object.assign({}, attr, { type: ADD_LINK });
 }
 
-function updateLinkPost(id, linkUrl, tags) {
-  return { type: UPDATE_LINK, id, linkUrl, tags };
+function updateLinkPost(id, linkUrl, tags, rssUrl) {
+  return { type: UPDATE_LINK, id, linkUrl, tags, rssUrl };
 }
 
 function delLinkPost(id) {
@@ -151,7 +151,7 @@ function handlingLinkListChange(linkId, newLink, selectedTag) {
       dispatch(delLinkPost(newLink.id));
     } else {
       // not new and not deleted from the selectedTag, so update
-      dispatch(updateLinkPost(newLink.id, newLink.linkUrl, newLink.tags));
+      dispatch(updateLinkPost(newLink.id, newLink.linkUrl, newLink.tags, newLink.rssUrl));
     }
   };
 }
