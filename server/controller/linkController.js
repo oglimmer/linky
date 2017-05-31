@@ -25,20 +25,17 @@ const ensureAllTag = (tagsArr) => {
 // URL
 const fixUrl = url => (url && !url.startsWith('http') ? `http://${url}` : url);
 const resolveUrl = url => new Promise((resolve) => {
-  console.log(url);
   const httpGetCall = requestRaw.get({
     url,
     followAllRedirects: true,
     timeout: 500,
   });
   httpGetCall.on('response', (response) => {
-    console.log('response');
     httpGetCall.abort();
     const linkUrl = removeTrailingSlash(response.request.href);
     resolve(linkUrl);
   });
   httpGetCall.on('error', () => {
-    console.log('error');
     httpGetCall.abort();
     resolve(url);
   });
