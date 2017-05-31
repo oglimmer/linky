@@ -1,6 +1,7 @@
 import winston from 'winston';
 import JwtUtil from '../util/JwtUtil';
 import linkDao from '../dao/linkDao';
+import feedUpdatesDao from '../dao/feedUpdatesDao';
 
 const updateLinkAndForward = (loadedLinkObj, claim, res) => {
   if (loadedLinkObj.userid !== claim.userid) {
@@ -29,6 +30,20 @@ const leave = (req, res) => {
       .catch((e) => {
         winston.loggers.get('application').error(e);
       });
+    feedUpdatesDao.getByLinkId(target).then((feedUpdatesResult) => {
+      if (feedUpdatesResult) {
+        const feedUpdatesRec = feedUpdatesResult.value;
+        if (feedUpdatesRec.latestData) {
+          feedUpdatesRec.data = feedUpdatesRec.latestData;
+          feedUpdatesRec.latestData = null;
+          feedUpdatesRec.lastUpdated = new Date();
+          feedUpdatesDao.insert(feedUpdatesRec);
+        }
+      }
+      return null;
+    }).catch((e) => {
+      winston.loggers.get('application').error(e);
+    });
   }
 };
 

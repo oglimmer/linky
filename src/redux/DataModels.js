@@ -17,6 +17,7 @@ export const addUrlForm = {
 export const initialStateMainData = {
   linkList: Immutable.List(),
   tagList: Immutable.List(),
+  feedUpdatesList: Immutable.List(),
   errorMessage: '',
   sortingByColumn: 'mostUsed',
   selectedTag: 'portal',

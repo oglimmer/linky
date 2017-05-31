@@ -23,7 +23,7 @@ const getSortingInfo = (sortingByColumn, obj) => {
   return null;
 };
 
-const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink }) => (
+const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink, feedUpdatesList }) => (
   <ListGroup>
     <ListGroupItem>
       <SortButton byColumn="mostUsed" text="Most used" />{' '}
@@ -47,12 +47,15 @@ const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink }) =>
         onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '), link.rssUrl)}
         onClickLink={onClickLink}
         faviconUrl={link.faviconUrl}
+        feedUpdates={feedUpdatesList.find(e => e.id === link.id)}
+        hasRssUrl={!!link.rssUrl}
       />),
     )}
   </ListGroup>
 );
 UILinkList.propTypes = {
   linkList: ImmutablePropTypes.listOf(PropTypes.shape(DEFAULT_LINK_PROP_TYPES)).isRequired,
+  feedUpdatesList: ImmutablePropTypes.listOf(PropTypes.shape()).isRequired,
   onUpdateLink: PropTypes.func.isRequired,
   onClickLink: PropTypes.func.isRequired,
   sortingByColumn: PropTypes.string.isRequired,
@@ -61,6 +64,7 @@ UILinkList.propTypes = {
 
 const mapStateToProps = state => ({
   linkList: state.mainData.linkList,
+  feedUpdatesList: state.mainData.feedUpdatesList,
   authToken: state.auth.token,
   sortingByColumn: state.mainData.sortingByColumn,
 });

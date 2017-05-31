@@ -7,6 +7,13 @@ import winston from 'winston';
 import JwtUtil from '../util/JwtUtil';
 import ResponseUtil from '../../src/util/ResponseUtil';
 
+class VerificationError extends Error {
+  constructor(msg) {
+    super(msg);
+    this.customError = true;
+  }
+}
+
 class Verification {
 
   constructor({ req, res, next }) {
@@ -17,7 +24,7 @@ class Verification {
 
   fail(err) {
     ResponseUtil.sendErrorResponse500(`Invalid auth token: ${err}`, this.res);
-    this.next(new Error(err));
+    this.next(new VerificationError(err));
   }
 
   succeed(user) {

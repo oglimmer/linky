@@ -6,12 +6,14 @@ import Immutable from 'immutable';
 import { AppContainer } from 'react-hot-loader';
 
 import configureStore from './util/configureStore';
+import { fetchRssUpdates } from './redux/actions';
 
 let state;
 if (window.$REDUX_STATE) {
   state = window.$REDUX_STATE;
   state.mainData.linkList = Immutable.List(state.mainData.linkList);
   state.mainData.tagList = Immutable.List(state.mainData.tagList);
+  state.mainData.feedUpdatesList = Immutable.List(state.mainData.feedUpdatesList);
 }
 
 const store = configureStore(state);
@@ -33,3 +35,4 @@ render();
 if (module.hot) {
   module.hot.accept('./components/Root', () => render());
 }
+store.dispatch(fetchRssUpdates());

@@ -5,7 +5,7 @@ import Immutable from 'immutable';
 import assert from 'assert';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK,
-  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE,
+  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES,
   CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG } from './actions';
 
 import { initialStateAuth, initialStateMainData, loginForm, addUrlForm, DEFAULT_LINK } from './DataModels';
@@ -61,6 +61,7 @@ function mainData(state = initialStateMainData, action) {
           linkUrl: action.linkUrl,
           tags: action.tags,
           faviconUrl: action.faviconUrl,
+          rssUrl: action.rssUrl,
         })),
       });
     case UPDATE_LINK:
@@ -111,6 +112,19 @@ function mainData(state = initialStateMainData, action) {
             lastCalled: new Date().toString(),
           }),
         ),
+        feedUpdatesList: state.feedUpdatesList.update(
+          state.feedUpdatesList.findIndex(ele => ele.id === action.id),
+          val => Object.assign({}, val, {
+            value: 0,
+          }),
+        ),
+      });
+    case RSS_UPDATES:
+      return Object.assign({}, state, {
+        feedUpdatesList: state.feedUpdatesList.push({
+          id: action.linkId,
+          value: action.newUpdates,
+        }),
       });
     default:
       return state;

@@ -94,13 +94,12 @@ class UpdateLinkProcessor extends BaseProcessor {
     const linkUrl = fixUrl(this.req.body.url);
     const rssUrl = fixUrl(this.req.body.rssUrl);
     const tags = ensureAllTag(getTags(this.req.body.tags));
-    return linkDao.getById(linkid).then((rec) => {
-      this.data = Object.assign({}, rec, {
-        tags,
-        linkUrl,
-        rssUrl,
-      });
-    });
+    this.data = {
+      linkid,
+      tags,
+      linkUrl,
+      rssUrl,
+    };
   }
 
   /* eslint-disable class-methods-use-this */
@@ -111,12 +110,18 @@ class UpdateLinkProcessor extends BaseProcessor {
 
   * process() {
     try {
-      yield linkDao.insert(this.data);
+      const rec = yield linkDao.getById(this.data.linkid);
+      const recToWrite = Object.assign({}, rec, {
+        tags: this.data.tags,
+        linkUrl: this.data.linkUrl,
+        rssUrl: this.data.rssUrl,
+      });
+      yield linkDao.insert(recToWrite);
       /* eslint-disable no-underscore-dangle */
-      this.data.id = this.data._id;
+      recToWrite.id = recToWrite._id;
       /* eslint-enable no-underscore-dangle */
-      this.res.send(this.data);
-      winston.loggers.get('application').debug('Update link: %j', this.data);
+      this.res.send(recToWrite);
+      winston.loggers.get('application').debug('Update link: %j', recToWrite);
     } catch (err) {
       winston.loggers.get('application').error('Failed to create link. Error = %j', err);
       ResponseUtil.sendErrorResponse500(err, this.res);

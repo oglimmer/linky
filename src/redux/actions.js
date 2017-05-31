@@ -24,6 +24,7 @@ export const SELECT_TAG = 'SELECT_TAG';
 export const EDIT_LINK = 'EDIT_LINK';
 export const DEL_TAG = 'DEL_TAG';
 export const MANIPULATE_TAG = 'MANIPULATE_TAG';
+export const RSS_UPDATES = 'RSS_UPDATES';
 
 /*
  * action creators
@@ -81,6 +82,10 @@ function delLinkPost(id) {
   return { type: DEL_LINK, id };
 }
 
+function setRssUpdates(linkId, newUpdates) {
+  return { type: RSS_UPDATES, linkId, newUpdates };
+}
+
 // ---------------------------
 
 export function resetAddLinkFields() {
@@ -106,6 +111,23 @@ function loadTags() {
     .then(response => response.json())
     .then(tagList => dispatch(setTags(tagList)))
     .catch(error => console.log(error));
+}
+
+export function fetchRssUpdates() {
+  return (dispatch, getState) => {
+    const { linkList } = getState().mainData;
+    linkList.forEach((linkElement) => {
+      fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
+      .then(response => response.json())
+      .then((json) => {
+        dispatch(setRssUpdates(linkElement.id, json.result));
+      })
+      .catch((ex) => {
+        dispatch(setErrorMessage(ex));
+        throw ex;
+      });
+    });
+  };
 }
 
 function fetchLinks(tag) {
