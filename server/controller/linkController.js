@@ -24,6 +24,25 @@ const ensureAllTag = (tagsArr) => {
 
 // URL
 const fixUrl = url => (url && !url.startsWith('http') ? `http://${url}` : url);
+const resolveUrl = url => new Promise((resolve) => {
+  console.log(url);
+  const httpGetCall = requestRaw.get({
+    url,
+    followAllRedirects: true,
+    timeout: 500,
+  });
+  httpGetCall.on('response', (response) => {
+    console.log('response');
+    httpGetCall.abort();
+    const linkUrl = removeTrailingSlash(response.request.href);
+    resolve(linkUrl);
+  });
+  httpGetCall.on('error', () => {
+    console.log('error');
+    httpGetCall.abort();
+    resolve(url);
+  });
+});
 
 class CreateLinkProcessor extends BaseProcessor {
 
@@ -35,38 +54,15 @@ class CreateLinkProcessor extends BaseProcessor {
     const url = fixUrl(this.req.body.url);
     const rssUrl = fixUrl(this.req.body.rssUrl);
     const tags = ensureAllTag(getTags(this.req.body.tags));
-    return new Promise((resolve) => {
-      favicon(url).then((faviconUrl) => {
-        const httpGetCall = requestRaw.get({
-          url,
-          followAllRedirects: true,
-          timeout: 500,
-        });
-        httpGetCall.on('response', (response) => {
-          httpGetCall.abort();
-          const linkUrl = removeTrailingSlash(response.request.href);
-          this.data = Object.assign({}, DEFAULT_LINK, {
-            type: 'link',
-            tags,
-            linkUrl,
-            faviconUrl,
-            rssUrl,
-          });
-          resolve();
-        });
-        httpGetCall.on('error', () => {
-          httpGetCall.abort();
-          this.data = Object.assign({}, DEFAULT_LINK, {
-            type: 'link',
-            tags,
-            linkUrl: url,
-            faviconUrl,
-            rssUrl,
-          });
-          resolve();
-        });
+    return resolveUrl(url).then(linkUrl => favicon(linkUrl).then((faviconUrl) => {
+      this.data = Object.assign({}, DEFAULT_LINK, {
+        type: 'link',
+        tags,
+        linkUrl,
+        faviconUrl,
+        rssUrl,
       });
-    });
+    }));
   }
 
   /* eslint-disable class-methods-use-this */
@@ -99,11 +95,13 @@ class UpdateLinkProcessor extends BaseProcessor {
   collectBodyParameters() {
     const { linkid } = this.req.params;
     const linkUrl = fixUrl(this.req.body.url);
+    const rssUrl = fixUrl(this.req.body.rssUrl);
     const tags = ensureAllTag(getTags(this.req.body.tags));
     return linkDao.getById(linkid).then((rec) => {
       this.data = Object.assign({}, rec, {
         tags,
         linkUrl,
+        rssUrl,
       });
     });
   }
