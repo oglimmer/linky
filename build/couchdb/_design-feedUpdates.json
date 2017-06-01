@@ -1,0 +1,1 @@
+{"_id":"_design/feedUpdates","language":"javascript","views":{"byLinkId":{"map":"function(doc) {\n  if(doc.type === 'feedUpdates') {\n    emit(doc.linkId, doc);\n  }\n}"}}}
