@@ -62,8 +62,8 @@ class GetRssUpdatesProcessor extends BaseProcessor {
         }
       });
     } else if (content.feed) {
-      const xmlns = content.feed.$;
-      console.log(`xmlns = ${xmlns}`);
+      // const xmlns = content.feed.$;
+      // console.log(`xmlns = ${xmlns}`);
       if (!content.feed.entry) {
         console.log(content);
         return 'No entry in RSS found';

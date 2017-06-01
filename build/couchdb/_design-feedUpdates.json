@@ -1,1 +1,1 @@
-{"_id":"_design/feedUpdates","language":"javascript","views":{"byLinkId":{"map":"function(doc) {\n  if(doc.type === 'feedUpdates') {\n    emit(doc.linkId, doc);\n  }\n}"}}}
+{"_id":"_design/feedUpdates","language":"javascript","views":{"byLinkId":{"map":"function(doc) {\n  if(doc.type === 'feedUpdates') {\n    emit(doc.linkId, doc);\n  }\n}"},"byUserId":{"map":"function(doc) {\n  if(doc.type === 'feedUpdates') {\n    emit(doc.userid, doc);\n  }\n}"}}}
