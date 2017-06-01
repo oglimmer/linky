@@ -48,7 +48,11 @@ class GetRssUpdatesProcessor extends BaseProcessor {
           e.item.forEach((f) => {
             // console.log(f);
             if (f.guid) {
-              currentFeedData.push(f.guid[0]);
+              if (typeof f.guid[0] === 'string') {
+                currentFeedData.push(f.guid[0]);
+              } else {
+                currentFeedData.push(f.guid[0]._);
+              }
             } else if (f.title) {
               currentFeedData.push(f.title[0]);
             } else {
@@ -119,7 +123,7 @@ class GetRssUpdatesProcessor extends BaseProcessor {
             feedUpdatesDao.insert(feedUpdatesRec);
           }
           this.res.send({ result: newFeedData.length });
-          winston.loggers.get('application').debug('RssUpdates for %s = %n', rec.rssUrl, newFeedData.length);
+          winston.loggers.get('application').debug('RssUpdates for %s = %i', rec.rssUrl, newFeedData.length);
         }
       }
     } catch (err) {
