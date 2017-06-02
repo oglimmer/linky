@@ -62,6 +62,8 @@ function mainData(state = initialStateMainData, action) {
           tags: action.tags,
           faviconUrl: action.faviconUrl,
           rssUrl: action.rssUrl,
+          pageTitle: action.pageTitle,
+          notes: action.notes,
         })),
       });
     case UPDATE_LINK:
@@ -72,6 +74,8 @@ function mainData(state = initialStateMainData, action) {
             linkUrl: action.linkUrl,
             tags: action.tags,
             rssUrl: action.rssUrl,
+            pageTitle: action.pageTitle,
+            notes: action.notes,
           }),
         ),
       });

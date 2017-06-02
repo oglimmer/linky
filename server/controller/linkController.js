@@ -1,6 +1,7 @@
 
 import winston from 'winston';
 import requestRaw from 'request';
+import { AllHtmlEntities } from 'html-entities';
 
 import favicon from '../util/favicon';
 import linkDao from '../dao/linkDao';
@@ -24,20 +25,40 @@ const ensureAllTag = (tagsArr) => {
 
 // URL
 const fixUrl = url => (url && !url.startsWith('http') ? `http://${url}` : url);
-const resolveUrl = url => new Promise((resolve) => {
+const resolveUrl = (url, pageTitle) => new Promise((resolve) => {
   const httpGetCall = requestRaw.get({
     url,
     followAllRedirects: true,
     timeout: 500,
   });
+  let buffer = '';
+  let title = pageTitle || url;
+  let linkUrl = url;
   httpGetCall.on('response', (response) => {
-    httpGetCall.abort();
-    const linkUrl = removeTrailingSlash(response.request.href);
-    resolve(linkUrl);
+    linkUrl = removeTrailingSlash(response.request.href);
+    if (pageTitle) {
+      httpGetCall.abort();
+      resolve({ linkUrl, title });
+    }
+  });
+  httpGetCall.on('data', (data) => {
+    const html = data.toString().replace(/[\n\r]/g, '');
+    buffer += html;
+    const findTitleRegEx = new RegExp('<title>(.*?)</title>', 'g');
+    const match = findTitleRegEx.exec(buffer);
+    if (match && match.length > 1) {
+      const entities = new AllHtmlEntities();
+      title = entities.decode(match[1]);
+      httpGetCall.abort();
+      resolve({ linkUrl, title });
+    }
+  });
+  httpGetCall.on('complete', () => {
+    resolve({ linkUrl, title });
   });
   httpGetCall.on('error', () => {
     httpGetCall.abort();
-    resolve(url);
+    resolve({ linkUrl, title });
   });
 });
 
@@ -51,15 +72,20 @@ class CreateLinkProcessor extends BaseProcessor {
     const url = fixUrl(this.req.body.url);
     const rssUrl = fixUrl(this.req.body.rssUrl);
     const tags = ensureAllTag(getTags(this.req.body.tags));
-    return resolveUrl(url).then(linkUrl => favicon(linkUrl).then((faviconUrl) => {
-      this.data = Object.assign({}, DEFAULT_LINK, {
-        type: 'link',
-        tags,
-        linkUrl,
-        faviconUrl,
-        rssUrl,
-      });
-    }));
+    const { pageTitle, notes } = this.req.body;
+    return resolveUrl(url, pageTitle)
+      .then(({ linkUrl, title }) => favicon(linkUrl)
+      .then((faviconUrl) => {
+        this.data = Object.assign({}, DEFAULT_LINK, {
+          type: 'link',
+          tags,
+          linkUrl,
+          faviconUrl,
+          rssUrl,
+          pageTitle: title,
+          notes,
+        });
+      }));
   }
 
   /* eslint-disable class-methods-use-this */
@@ -94,11 +120,14 @@ class UpdateLinkProcessor extends BaseProcessor {
     const linkUrl = fixUrl(this.req.body.url);
     const rssUrl = fixUrl(this.req.body.rssUrl);
     const tags = ensureAllTag(getTags(this.req.body.tags));
+    const { pageTitle, notes } = this.req.body;
     this.data = {
       linkid,
       tags,
       linkUrl,
       rssUrl,
+      pageTitle,
+      notes,
     };
   }
 
@@ -115,6 +144,8 @@ class UpdateLinkProcessor extends BaseProcessor {
         tags: this.data.tags,
         linkUrl: this.data.linkUrl,
         rssUrl: this.data.rssUrl,
+        pageTitle: this.data.pageTitle,
+        notes: this.data.notes,
       });
       yield linkDao.insert(recToWrite);
       /* eslint-disable no-underscore-dangle */

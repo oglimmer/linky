@@ -74,8 +74,8 @@ function addLinkPost(attr) {
   return Object.assign({}, attr, { type: ADD_LINK });
 }
 
-function updateLinkPost(id, linkUrl, tags, rssUrl) {
-  return { type: UPDATE_LINK, id, linkUrl, tags, rssUrl };
+function updateLinkPost(id, linkUrl, tags, rssUrl, pageTitle, notes) {
+  return { type: UPDATE_LINK, id, linkUrl, tags, rssUrl, pageTitle, notes };
 }
 
 function delLinkPost(id) {
@@ -94,6 +94,8 @@ export function resetAddLinkFields() {
     dispatch(actions.reset('addUrl.tags'));
     dispatch(actions.reset('addUrl.id'));
     dispatch(actions.reset('addUrl.rssUrl'));
+    dispatch(actions.reset('addUrl.pageTitle'));
+    dispatch(actions.reset('addUrl.notes'));
   };
 }
 
@@ -173,7 +175,8 @@ function handlingLinkListChange(linkId, newLink, selectedTag) {
       dispatch(delLinkPost(newLink.id));
     } else {
       // not new and not deleted from the selectedTag, so update
-      dispatch(updateLinkPost(newLink.id, newLink.linkUrl, newLink.tags, newLink.rssUrl));
+      dispatch(updateLinkPost(newLink.id, newLink.linkUrl, newLink.tags, newLink.rssUrl,
+        newLink.pageTitle, newLink.notes));
     }
   };
 }
@@ -187,12 +190,12 @@ function handlingTagListChange(newLink, oldTags) {
   };
 }
 
-export function persistLink(linkId, url, tags, rssUrl) {
+export function persistLink(linkId, url, tags, rssUrl, pageTitle, notes) {
   return (dispatch, getState) => {
     const { linkList, selectedTag } = getState().mainData;
     return (linkId ?
-      fetch.put(`/rest/links/${linkId}`, { url, tags, rssUrl }, getState().auth.token) :
-      fetch.post('/rest/links', { url, tags, rssUrl }, getState().auth.token))
+      fetch.put(`/rest/links/${linkId}`, { url, tags, rssUrl, pageTitle, notes }, getState().auth.token) :
+      fetch.post('/rest/links', { url, tags, rssUrl, pageTitle, notes }, getState().auth.token))
       .then(response => response.json())
       .then((newLink) => {
         dispatch(handlingLinkListChange(linkId, newLink, selectedTag, dispatch));
@@ -216,12 +219,14 @@ export function delLink(id) {
   };
 }
 
-export function editLink(id, url, tags, rssUrl) {
+export function editLink(id, url, tags, rssUrl, pageTitle, notes) {
   return (dispatch) => {
     dispatch(actions.change('addUrl.id', id));
     dispatch(actions.change('addUrl.url', url));
     dispatch(actions.change('addUrl.tags', tags));
     dispatch(actions.change('addUrl.rssUrl', rssUrl));
+    dispatch(actions.change('addUrl.pageTitle', pageTitle));
+    dispatch(actions.change('addUrl.notes', notes));
   };
 }
 

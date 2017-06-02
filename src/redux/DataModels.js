@@ -12,6 +12,8 @@ export const addUrlForm = {
   url: '',
   tags: '',
   rssUrl: '',
+  pageTitle: '',
+  notes: '',
 };
 
 export const initialStateMainData = {
@@ -35,6 +37,8 @@ export const DEFAULT_LINK = {
   createdDate: new Date().toString(),
   tags: ['all'],
   rssUrl: '',
+  pageTitle: '',
+  notes: '',
 };
 
 export const DEFAULT_LINK_PROP_TYPES = {
@@ -44,5 +48,7 @@ export const DEFAULT_LINK_PROP_TYPES = {
   lastCalled: PropTypes.string.isRequired,
   createdDate: PropTypes.string.isRequired,
   tags: PropTypes.array.isRequired,
-  rssUrl: PropTypes.string.isRequired,
+  rssUrl: PropTypes.string,
+  pageTitle: PropTypes.string,
+  notes: PropTypes.string,
 };

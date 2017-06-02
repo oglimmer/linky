@@ -44,7 +44,8 @@ const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink, feed
         key={link.id}
         id={link.id}
         linkUrl={`${link.linkUrl} [${getSortingInfo(sortingByColumn, link)}]`}
-        onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '), link.rssUrl)}
+        pageTitle={link.pageTitle}
+        onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '), link.rssUrl, link.pageTitle, link.notes)}
         onClickLink={onClickLink}
         faviconUrl={link.faviconUrl}
         feedUpdates={feedUpdatesList.find(e => e.id === link.id)}
@@ -70,7 +71,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onUpdateLink: (id, url, tags, rssUrl) => dispatch(editLink(id, url, tags, rssUrl)),
+  onUpdateLink: (id, url, tags, rssUrl, pageTitle, notes) =>
+    dispatch(editLink(id, url, tags, rssUrl, pageTitle, notes)),
   onClickLink: id => dispatch(clickLink(id)),
 });
 
