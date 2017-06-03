@@ -23,7 +23,7 @@ fi
 
 if [ "$1" == "createlink" ]; then
 
-	curl -s -X POST --data '{"linkUrl":"http://google.com/test/for/nothing"}' -H "Content-Type: application/json" -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/links
+	curl -s -X POST --data '{"url":"http://oglimmer.de","tags":"","notes":"","pageTitle":"","rssUrl":""}' -H "Content-Type: application/json" -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/links
 
 fi
 
