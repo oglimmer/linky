@@ -24,6 +24,13 @@ const ensureAllTag = (tagsArr) => {
 };
 
 // URL
+const isHtml = (response) => {
+  const contentTypeHeader = response.headers['content-type'];
+  if (!contentTypeHeader) {
+    return false;
+  }
+  return contentTypeHeader.indexOf('text/html') === 0;
+};
 const fixUrl = url => (url && !url.startsWith('http') ? `http://${url}` : url);
 const resolveUrl = (url, pageTitle) => new Promise((resolve) => {
   const httpGetCall = requestRaw.get({
@@ -36,7 +43,7 @@ const resolveUrl = (url, pageTitle) => new Promise((resolve) => {
   let linkUrl = url;
   httpGetCall.on('response', (response) => {
     linkUrl = removeTrailingSlash(response.request.href);
-    if (pageTitle) {
+    if (pageTitle || !isHtml(response)) {
       httpGetCall.abort();
       resolve({ linkUrl, title });
     }
