@@ -1,4 +1,4 @@
-::-webkit-input-placeholder 
+.hidePlaceholder::-webkit-input-placeholder
 {
   /* safari doesn't clear the placeholder when setting the value via javascript */
   color: transparent!important;

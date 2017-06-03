@@ -3,16 +3,16 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
+import { Button, FormGroup, ControlLabel } from 'react-bootstrap';
 
 import { withRouter } from 'react-router';
-import { Form } from 'react-redux-form';
+import { Form, Control } from 'react-redux-form';
 import { connect } from 'react-redux';
 
 import { checkAuth } from '../redux/actions';
 
 import AlertAdapter from '../components/AlertAdapter';
-import FormGroupAdapter from '../components/FormGroupAdapter';
+import FormControlAdapter from '../components/FormControlAdapter';
 
 const click = (target) => {
   document.location.href = `/auth/${target}`;
@@ -65,19 +65,30 @@ const Login = ({ dispatch, history }) => (
             }, () => {});
           }}
         >
-          <FormGroupAdapter
-            label="Enter your registered email address"
-            model="email"
-            placeholder="email"
-            autoFocus="true"
-          />
-          <FormGroupAdapter
-            label="Enter password"
-            type="password"
-            model="password"
-            placeholder="password"
-          />
-          <Button type="submit">Log in</Button>
+          <FormGroup controlId="loginEmail">
+            <ControlLabel>Enter your registered email address</ControlLabel>
+            <Control
+              type="text"
+              componentClass="input"
+              model=".email"
+              placeholder="email"
+              autoFocus="true"
+              component={FormControlAdapter}
+            />
+          </FormGroup>
+          <FormGroup controlId="loginPassword">
+            <ControlLabel>Enter password</ControlLabel>
+            <Control
+              type="password"
+              componentClass="input"
+              model=".password"
+              placeholder="password"
+              component={FormControlAdapter}
+            />
+          </FormGroup>
+          <FormGroup controlId="loginSubmit">
+            <Button type="submit">Log in</Button>
+          </FormGroup>
         </Form>
       </div>
     </div>) : '' }

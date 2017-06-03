@@ -1,63 +1,74 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
+import { Button, FormGroup } from 'react-bootstrap';
 import { Form } from 'react-redux-form';
 import { connect } from 'react-redux';
 
 import { persistLink, delLink, resetAddLinkFields } from '../redux/actions';
-import FormGroupAdapter from '../components/FormGroupAdapter';
+import UIInputElement from '../components/UIInputElement';
 
 const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete }) => (
   <Form
+    className="form-horizontal"
     model="addUrl"
     onSubmit={formData => onSubmit(formData, linkId)}
   >
-    <FormGroupAdapter
-      label="Add a new link"
-      model="url"
-      placeholder="url to add (with or without http://)"
-      autoFocus="true"
-      autoComplete="off"
-    />
-    <FormGroupAdapter
-      label="Add some tags"
-      model="tags"
-      placeholder="a tag is one word [a-z0-9]"
-      autoComplete="off"
-    />
-    <FormGroupAdapter
-      label="Add a RSS url if available"
-      model="rssUrl"
-      placeholder="url to RSS feed for this page"
-      autoComplete="off"
-    />
-    <FormGroupAdapter
-      label="Page Title"
-      model="pageTitle"
-      placeholder="the page title (leave blank to fill automatically)"
-      autoComplete="off"
-    />
-    <FormGroupAdapter
-      label="Notes"
-      model="notes"
-      placeholder="Just some notes"
-      autoComplete="off"
-    />
-    <Button type="submit">{ linkId === null ? 'Create' : 'Update' } Link</Button>
+    <FormGroup controlId="row1controls">
+      <UIInputElement
+        label="Url"
+        model="url"
+        placeholder="url to add (with or without http://)"
+        autoFocus="true"
+        autoComplete="off"
+      />
+      <UIInputElement
+        label="Tags"
+        model="tags"
+        placeholder="a tag is one word [a-z0-9]"
+        autoComplete="off"
+      />
+    </FormGroup>
+    <FormGroup controlId="row2controls">
+      <UIInputElement
+        label="Feed Url"
+        model="rssUrl"
+        placeholder="url to RSS feed for this page"
+        autoComplete="off"
+      />
+      <UIInputElement
+        label="Title"
+        model="pageTitle"
+        placeholder="the page title (leave blank to fill automatically)"
+        autoComplete="off"
+      />
+    </FormGroup>
+    <FormGroup controlId="row3controls">
+      <UIInputElement
+        label="Notes"
+        model="notes"
+        placeholder="Just some notes"
+        autoComplete="off"
+        componentClass="textarea"
+        cols={11}
+      />
+    </FormGroup>
+    <FormGroup controlId="row4controls">
+      <Button type="submit">{ linkId === null ? 'Create' : 'Update' } Link</Button>
 
-    { linkId !== null ?
-      <span>
-        {' '}
-        <Button
-          onClick={() => onDelete(linkId)}
-          type="button"
-        >
-          Del
-        </Button>
-        {' '}
-        <Button onClick={onClose} type="button">Done</Button>
-      </span> : '' }
+      { linkId !== null ?
+        <span>
+          {' '}
+          <Button
+            onClick={() => onDelete(linkId)}
+            type="button"
+          >
+            Del
+          </Button>
+          {' '}
+          <Button onClick={onClose} type="button">Done</Button>
+        </span> : '' }
+    </FormGroup>
 
   </Form>
 );
