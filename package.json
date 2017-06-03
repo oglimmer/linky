@@ -26,6 +26,7 @@
     "cookie-parser": "^1.4.3",
     "ejs": "^2.5.5",
     "express": "^4.14.1",
+    "express-http-proxy": "^1.0.3",
     "express-winston": "^2.3.0",
     "favicon": "^0.0.2",
     "html-entities": "^1.2.1",

@@ -19,7 +19,7 @@ import thunkMiddleware from 'redux-thunk';
 import winstonConf from 'winston-config';
 import expressWinston from 'express-winston';
 
-import { webpack, webpackDevMiddleware, webpackHotMiddleware, emptyCache } from './debug-mode';
+import { webpack, webpackDevMiddleware, webpackHotMiddleware, emptyCache, proxy } from './debug-mode';
 
 import httpRoutes from './util/httpRoutesEntry';
 
@@ -46,74 +46,92 @@ app.use(expressWinston.logger({
 }));
 
 const serverDirectory = process.env.NODE_ENV === 'production' ? '../dist' : '../dynamic-resources';
+const debugMode = process.env.DEBUG_MODE;
 
-// Set view path
-// set up ejs for templating. You can use whatever
-app.set('views', path.join(__dirname, serverDirectory));
-app.set('view engine', 'ejs');
+// load-balancer health check
+app.head('*', (req, res) => {
+  res.status(200).end();
+});
 
-httpRoutes(app);
+if (!debugMode || debugMode !== 'web') {
+  winston.loggers.get('application').info('Serving REST endpoints');
+  httpRoutes(app);
+} else {
+  winston.loggers.get('application').info('Using proxy to REST endpoints');
+  app.use('/rest', proxy('localhost:8081', { proxyReqPathResolver: req => `/rest${req.url}` }));
+  app.use('/leave', proxy('localhost:8081', { proxyReqPathResolver: req => `/leave${req.url}` }));
+  app.use('/auth', proxy('localhost:8081', { proxyReqPathResolver: req => `/auth${req.url}` }));
+  app.use('/authback', proxy('localhost:8081', { proxyReqPathResolver: req => `/authback${req.url}` }));
+}
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, serverDirectory)));
 }
 
-app.use(express.static(path.join(__dirname, '../static-resources')));
+if (!debugMode || debugMode !== 'rest') {
+  winston.loggers.get('application').info('Serving web endpoints');
+  app.use(express.static(path.join(__dirname, '../static-resources')));
 
-if (process.env.NODE_ENV === 'development') {
-  /* eslint-disable global-require */
-  const config = require('../build/webpack.dev.config');
-  /* eslint-enable global-require */
-  const compiler = webpack(config);
-  app.use(webpackDevMiddleware(compiler, {
-    publicPath: config.output.publicPath, stats: { colors: true } }));
-  app.use(webpackHotMiddleware(compiler));
-  winston.loggers.get('application').info('Server running with dynamic bundle.js generation');
-}
-
-const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
-
-app.use((req, res) => {
-  const store = finalCreateStore(combinedReducers);
-
-  winston.loggers.get('application').debug(`Processing match at url = ${req.url}`);
+  // Set view path
+  // set up ejs for templating. You can use whatever
+  app.set('views', path.join(__dirname, serverDirectory));
+  app.set('view engine', 'ejs');
 
   if (process.env.NODE_ENV === 'development') {
-    emptyCache();
+    /* eslint-disable global-require */
+    const config = require('../build/webpack.dev.config');
+    /* eslint-enable global-require */
+    const compiler = webpack(config);
+    app.use(webpackDevMiddleware(compiler, {
+      publicPath: config.output.publicPath, stats: { colors: true } }));
+    app.use(webpackHotMiddleware(compiler));
+    winston.loggers.get('application').info('Server running with dynamic bundle.js generation');
   }
 
-  fetchComponentData(store.dispatch, req, res)
-  .then(() => {
-    const context = {};
-    const reactHtml = ReactDOMServer.renderToString(
-      <StaticRouter location={req.url} context={context}>
-        <Provider store={store}>
-          <Routing store={store} />
-        </Provider>
-      </StaticRouter>,
-    );
+  const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
 
-    if (context.url) {
-      res.writeHead(301, {
-        Location: context.url,
-      });
-      res.end();
-    } else {
-      const initialState = JSON.stringify(store.getState());
-      res.render('index.ejs', { reactHtml, initialState });
+  app.use((req, res) => {
+    const store = finalCreateStore(combinedReducers);
+
+    winston.loggers.get('application').debug(`Processing match at url = ${req.url}`);
+
+    if (process.env.NODE_ENV === 'development') {
+      emptyCache();
     }
-  })
-  .catch((err) => {
-    if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
-      winston.loggers.get('application').error(err);
-      res.status(500).send('Server error');
-    }
+
+    fetchComponentData(store.dispatch, req, res)
+    .then(() => {
+      const context = {};
+      const reactHtml = ReactDOMServer.renderToString(
+        <StaticRouter location={req.url} context={context}>
+          <Provider store={store}>
+            <Routing store={store} />
+          </Provider>
+        </StaticRouter>,
+      );
+
+      if (context.url) {
+        res.writeHead(301, {
+          Location: context.url,
+        });
+        res.end();
+      } else {
+        const initialState = JSON.stringify(store.getState());
+        res.render('index.ejs', { reactHtml, initialState });
+      }
+    })
+    .catch((err) => {
+      if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
+        winston.loggers.get('application').error(err);
+        res.status(500).send('Server error');
+      }
+    });
   });
-});
+}
 
 // example of handling 404 pages
 app.get('*', (req, res) => {
-  winston.loggers.get('application').error('Server.js > 404 - Page Not Found');
+  winston.loggers.get('application').error(`Server.js > 404 - Page Not Found ${req.url}`);
   res.status(404).send('Server.js > 404 - Page Not Found');
 });
 
