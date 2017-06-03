@@ -224,9 +224,9 @@ export function editLink(id, url, tags, rssUrl, pageTitle, notes) {
     dispatch(actions.change('addUrl.id', id));
     dispatch(actions.change('addUrl.url', url));
     dispatch(actions.change('addUrl.tags', tags));
-    dispatch(actions.change('addUrl.rssUrl', rssUrl));
-    dispatch(actions.change('addUrl.pageTitle', pageTitle));
-    dispatch(actions.change('addUrl.notes', notes));
+    dispatch(actions.change('addUrl.rssUrl', rssUrl || ''));
+    dispatch(actions.change('addUrl.pageTitle', pageTitle || ''));
+    dispatch(actions.change('addUrl.notes', notes || ''));
   };
 }
 
