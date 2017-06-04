@@ -68,7 +68,11 @@ function clearAuthToken() {
 }
 
 function setErrorMessage(errorMessage) {
-  return { type: SET_ERROR_MESSAGE, errorMessage };
+  const action = { type: SET_ERROR_MESSAGE, errorMessage };
+  if (typeof errorMessage !== 'string') {
+    action.errorMessage = JSON.stringify(errorMessage);
+  }
+  return action;
 }
 
 function addLinkPost(attr) {
@@ -123,7 +127,7 @@ function loadTags() {
 export function fetchRssUpdates() {
   return (dispatch, getState) => {
     const { linkList } = getState().mainData;
-    linkList.forEach((linkElement) => {
+    linkList.filter(e => e.rssUrl).forEach((linkElement) => {
       fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
       .then(response => response.json())
       .then((json) => {
@@ -263,7 +267,7 @@ export function checkAuth(email, password) {
         return Promise.all([
           dispatch(setAuthToken(json.token)),
           dispatch(initialLoad()),
-        ]);
+        ]).then(() => dispatch(fetchRssUpdates()));
       }
       throw json.message;
     })

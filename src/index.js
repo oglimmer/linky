@@ -6,7 +6,6 @@ import Immutable from 'immutable';
 import { AppContainer } from 'react-hot-loader';
 
 import configureStore from './util/configureStore';
-import { fetchRssUpdates } from './redux/actions';
 
 let state;
 if (window.$REDUX_STATE) {
@@ -35,4 +34,3 @@ render();
 if (module.hot) {
   module.hot.accept('./components/Root', () => render());
 }
-store.dispatch(fetchRssUpdates());
