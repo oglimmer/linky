@@ -5,7 +5,7 @@ import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 
-import { editLink, clickLink } from '../redux/actions';
+import { editLink, clickLink, toggleVisibilityMenuBar } from '../redux/actions';
 
 import UILinkListElement from './UILinkListElement';
 import SortButton from './SortButton';
@@ -71,8 +71,10 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onUpdateLink: (id, url, tags, rssUrl, pageTitle, notes) =>
-    dispatch(editLink(id, url, tags, rssUrl, pageTitle, notes)),
+  onUpdateLink: (id, url, tags, rssUrl, pageTitle, notes) => {
+    dispatch(editLink(id, url, tags, rssUrl, pageTitle, notes));
+    dispatch(toggleVisibilityMenuBar(true));
+  },
   onClickLink: id => dispatch(clickLink(id)),
 });
 

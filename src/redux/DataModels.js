@@ -25,6 +25,10 @@ export const initialStateMainData = {
   selectedTag: 'portal',
 };
 
+export const initialMenuBar = {
+  addEnabled: false,
+};
+
 export const initialStateAuth = {
   token: '',
 };

@@ -6,9 +6,11 @@ import assert from 'assert';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES,
-  CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG } from './actions';
+  CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG,
+  TOGGLE_VISIBILITY } from './actions';
 
-import { initialStateAuth, initialStateMainData, loginForm, addUrlForm, DEFAULT_LINK } from './DataModels';
+import { initialStateAuth, initialStateMainData, loginForm, addUrlForm,
+  DEFAULT_LINK, initialMenuBar } from './DataModels';
 
 
 function auth(state = initialStateAuth, action) {
@@ -19,6 +21,17 @@ function auth(state = initialStateAuth, action) {
       });
     case CLEAR_AUTH_TOKEN:
       return Object.assign({}, state, initialStateAuth);
+    default:
+      return state;
+  }
+}
+
+function menuBar(state = initialMenuBar, action) {
+  switch (action.type) {
+    case TOGGLE_VISIBILITY:
+      return Object.assign({}, state, {
+        addEnabled: !state.addEnabled || action.forceShow,
+      });
     default:
       return state;
   }
@@ -138,6 +151,7 @@ function mainData(state = initialStateMainData, action) {
 export default combineReducers({
   mainData,
   auth,
+  menuBar,
   login: combineForms(loginForm, 'login'),
   addUrl: combineForms(addUrlForm, 'addUrl'),
 });

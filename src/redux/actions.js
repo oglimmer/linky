@@ -25,6 +25,7 @@ export const EDIT_LINK = 'EDIT_LINK';
 export const DEL_TAG = 'DEL_TAG';
 export const MANIPULATE_TAG = 'MANIPULATE_TAG';
 export const RSS_UPDATES = 'RSS_UPDATES';
+export const TOGGLE_VISIBILITY = 'TOGGLE_VISIBILITY';
 
 /*
  * action creators
@@ -84,6 +85,10 @@ function delLinkPost(id) {
 
 function setRssUpdates(linkId, newUpdates) {
   return { type: RSS_UPDATES, linkId, newUpdates };
+}
+
+export function toggleVisibilityMenuBar(forceShow) {
+  return { type: TOGGLE_VISIBILITY, forceShow };
 }
 
 // ---------------------------
