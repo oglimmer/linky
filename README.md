@@ -1,6 +1,8 @@
 # linky
 A link management system - or maybe just a playground for reactjs, node and stuff ;)
 
+Installed at [https://linky.oglimmer.de](https://linky.oglimmer.de)
+
 This project features:
 
 * react
@@ -9,6 +11,7 @@ This project features:
 * react-router
 * eslint
 * form based authentication
+* oauth1a / oauth2 / openid based authentication
 * REST API with jsonwebtoken
 * react-redux-form
 * CouchDB backend via nano
@@ -24,17 +27,21 @@ Install couchdb and import the views (see https://www.npmjs.com/package/couchvie
 This starts a webserver at :8080 for the REST services, all static files and the on-the-fly
 generated bundle.js
 
-- npm run dev
+- yarn run dev
 
 => open http://localhost:8080
 
 When using nodemon instead of dev you start the server with a nodemon watcher underneath.
 
-- npm run nodemon
+- yarn run nodemon
 
-You can check the whole project via eslint with
+You can check the whole project via eslint and run all unit tests with
 
-- npm run eslint
+- yarn run test
+
+When the couchdb is up, you can run integration tests via
+
+- yarn run integrationtest
 
 # Playing with the REST service
 
@@ -46,14 +53,56 @@ See build/test for test.sh. The follwing commands are supported:
 - getlinks
 - deletelink "ID"
 
+# Executing the integration tests in a docker environment
+
+Go to build/docker and use ./run.sh
+
+- `./run.sh local` will use the current project
+- `./run.sh git` will checkout the master 
+- `./run.sh clean` will clean temporary files
+
 # prod setup
 
 **The jwt private key is hardcoded as "foobar"!!**
 
 To build the client side bundle.js:
 
-- npm run build
+- yarn run build
 
 To start the server at :8080 without dynamic bundle.js generation:
 
-- npm start
+- yarn start
+
+# Parameters
+
+The server script has several parameters:
+
+## NODE_ENV
+
+This parameter **must** either be `production` or `development`.
+
+- development: webpack builds are on demand and hot-loading
+- production: webpack must be executed separately before starting the server script
+
+## DEBUG_MODE
+
+This parameter **may** either be `web` or `rest`.
+
+- web: the server only serves html/css/js files. The server doesn't start the REST interface. It uses the PROXY_BIND and PROXY_PORT (default: localhost:8081) to find the rest interfaces.
+- rest: the server only serves the rest interfaces. the server doesn't serve any html/css/js files.
+
+## PORT
+
+Defines the port where the http server bindes to. Default 8080.
+
+## BIND
+
+Defines the interface where the http server bindes to. Default localhost.
+
+## LINKY_PROPERTIES
+
+A file path to a json formatted property file. Is this parameter undefined the server uses ./server/util/linky_default.properties.
+
+## LINKY_SERVER
+
+Special parameter only used in integration tests. Defines the protocol, server and port for the linky server. Default: http://localhost:8080

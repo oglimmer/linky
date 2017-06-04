@@ -57,11 +57,13 @@ if (!debugMode || debugMode !== 'web') {
   winston.loggers.get('application').info('Serving REST endpoints');
   httpRoutes(app);
 } else {
-  winston.loggers.get('application').info('Using proxy to REST endpoints');
-  app.use('/rest', proxy('localhost:8081', { proxyReqPathResolver: req => `/rest${req.url}` }));
-  app.use('/leave', proxy('localhost:8081', { proxyReqPathResolver: req => `/leave${req.url}` }));
-  app.use('/auth', proxy('localhost:8081', { proxyReqPathResolver: req => `/auth${req.url}` }));
-  app.use('/authback', proxy('localhost:8081', { proxyReqPathResolver: req => `/authback${req.url}` }));
+  const proxyPort = process.env.PROXY_PORT || '8081';
+  const proxyBind = process.env.PROXY_BIND || '127.0.0.1';
+  winston.loggers.get('application').info(`Using proxy ${proxyBind}:${proxyPort} to REST endpoints`);
+  app.use('/rest', proxy(`${proxyBind}:${proxyPort}`, { proxyReqPathResolver: req => `/rest${req.url}` }));
+  app.use('/leave', proxy(`${proxyBind}:${proxyPort}`, { proxyReqPathResolver: req => `/leave${req.url}` }));
+  app.use('/auth', proxy(`${proxyBind}:${proxyPort}`, { proxyReqPathResolver: req => `/auth${req.url}` }));
+  app.use('/authback', proxy(`${proxyBind}:${proxyPort}`, { proxyReqPathResolver: req => `/authback${req.url}` }));
 }
 
 if (process.env.NODE_ENV === 'production') {
