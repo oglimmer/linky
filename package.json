@@ -86,7 +86,7 @@
   },
   "scripts": {
     "dev": "NODE_ENV=development node -r babel-register -r babel-polyfill --trace-warnings $NODE_DEBUG_OPTION server/",
-    "nodemon": "NODE_ENV=development nodemon -r babel-register -r babel-polyfill server/",
+    "nodemon": "NODE_ENV=development nodemon -w server/ -r babel-register -r babel-polyfill server/",
     "start": "NODE_ENV=production node -r babel-register -r babel-polyfill server/",
     "build": "rm -rf dist && webpack -p --progress --colors --config build/webpack.prod.config.js",
     "test": "eslint server src && jest",
