@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 
 import { BrowserRouter } from 'react-router-dom';
-import { fetchRssUpdates } from '../redux/actions';
+import { startRssUpdates } from '../redux/actions';
 
 import Routing from '../routes/Routing';
 
@@ -18,9 +18,7 @@ class Root extends React.Component {
   }
 
   componentDidMount() {
-    if (this.store.getState().auth.token) {
-      this.store.dispatch(fetchRssUpdates());
-    }
+    this.store.dispatch(startRssUpdates());
   }
 
   render() {

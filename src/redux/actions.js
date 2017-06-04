@@ -127,16 +127,35 @@ function loadTags() {
 export function fetchRssUpdates() {
   return (dispatch, getState) => {
     const { linkList } = getState().mainData;
+    const ps = [];
+    let totalNewUpdates = 0;
     linkList.filter(e => e.rssUrl).forEach((linkElement) => {
-      fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
-      .then(response => response.json())
-      .then((json) => {
-        dispatch(setRssUpdates(linkElement.id, json.result));
-      })
-      .catch((ex) => {
-        dispatch(setErrorMessage(ex));
-        throw ex;
-      });
+      ps.push(new Promise((resolve, reject) => {
+        fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
+        .then(response => response.json())
+        .then((json) => {
+          totalNewUpdates += json.result;
+          dispatch(setRssUpdates(linkElement.id, json.result));
+          resolve();
+        })
+        .catch((ex) => {
+          dispatch(setErrorMessage(ex));
+          reject(ex);
+        });
+      }));
+    });
+    Promise.all(ps).then(() => {
+      if (totalNewUpdates > 0) {
+        if (Notification.permission !== 'granted') {
+          Notification.requestPermission();
+        } else {
+          /* eslint-disable no-new */
+          new Notification(`${totalNewUpdates} unread RSS feeds found!`, {
+            icon: 'https://linky.oglimmer.de/favicon.ico',
+          });
+          /* eslint-enable no-new */
+        }
+      }
     });
   };
 }
@@ -250,6 +269,17 @@ export function initialLoad() {
   ]);
 }
 
+export function startRssUpdates() {
+  return (dispatch, getState) => {
+    if (getState().auth.token) {
+      dispatch(fetchRssUpdates());
+      setTimeout(() => {
+        dispatch(startRssUpdates());
+      }, 1000 * 60 * 5);
+    }
+  };
+}
+
 export function checkAuth(email, password) {
   return (dispatch) => {
     dispatch(setErrorMessage(''));
@@ -267,7 +297,7 @@ export function checkAuth(email, password) {
         return Promise.all([
           dispatch(setAuthToken(json.token)),
           dispatch(initialLoad()),
-        ]).then(() => dispatch(fetchRssUpdates()));
+        ]).then(() => dispatch(startRssUpdates()));
       }
       throw json.message;
     })
