@@ -29,7 +29,6 @@ export default {
     if (body) {
       param.body = JSON.stringify(body);
     }
-    console.log(param);
     return fetch(baseUrl + url, param);
   },
 
