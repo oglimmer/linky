@@ -93,14 +93,22 @@ const deleteUserBySourceId = (sourceId) => {
 const args = process.argv;
 
 if (args.length < 3) {
-  console.log('Command missing. Use: deleteuserbyemail|deleteuserbysourceid|listusersbyemail|listusersbysourceid [ID]');
+  console.log('Command missing. Use: command [ID]');
+  console.log('Available commands:');
+  console.log('deleteuserbyemail EMAIL');
+  console.log('deleteuserbysourceid SOURCEID');
+  console.log('deleteuserbyid ID|...');
+  console.log('listusersbyemail');
+  console.log('listusersbysourceid');
+  console.log('listusersbyid ID');
+  console.log('summary');
   process.exit(1);
 }
 
 const command = args[2];
 const param = args[3];
 
-console.log(`Executing command ${command} with param ${param}`);
+console.log(`Executing command ${command}...`);
 
 if (command === 'deleteuserbyemail') {
   if (!param) {
@@ -118,6 +126,19 @@ if (command === 'deleteuserbysourceid') {
   deleteUserBySourceId(param);
 }
 
+if (command === 'deleteuserbyid') {
+  if (!param) {
+    console.error('Missing at least one parameter');
+    process.exit(1);
+  }
+  args.filter((ele, ind) => ind > 2).forEach((id) => {
+    userDao.getById(id).then((rec) => {
+      console.log(`Delete user = ${id}`);
+      deleteUserById(rec._id, rec._rev);
+    }).catch(() => console.log(`User id not found = ${id}`));
+  });
+}
+
 if (command === 'listusersbyemail') {
   view('users', 'byEmail')
     .then(result => result.rows)
@@ -133,14 +154,6 @@ if (command === 'listusersbysourceid') {
     .then(rows => rows.map(r => r.value))
     .then(rows => rows.forEach((row) => {
       console.log(`${row.source}${row.sourceId}`);
-    }));
-}
-
-if (command === 'listusers') {
-  view('debug', 'allUsers')
-    .then(result => result.rows)
-    .then(rows => rows.forEach((row) => {
-      console.log(`${row.key}     ${row.value}      ${row.id}`);
     }));
 }
 
