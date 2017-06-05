@@ -2,7 +2,6 @@
 import { combineForms } from 'react-redux-form';
 import { combineReducers } from 'redux';
 import Immutable from 'immutable';
-import assert from 'assert';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES,
@@ -51,16 +50,24 @@ const selectTagStateUpdate = (state, action) => {
 
 const manipulateTagStateUpdate = (state, action) => {
   const index = state.tagList.findIndex(ele => ele[0] === action.tagName);
-  if (index === -1) {
-    assert(action.val === 1);
-    return {
-      tagList: state.tagList.push([action.tagName, 1]),
-    };
-  }
   return {
     tagList: state.tagList.update(
-      index,
+      index === -1 ? state.tagList.size : index,
+      [action.tagName, 0],
       val => [val[0], val[1] + action.val],
+    ),
+  };
+};
+
+const updateFeedUpdatesList = (state, action) => {
+  const index = state.feedUpdatesList.findIndex(ele => ele.id === action.linkId);
+  return {
+    feedUpdatesList: state.feedUpdatesList.update(
+      index === -1 ? state.feedUpdatesList.size : index,
+      () => ({
+        id: action.linkId,
+        value: action.newUpdates,
+      }),
     ),
   };
 };
@@ -137,12 +144,7 @@ function mainData(state = initialStateMainData, action) {
         ),
       });
     case RSS_UPDATES:
-      return Object.assign({}, state, {
-        feedUpdatesList: state.feedUpdatesList.push({
-          id: action.linkId,
-          value: action.newUpdates,
-        }),
-      });
+      return Object.assign({}, state, updateFeedUpdatesList(state, action));
     default:
       return state;
   }
