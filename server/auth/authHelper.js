@@ -19,6 +19,7 @@ const addCookieAndForward = (req, res, token, type, remoteUserId) => {
       visitorId,
       authType: type,
       hint: remoteUserId,
+      createdDate: new Date(),
     });
     res.cookie('vistorToken', visitorId, { maxAge: 31536000000, httpOnly: true, secure: properties.server.jwt.httpsOnly });
   }
@@ -43,6 +44,7 @@ const insertUserIntoDBIfNeeded = (type, remoteUserJson, localUserObj) => {
     source: type,
     sourceId: remoteUserJson.id,
     sourceData: remoteUserJson,
+    createdDate: new Date(),
   });
 };
 
