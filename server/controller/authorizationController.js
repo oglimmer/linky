@@ -45,7 +45,12 @@ class Verification {
           reject('authorization header invalid');
         }
       } else {
-        reject('authorization header not found');
+        const { authToken } = this.req.cookies;
+        if (authToken) {
+          fulfill(authToken);
+        } else {
+          reject('authorization header or cookie not found');
+        }
       }
     });
   }

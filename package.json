@@ -29,6 +29,7 @@
     "express-http-proxy": "^1.0.3",
     "express-winston": "^2.3.0",
     "favicon": "^0.0.2",
+    "fs-extra": "^3.0.1",
     "html-entities": "^1.2.1",
     "immutable": "^3.8.1",
     "ionicons": "^3.0.0",

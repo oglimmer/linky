@@ -23,6 +23,12 @@ const ensureAllTag = (tagsArr) => {
   return tagsArr;
 };
 
+// FAVICON
+const rewriteFavicon = (rec) => {
+  const recToMod = rec;
+  recToMod.faviconUrl = rec.faviconUrl && `https://linky.oglimmer.de/rest/links/${rec.id}/favicon`;
+};
+
 // URL
 const isHtml = (response) => {
   const contentTypeHeader = response.headers['content-type'];
@@ -105,6 +111,7 @@ class CreateLinkProcessor extends BaseProcessor {
     try {
       const { id } = yield linkDao.insert(this.data);
       this.data.id = id;
+      rewriteFavicon(this.data);
       this.res.send(this.data);
       winston.loggers.get('application').debug('Create link id=%s to db: %j', id, this.data);
     } catch (err) {
@@ -157,6 +164,7 @@ class UpdateLinkProcessor extends BaseProcessor {
       yield linkDao.insert(recToWrite);
       /* eslint-disable no-underscore-dangle */
       recToWrite.id = recToWrite._id;
+      rewriteFavicon(recToWrite);
       /* eslint-enable no-underscore-dangle */
       this.res.send(recToWrite);
       winston.loggers.get('application').debug('Update link: %j', recToWrite);
@@ -187,6 +195,7 @@ class GetLinkProcessor extends BaseProcessor {
       const responseArr = rows.map((row) => {
         const { _id, _rev, ...mappedRow } = row.value;
         mappedRow.id = _id;
+        rewriteFavicon(mappedRow);
         return mappedRow;
       });
       this.res.send(responseArr);
