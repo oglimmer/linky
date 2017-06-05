@@ -32,6 +32,40 @@ const deleteUserById = (id, rev) => {
   destroy(id, rev);
 };
 
+const listCompleteUserById = (id) => {
+  view('feedUpdates', 'byUserId', { key: id })
+    .then(resultFU => resultFU.rows)
+    .then(rowsFU => rowsFU.map(r => r.value))
+    .then(rowsFU => rowsFU.forEach((rowFU) => {
+      console.log(`feedUpdate \`${rowFU.data[0]}\``);
+    }));
+  view('links', 'byUserid', { key: id })
+    .then(resultL => resultL.rows)
+    .then(rowsL => rowsL.map(r => r.value))
+    .then(rowsL => rowsL.forEach((rowL) => {
+      console.log(`link \`${rowL.linkUrl}\``);
+    }));
+};
+
+const listSummaryUserById = (id, user) => {
+  let totalUpdates = 0;
+  let totalLinks = 0;
+  Promise.all([
+    view('feedUpdates', 'byUserId', { key: id })
+    .then(resultFU => resultFU.rows)
+    .then((rowsFU) => {
+      totalUpdates = rowsFU.length;
+    }),
+    view('links', 'byUserid', { key: id })
+    .then(resultL => resultL.rows)
+    .then((rowsL) => {
+      totalLinks = rowsL.length;
+    }),
+  ]).then(() => {
+    console.log(`${user}, ${totalLinks}, ${totalUpdates}`);
+  });
+};
+
 const deleteUserByEmail = (email) => {
   userDao.getByEmail(email).then((rowRaw) => {
     if (rowRaw) {
@@ -99,6 +133,34 @@ if (command === 'listusersbysourceid') {
     .then(rows => rows.map(r => r.value))
     .then(rows => rows.forEach((row) => {
       console.log(`${row.source}${row.sourceId}`);
+    }));
+}
+
+if (command === 'listusers') {
+  view('debug', 'allUsers')
+    .then(result => result.rows)
+    .then(rows => rows.forEach((row) => {
+      console.log(`${row.key}     ${row.value}      ${row.id}`);
+    }));
+}
+
+if (command === 'listusersbyid') {
+  if (!param) {
+    console.error('Missing parameter');
+    process.exit(1);
+  }
+  userDao.getById(param).then((rec) => {
+    console.log(rec);
+    listCompleteUserById(param);
+  });
+}
+
+if (command === 'summary') {
+  console.log('USER, TOTAL_LINKS, TOTAL_UPDATES');
+  view('debug', 'allUsers')
+    .then(result => result.rows)
+    .then(rows => rows.forEach((row) => {
+      listSummaryUserById(row.id, `${row.id}:${row.key} (${row.value})`);
     }));
 }
 
