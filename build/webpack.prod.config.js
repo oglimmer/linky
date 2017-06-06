@@ -105,7 +105,7 @@ module.exports = {
         loader: StringReplacePlugin.replace({
           replacements: [
             {
-              pattern: /\/\* CONSTANT_START [\w\d_]* \*\/["'\s\w\d]*\/\* CONSTANT_END \*\//ig,
+              pattern: /\/\* CONSTANT_START [\w\d_]* \*\/["'=.\s\w\d]*\/\* CONSTANT_END \*\//ig,
               replacement: (match) => {
                 const tmp1 = match.substring(match.indexOf('CONSTANT_START') + 14);
                 const tmp2 = tmp1.trim();
@@ -115,6 +115,9 @@ module.exports = {
                 const tmp4 = tmp2.substring(tmp2.indexOf('*/') + 2);
                 const defaultValue = tmp4.substring(0, tmp4.indexOf('/*'));
 
+                if (varName === 'SHOW_USER_PASSWORD_FORM') {
+                  return 'false';
+                }
                 if (varName === 'GIT_COMMIT_HASH') {
                   const hash = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim().substring(0, 7);
                   return `'${hash}'`;

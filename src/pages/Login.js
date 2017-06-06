@@ -18,7 +18,7 @@ const click = (target) => {
   document.location.href = `/auth/${target}`;
 };
 
-const showUserPasswordLogin = /* CONSTANT_START SHOW_USER_PASSWORD_FORM */false/* CONSTANT_END */;
+const showUserPasswordLogin = /* CONSTANT_START SHOW_USER_PASSWORD_FORM */process.env.NODE_ENV === 'development'/* CONSTANT_END */;
 
 const Login = ({ dispatch, history }) => (
   <div className="row">
