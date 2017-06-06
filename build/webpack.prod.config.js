@@ -25,6 +25,7 @@ module.exports = {
     './dynamic-resources/favicon.ico',
     'babel-polyfill',
     './src/index.js',
+    './static-resources/default.png',
   ],
 
   output: {

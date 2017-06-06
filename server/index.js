@@ -67,19 +67,21 @@ if (!debugMode || debugMode !== 'web') {
 }
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, serverDirectory)));
+  const staticFiles = path.join(__dirname, serverDirectory);
+  winston.loggers.get('application').info(`Serving static files from ${staticFiles}`);
+  app.use(express.static(staticFiles));
 }
 
 if (!debugMode || debugMode !== 'rest') {
-  winston.loggers.get('application').info('Serving web endpoints');
-  app.use(express.static(path.join(__dirname, '../static-resources')));
-
   // Set view path
   // set up ejs for templating. You can use whatever
   app.set('views', path.join(__dirname, serverDirectory));
   app.set('view engine', 'ejs');
 
   if (process.env.NODE_ENV === 'development') {
+    const staticFiles = path.join(__dirname, '../static-resources');
+    winston.loggers.get('application').info(`Serving static files from ${staticFiles}`);
+    app.use(express.static(staticFiles));
     /* eslint-disable global-require */
     const config = require('../build/webpack.dev.config');
     /* eslint-enable global-require */

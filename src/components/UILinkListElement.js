@@ -6,7 +6,7 @@ import { Button, ListGroupItem } from 'react-bootstrap';
 const UILinkListElement =
   ({ id, pageTitle, onUpdateLink, onClickLink, faviconUrl, feedUpdates, hasRssUrl }) => (
     <ListGroupItem onClick={() => onClickLink(id)} href={`/leave?target=${id}`} target="_blank">
-      <img width="16" src={faviconUrl || '/images/default.png'} alt="favicon" />
+      <img width="16" src={faviconUrl || '/default.png'} alt="favicon" />
       {' '}
       {pageTitle}
       {' '}
