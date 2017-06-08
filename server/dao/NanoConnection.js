@@ -11,8 +11,17 @@ const config = {
   url,
   requestDefaults: {
     rejectUnauthorized: dbProps.rejectUnauthorized,
+    headers: {
+    },
   },
 };
+
+const username = dbProps.user;
+if (username) {
+  const password = dbProps.password;
+  const auth = `Basic ${new Buffer(`${username}:${password}`).toString('base64')}`;
+  config.requestDefaults.headers.Authorization = auth;
+}
 
 winston.loggers.get('application').debug('DB config is %j', config);
 
