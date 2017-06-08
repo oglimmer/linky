@@ -1,13 +1,11 @@
 
-import nano from 'nano';
 import { Promise } from 'bluebird';
 
 import BaseDataAccessObject from './BaseDataAccessObject';
-import properties from '../util/linkyproperties';
 
-const linkyDb = nano(`${properties.server.db.protocol}://${properties.server.db.host}:${properties.server.db.port}/${properties.server.db.name}`);
+import linkyDb from './NanoConnection';
+
 const view = Promise.promisify(linkyDb.view);
-
 
 class LinkDao extends BaseDataAccessObject {
 

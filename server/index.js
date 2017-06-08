@@ -4,6 +4,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import responseTime from 'response-time';
 
 import path from 'path';
 
@@ -37,9 +38,17 @@ const winston = winstonConf.fromFileSync(logConfig);
 
 const app = express();
 
+app.use(responseTime());
 app.use(bodyParser.json());
 app.use(compression());
 app.use(cookieParser());
+
+app.use(responseTime((req, res, time) => {
+  if (req.method === 'HEAD') {
+    return;
+  }
+  winston.loggers.get('application').debug('Request %s for %s took %d millis', req.method, req.url, Math.round(time));
+}));
 
 app.use(expressWinston.logger({
   winstonInstance: winston.loggers.get('http'),
