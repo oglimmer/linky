@@ -1,48 +1,42 @@
-import winston from 'winston';
+// import winston from 'winston';
+import bluebird from 'bluebird';
 import JwtUtil from '../util/JwtUtil';
 import linkDao from '../dao/linkDao';
 import feedUpdatesDao from '../dao/feedUpdatesDao';
-
-const updateLinkAndForward = (loadedLinkObj, claim, res) => {
-  if (loadedLinkObj.userid !== claim.userid) {
-    throw Error('Failed to verify user on referenced link');
-  }
-  const updatedLink = loadedLinkObj;
-  const lastCalled = new Date();
-  updatedLink.callCounter += 1;
-  updatedLink.lastCalled = lastCalled;
-  // MIGRATION CODE
-  if (!updatedLink.createdDate) {
-    updatedLink.createdDate = lastCalled;
-  }
-  return linkDao.insert(updatedLink).then(() => res.redirect(loadedLinkObj.linkUrl));
-};
-
-const loadAndUpdateLinkAndForward = (claim, linkId, res) => linkDao.getById(linkId)
-  .then(loadedLinkObj => updateLinkAndForward(loadedLinkObj, claim, res));
 
 const leave = (req, res) => {
   if (req.cookies.authToken) {
     const { target } = req.query;
     const { authToken } = req.cookies;
-    JwtUtil.verify(authToken)
-      .then(claim => loadAndUpdateLinkAndForward(claim, target, res))
-      .catch((e) => {
-        winston.loggers.get('application').error(e);
-      });
-    feedUpdatesDao.getByLinkId(target).then((feedUpdatesResult) => {
-      if (feedUpdatesResult) {
-        const feedUpdatesRec = feedUpdatesResult.value;
-        if (feedUpdatesRec.latestData) {
-          feedUpdatesRec.data = feedUpdatesRec.latestData;
-          feedUpdatesRec.latestData = null;
-          feedUpdatesRec.lastUpdated = new Date();
-          feedUpdatesDao.insert(feedUpdatesRec);
-        }
+
+    bluebird.coroutine(function* exec() {
+      const claim = yield JwtUtil.verify(authToken);
+      const loadedLinkObj = yield linkDao.getById(target);
+      if (loadedLinkObj.userid !== claim.userid) {
+        throw Error('Failed to verify user on referenced link');
       }
-      return null;
-    }).catch((e) => {
-      winston.loggers.get('application').error(e);
+      res.redirect(loadedLinkObj.linkUrl);
+
+      setTimeout(() => {
+        const updatedLink = loadedLinkObj;
+        updatedLink.callCounter += 1;
+        updatedLink.lastCalled = new Date();
+        linkDao.insert(updatedLink);
+      }, 0);
+      setTimeout(() => {
+        bluebird.coroutine(function* updateFeedUpdates() {
+          const feedUpdatesResult = yield feedUpdatesDao.getByLinkId(target);
+          if (feedUpdatesResult) {
+            const feedUpdatesRec = feedUpdatesResult.value;
+            if (feedUpdatesRec.latestData) {
+              feedUpdatesRec.data = feedUpdatesRec.latestData;
+              feedUpdatesRec.latestData = null;
+              feedUpdatesRec.lastUpdated = new Date();
+              feedUpdatesDao.insert(feedUpdatesRec);
+            }
+          }
+        });
+      }, 0);
     });
   }
 };
