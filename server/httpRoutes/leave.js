@@ -35,9 +35,9 @@ const leave = (req, res) => {
               feedUpdatesDao.insert(feedUpdatesRec);
             }
           }
-        });
+        }).bind(this)();
       }, 0);
-    });
+    }).bind(this)();
   }
 };
 
