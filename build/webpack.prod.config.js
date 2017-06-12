@@ -9,6 +9,11 @@ const GitRevisionPlugin = require('git-revision-webpack-plugin');
 const StringReplacePlugin = require('string-replace-webpack-plugin');
 const execSync = require('child_process').execSync;
 
+const serverPropsLoader = require('../server/util/serverPropsLoader');
+const BuildInfo = require('../src/util/BuildInfo');
+
+serverPropsLoader(BuildInfo);
+
 console.log('Using webpack.prod.config.js');
 // https://github.com/webpack/webpack/issues/2537
 process.env.NODE_ENV = 'production';
@@ -119,11 +124,6 @@ module.exports = {
                 if (varName === 'SHOW_USER_PASSWORD_FORM') {
                   return 'false';
                 }
-                if (varName === 'IMPRESSUM') {
-                  if (fs.existsSync('/etc/linky-impressum.txt')) {
-                    return `'${fs.readFileSync('/etc/linky-impressum.txt')}'`;
-                  }
-                }
                 if (varName === 'GIT_COMMIT_HASH') {
                   const hash = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim().substring(0, 7);
                   return `'${hash}'`;
@@ -135,6 +135,10 @@ module.exports = {
                 if (varName === 'BUILDDATE') {
                   const now = new Date();
                   return `'${now}'`;
+                }
+                if (varName === 'SERVER_PROPS_LOADER') {
+                  const name = defaultValue.trim().substr(1, defaultValue.length - 2);
+                  return `'${BuildInfo[name]}'`;
                 }
                 return defaultValue;
               },

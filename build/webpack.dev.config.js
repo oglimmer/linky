@@ -4,6 +4,8 @@ const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const StringReplacePlugin = require('string-replace-webpack-plugin');
 
+const BuildInfo = require('../src/util/BuildInfo');
+
 console.log('Using webpack.dev.config.js');
 
 module.exports = {
@@ -86,6 +88,11 @@ module.exports = {
 
                 if (varName === 'SHOW_USER_PASSWORD_FORM') {
                   return 'true';
+                }
+
+                if (varName === 'SERVER_PROPS_LOADER') {
+                  const name = defaultValue.trim().substr(1, defaultValue.length - 2);
+                  return `'${BuildInfo[name]}'`;
                 }
 
                 console.log(`Failed to replace source code constant ${varName} using default ${defaultValue}`);

@@ -32,6 +32,11 @@ import properties from './util/linkyproperties';
 
 import Routing from '../src/routes/Routing';
 
+import serverPropsLoader from './util/serverPropsLoader';
+import BuildInfo from '../src/util/BuildInfo';
+
+serverPropsLoader(BuildInfo);
+
 const logConfig = path.resolve(__dirname, properties.server.log.path);
 console.log(`Using logConfig from ${logConfig}`);
 const winston = winstonConf.fromFileSync(logConfig);
