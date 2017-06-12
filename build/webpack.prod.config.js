@@ -1,5 +1,6 @@
 
 const path = require('path');
+const fs = require('fs');
 const webpack = require('webpack');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
@@ -117,6 +118,11 @@ module.exports = {
 
                 if (varName === 'SHOW_USER_PASSWORD_FORM') {
                   return 'false';
+                }
+                if (varName === 'IMPRESSUM') {
+                  if (fs.existsSync('/etc/linky-impressum.txt')) {
+                    return `'${fs.readFileSync('/etc/linky-impressum.txt')}'`;
+                  }
                 }
                 if (varName === 'GIT_COMMIT_HASH') {
                   const hash = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim().substring(0, 7);

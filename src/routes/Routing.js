@@ -8,6 +8,7 @@ import { Route, Redirect } from 'react-router-dom';
 import Layout from '../pages/Layout';
 import Login from '../pages/Login';
 import PortalPage from '../pages/PortalPage';
+import Impressum from '../pages/Impressum';
 
 const isAuth = (store) => {
   const { auth } = store.getState();
@@ -59,6 +60,7 @@ const Routing = ({ store }) => (
       path="/portalPage"
       component={PortalPage}
     />
+    <Route exact path="/impressum" component={Impressum} />
   </Layout>
 );
 Routing.propTypes = {

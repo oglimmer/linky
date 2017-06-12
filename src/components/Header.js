@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 import LogoutButton from './LogoutButton';
 import ToggleAddLinkMenuButton from './ToggleAddLinkMenuButton';
@@ -9,7 +10,7 @@ const Header = () => (
   <Navbar collapseOnSelect>
     <Navbar.Header>
       <Navbar.Brand>
-        <a href="#top">Linky</a>
+        <Link to="/">Linky</Link>
       </Navbar.Brand>
       <Navbar.Toggle />
     </Navbar.Header>
