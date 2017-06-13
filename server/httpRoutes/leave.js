@@ -1,8 +1,10 @@
-// import winston from 'winston';
+import winston from 'winston';
 import bluebird from 'bluebird';
 import JwtUtil from '../util/JwtUtil';
 import linkDao from '../dao/linkDao';
 import feedUpdatesDao from '../dao/feedUpdatesDao';
+
+/* eslint-disable no-underscore-dangle */
 
 const leave = (req, res) => {
   if (req.cookies.authToken) {
@@ -17,26 +19,31 @@ const leave = (req, res) => {
       }
       res.redirect(loadedLinkObj.linkUrl);
 
-      setTimeout(() => {
-        const updatedLink = loadedLinkObj;
-        updatedLink.callCounter += 1;
-        updatedLink.lastCalled = new Date();
-        linkDao.insert(updatedLink);
-      }, 0);
-      setTimeout(() => {
-        bluebird.coroutine(function* updateFeedUpdates() {
-          const feedUpdatesResult = yield feedUpdatesDao.getByLinkId(target);
-          if (feedUpdatesResult) {
-            const feedUpdatesRec = feedUpdatesResult.value;
-            if (feedUpdatesRec.latestData) {
-              feedUpdatesRec.data = feedUpdatesRec.latestData;
-              feedUpdatesRec.latestData = null;
-              feedUpdatesRec.lastUpdated = new Date();
-              feedUpdatesDao.insert(feedUpdatesRec);
+      bluebird.coroutine(function* updateRecs() {
+        try {
+          const updatedLink = loadedLinkObj;
+          updatedLink.callCounter += 1;
+          updatedLink.lastCalled = new Date();
+          yield linkDao.insert(updatedLink);
+        } catch (err) {
+          winston.loggers.get('application').debug(`Failed to update link.callcounter for ${loadedLinkObj._id}`);
+        }
+
+        const feedUpdatesResult = yield feedUpdatesDao.getByLinkId(target);
+        if (feedUpdatesResult) {
+          const feedUpdatesRec = feedUpdatesResult.value;
+          if (feedUpdatesRec.latestData) {
+            feedUpdatesRec.data = feedUpdatesRec.latestData;
+            feedUpdatesRec.latestData = null;
+            feedUpdatesRec.lastUpdated = new Date();
+            try {
+              yield feedUpdatesDao.insert(feedUpdatesRec);
+            } catch (err) {
+              winston.loggers.get('application').debug(`Failed to update feedUpdates.data for ${feedUpdatesRec._id}`);
             }
           }
-        }).bind(this)();
-      }, 0);
+        }
+      }).bind(this)();
     }).bind(this)();
   }
 };
