@@ -1,13 +1,10 @@
 #!/usr/bin/env node -r babel-register -r babel-polyfill
 // node -r babel-register -r babel-polyfill server/admin-cli.js
 
-import nano from 'nano';
 import { Promise } from 'bluebird';
 
-import properties from './util/linkyproperties';
 import userDao from './dao/userDao';
-
-const linkyDb = nano(`${properties.server.db.protocol}://${properties.server.db.host}:${properties.server.db.port}/${properties.server.db.name}`);
+import linkyDb from './dao/NanoConnection';
 
 const view = Promise.promisify(linkyDb.view);
 const destroy = Promise.promisify(linkyDb.destroy);
@@ -43,7 +40,7 @@ const listCompleteUserById = (id) => {
     .then(resultL => resultL.rows)
     .then(rowsL => rowsL.map(r => r.value))
     .then(rowsL => rowsL.forEach((rowL) => {
-      console.log(`link \`${rowL.linkUrl}\``);
+      console.log(`link \`${rowL.linkUrl}\`, callCounter:${rowL.callCounter}`);
     }));
 };
 
@@ -98,9 +95,9 @@ if (args.length < 3) {
   console.log('deleteuserbyemail EMAIL');
   console.log('deleteuserbysourceid SOURCEID');
   console.log('deleteuserbyid ID|...');
+  console.log('listusersbyid ID');
   console.log('listusersbyemail');
   console.log('listusersbysourceid');
-  console.log('listusersbyid ID');
   console.log('summary');
   process.exit(1);
 }
@@ -144,7 +141,7 @@ if (command === 'listusersbyemail') {
     .then(result => result.rows)
     .then(rows => rows.map(r => r.value))
     .then(rows => rows.forEach((row) => {
-      console.log(row.email);
+      console.log(`${row._id}:${row.email}`);
     }));
 }
 
