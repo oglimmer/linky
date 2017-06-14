@@ -88,7 +88,9 @@ const main = (count) => {
     createdLinks.push(result);
     // total += 1;
   })
-  .catch(() => console.log('Failed to create link'));
+  .catch((err) => {
+    console.log(`Failed to create link: ${err.message}`);
+  });
 
   console.time('create user');
   request.post({
@@ -130,7 +132,7 @@ const main = (count) => {
   .then(() => {
     console.time('create links');
     const ps = [];
-    for (let k = 0; k < 20; k += 1) {
+    for (let k = 0; k < 10; k += 1) {
       ps.push(createLink);
     }
     return pAll(ps, { concurrency: 4 });
@@ -166,11 +168,11 @@ const main = (count) => {
   .then(() => {
     console.time('leaving links');
     const ps = [];
-    for (let k = 0; k < 1; k += 1) {
+    for (let k = 0; k < 10; k += 1) {
       const linkid = createdLinks[parseInt(Math.random() * createdLinks.length, 10)].id;
       ps.push(() => leavingLinks(linkid));
     }
-    return pAll(ps, { concurrency: 4 });
+    return pAll(ps, { concurrency: 4 }).catch(() => Promise.resolve());
   })
   .then(() => console.timeEnd('leaving links'))
   .then(() => main(count + 1))
