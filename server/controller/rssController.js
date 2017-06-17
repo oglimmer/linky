@@ -26,14 +26,14 @@ const getIdForAtom = (e) => {
   return 'no id found';
 };
 
-const getIdForRss2 = (f) => {
-  if (f.guid) {
-    if (typeof f.guid[0] === 'string') {
-      return f.guid[0];
+const getIdForRss2 = (e) => {
+  if (e.guid) {
+    if (typeof e.guid[0] === 'string') {
+      return e.guid[0];
     }
-    return f.guid[0]._;
-  } else if (f.title) {
-    return f.title[0];
+    return e.guid[0]._;
+  } else if (e.title) {
+    return e.title[0];
   }
   console.log('entry without guid or title :/');
   return 'no id found';
@@ -50,20 +50,14 @@ const getIdForRdf = (e) => {
 const createDisplayElement = (e) => {
   const ele = {};
   if (e.link) {
-    if (Array.isArray(e.link)) {
-      ele.link = '';
-      e.link.forEach((link) => {
-        if (typeof link === 'string') {
-          ele.link += link;
-        } else {
-          ele.link += link.$.href;
-        }
-      });
-    } else if (typeof e.link[0] === 'string') {
-      ele.link = e.link[0];
-    } else {
-      ele.link = e.link[0].$.href;
-    }
+    ele.link = '';
+    e.link.forEach((link) => {
+      if (typeof link === 'string') {
+        ele.link += link;
+      } else {
+        ele.link += link.$.href;
+      }
+    });
   } else {
     ele.link = 'no link';
   }
