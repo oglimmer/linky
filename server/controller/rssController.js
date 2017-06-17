@@ -53,7 +53,11 @@ const createDisplayElement = (e) => {
     if (Array.isArray(e.link)) {
       ele.link = '';
       e.link.forEach((link) => {
-        ele.link += link.$.href;
+        if (typeof link === 'string') {
+          ele.link += link;
+        } else {
+          ele.link += link.$.href;
+        }
       });
     } else if (typeof e.link[0] === 'string') {
       ele.link = e.link[0];
@@ -71,6 +75,9 @@ const createDisplayElement = (e) => {
     }
   } else {
     ele.title = ele.link;
+  }
+  if (ele.title.length > 150) {
+    ele.title = `${ele.title.substring(0, 150)}...`;
   }
   return ele;
 };
