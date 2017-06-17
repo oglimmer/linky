@@ -3,8 +3,8 @@ import { combineForms } from 'react-redux-form';
 import { combineReducers } from 'redux';
 import Immutable from 'immutable';
 
-import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK,
-  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES,
+import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DETAILS_ID,
+  SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES, RSS_UPDATES_DETAILS,
   CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG,
   TOGGLE_VISIBILITY } from './actions';
 
@@ -145,6 +145,14 @@ function mainData(state = initialStateMainData, action) {
       });
     case RSS_UPDATES:
       return Object.assign({}, state, updateFeedUpdatesList(state, action));
+    case RSS_UPDATES_DETAILS:
+      return Object.assign({}, state, {
+        feedUpdatesDetails: Immutable.List(action.newDetails),
+      });
+    case RSS_SET_DETAILS_ID:
+      return Object.assign({}, state, {
+        selectedLinkForDetails: action.id,
+      });
     default:
       return state;
   }

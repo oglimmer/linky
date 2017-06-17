@@ -11,81 +11,158 @@ import BaseProcessor from './BaseProcessor';
 
 const parseStringPromise = Promise.promisify(parseString);
 
+// SUPPORTED FEED TYPES:
+// https://en.wikipedia.org/wiki/Atom_(standard)
+// https://en.wikipedia.org/wiki/RSS
+// http://web.resource.org/rss/1.0/spec
+
+const getIdForAtom = (e) => {
+  if (e.id) {
+    return e.id[0];
+  } else if (e.title) {
+    return e.title[0];
+  }
+  console.log('entry without id or title :/');
+  return 'no id found';
+};
+
+const getIdForRss2 = (f) => {
+  if (f.guid) {
+    if (typeof f.guid[0] === 'string') {
+      return f.guid[0];
+    }
+    return f.guid[0]._;
+  } else if (f.title) {
+    return f.title[0];
+  }
+  console.log('entry without guid or title :/');
+  return 'no id found';
+};
+
+const getIdForRdf = (e) => {
+  if (e.title) {
+    return e.title[0];
+  }
+  console.log('entry without title :/');
+  return 'no id found';
+};
+
+const createDisplayElement = (e) => {
+  const ele = {};
+  if (e.link) {
+    if (Array.isArray(e.link)) {
+      ele.link = '';
+      e.link.forEach((link) => {
+        ele.link += link.$.href;
+      });
+    } else if (typeof e.link[0] === 'string') {
+      ele.link = e.link[0];
+    } else {
+      ele.link = e.link[0].$.href;
+    }
+  } else {
+    ele.link = 'no link';
+  }
+  if (e.title) {
+    if (typeof e.title[0] === 'string') {
+      ele.title = e.title[0];
+    } else {
+      ele.title = e.title[0]._;
+    }
+  } else {
+    ele.title = ele.link;
+  }
+  return ele;
+};
+
+const getKeyContent = (content) => {
+  const currentFeedData = [];
+  if (!content) {
+    return 'No content found';
+  } else if (content['rdf:RDF']) {
+    if (!content['rdf:RDF'].item) {
+      return 'No item in RSS found';
+    }
+    content['rdf:RDF'].item.forEach((e) => {
+      currentFeedData.push(getIdForRdf(e));
+    });
+  } else if (content.rss) {
+    if (!content.rss.channel) {
+      return 'No channel in RSS found';
+    }
+    content.rss.channel.forEach((e) => {
+      if (e.item) {
+        e.item.forEach((f) => {
+          currentFeedData.push(getIdForRss2(f));
+        });
+      }
+    });
+  } else if (content.feed) {
+    // const xmlns = content.feed.$;
+    // console.log(`xmlns = ${xmlns}`);
+    if (!content.feed.entry) {
+      winston.loggers.get('application').debug('No entries for %j', content);
+      return 'No entry in RSS found';
+    }
+    content.feed.entry.forEach((e) => {
+      currentFeedData.push(getIdForAtom(e));
+    });
+  } else {
+    winston.loggers.get('application').debug('No valid RSS: %j', content);
+    return 'No valid RSS found';
+  }
+  return currentFeedData;
+};
+
+const getDisplayContent = (content, newIds) => {
+  const currentFeedData = [];
+  if (!content) {
+    return 'No content found';
+  } else if (content['rdf:RDF']) {
+    if (!content['rdf:RDF'].item) {
+      return 'No item in RSS found';
+    }
+    content['rdf:RDF'].item.filter(e => newIds.find(id => id === getIdForRdf(e))).forEach((e) => {
+      currentFeedData.push(createDisplayElement(e));
+    });
+  } else if (content.rss) {
+    if (!content.rss.channel) {
+      return 'No channel in RSS found';
+    }
+    content.rss.channel.forEach((chan) => {
+      if (chan.item) {
+        chan.item.filter(e => newIds.find(id => id === getIdForRss2(e))).forEach((e) => {
+          currentFeedData.push(createDisplayElement(e));
+        });
+      }
+    });
+  } else if (content.feed) {
+    if (!content.feed.entry) {
+      winston.loggers.get('application').debug('No entries for %j', content);
+      return 'No entry in RSS found';
+    }
+    content.feed.entry.filter(e => newIds.find(id => id === getIdForAtom(e))).forEach((e) => {
+      currentFeedData.push(createDisplayElement(e));
+    });
+  } else {
+    winston.loggers.get('application').debug('No valid RSS: %j', content);
+    return 'No valid RSS found';
+  }
+  return currentFeedData;
+};
+
+
 class GetRssUpdatesProcessor extends BaseProcessor {
 
-  constructor(req, res, next) {
+  constructor(req, res, next, includingDisplay) {
     super(req, res, next, true);
+    this.includingDisplay = includingDisplay;
   }
 
   collectBodyParameters() {
     const { linkId } = this.req.params;
     this.data = { linkId };
   }
-
-  /* eslint-disable class-methods-use-this */
-  getKeyContent(content) {
-    const currentFeedData = [];
-    if (!content) {
-      return 'No content found';
-    } else if (content['rdf:RDF']) {
-      if (!content['rdf:RDF'].item) {
-        return 'No item in RSS found';
-      }
-      content['rdf:RDF'].item.forEach((e) => {
-        // console.log(e);
-        if (e.title) {
-          currentFeedData.push(e.title[0]);
-        } else {
-          console.log('entry without title :/');
-        }
-      });
-    } else if (content.rss) {
-      if (!content.rss.channel) {
-        return 'No channel in RSS found';
-      }
-      content.rss.channel.forEach((e) => {
-        if (e.item) {
-          e.item.forEach((f) => {
-            // console.log(f);
-            if (f.guid) {
-              if (typeof f.guid[0] === 'string') {
-                currentFeedData.push(f.guid[0]);
-              } else {
-                currentFeedData.push(f.guid[0]._);
-              }
-            } else if (f.title) {
-              currentFeedData.push(f.title[0]);
-            } else {
-              console.log('entry without guid or title :/');
-            }
-          });
-        }
-      });
-    } else if (content.feed) {
-      // const xmlns = content.feed.$;
-      // console.log(`xmlns = ${xmlns}`);
-      if (!content.feed.entry) {
-        console.log(content);
-        return 'No entry in RSS found';
-      }
-      content.feed.entry.forEach((e) => {
-        if (e.id) {
-          currentFeedData.push(e.id[0]);
-        } else if (e.title) {
-          currentFeedData.push(e.title[0]);
-        } else {
-          console.log('entry without id or title :/');
-        }
-      });
-    } else {
-      console.log(content);
-      return 'No valid RSS found';
-    }
-    // console.log('currentFeedData');
-    // console.log(currentFeedData);
-    return currentFeedData;
-  }
-  /* eslint-enable class-methods-use-this */
 
   * process() {
     try {
@@ -95,7 +172,7 @@ class GetRssUpdatesProcessor extends BaseProcessor {
       } else {
         const contentXmlStr = yield request.get({ uri: rec.rssUrl });
         const content = yield parseStringPromise(contentXmlStr);
-        const currentFeedData = this.getKeyContent(content);
+        const currentFeedData = getKeyContent(content);
         if (typeof currentFeedData === 'string') {
           ResponseUtil.sendErrorResponse500(currentFeedData, this.res);
         } else {
@@ -112,18 +189,19 @@ class GetRssUpdatesProcessor extends BaseProcessor {
           } else {
             feedUpdatesRec = feedUpdatesRec.value;
           }
-          // console.log('feedUpdatesRec');
-          // console.log(feedUpdatesRec);
           const newFeedData = currentFeedData.filter(e => feedUpdatesRec.data.indexOf(e) === -1);
-          // console.log('newFeedData');
-          // console.log(newFeedData);
+          winston.loggers.get('application').debug('RssUpdates for %s = %j', rec.rssUrl, newFeedData);
           if (newFeedData.length > 0) {
             feedUpdatesRec.latestData = currentFeedData;
             feedUpdatesRec.lastUpdated = new Date();
             feedUpdatesDao.insert(feedUpdatesRec);
           }
-          this.res.send({ result: newFeedData.length });
-          winston.loggers.get('application').debug('RssUpdates for %s = %i', rec.rssUrl, newFeedData.length);
+          const response = { result: newFeedData.length };
+          if (this.includingDisplay) {
+            response.display = getDisplayContent(content, newFeedData);
+          }
+          this.res.send(response);
+          winston.loggers.get('application').debug('RssUpdates for %s = %d', rec.rssUrl, newFeedData.length);
         }
       }
     } catch (err) {
@@ -132,15 +210,18 @@ class GetRssUpdatesProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 export default {
 
   getRssUpdatesCollection: function getRssUpdatesCollection(req, res, next) {
-    const glp = new GetRssUpdatesProcessor(req, res, next);
+    const glp = new GetRssUpdatesProcessor(req, res, next, false);
     glp.doProcess();
   },
 
+  getRssUpdatesDetails: function getRssUpdatesDetails(req, res, next) {
+    const glp = new GetRssUpdatesProcessor(req, res, next, true);
+    glp.doProcess();
+  },
 
 };

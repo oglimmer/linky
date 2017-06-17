@@ -20,6 +20,8 @@ export const initialStateMainData = {
   linkList: Immutable.List(),
   tagList: Immutable.List(),
   feedUpdatesList: Immutable.List(),
+  feedUpdatesDetails: Immutable.List(),
+  selectedLinkForDetails: null,
   errorMessage: '',
   sortingByColumn: 'mostUsed',
   selectedTag: 'portal',

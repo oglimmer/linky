@@ -25,6 +25,8 @@ export const EDIT_LINK = 'EDIT_LINK';
 export const DEL_TAG = 'DEL_TAG';
 export const MANIPULATE_TAG = 'MANIPULATE_TAG';
 export const RSS_UPDATES = 'RSS_UPDATES';
+export const RSS_UPDATES_DETAILS = 'RSS_UPDATES_DETAILS';
+export const RSS_SET_DETAILS_ID = 'RSS_SET_DETAILS_ID';
 export const TOGGLE_VISIBILITY = 'TOGGLE_VISIBILITY';
 
 /*
@@ -91,6 +93,14 @@ function setRssUpdates(linkId, newUpdates) {
   return { type: RSS_UPDATES, linkId, newUpdates };
 }
 
+function setRssUpdatesDetails(linkId, newDetails) {
+  return { type: RSS_UPDATES_DETAILS, linkId, newDetails };
+}
+
+function setRssDetailsId(id) {
+  return { type: RSS_SET_DETAILS_ID, id };
+}
+
 export function toggleVisibilityMenuBar(forceShow) {
   return { type: TOGGLE_VISIBILITY, forceShow };
 }
@@ -122,6 +132,23 @@ function loadTags() {
     .then(response => response.json())
     .then(tagList => dispatch(setTags(tagList)))
     .catch(error => console.log(error));
+}
+
+export function fetchRssUpdatesDetails(id) {
+  return (dispatch, getState) => {
+    if (getState().mainData.selectedLinkForDetails === id) {
+      dispatch(setRssDetailsId(null));
+      return null;
+    }
+    return fetch.get(`/rest/links/${id}/rssDetails`, getState().auth.token)
+    .then(response => response.json())
+    .then((json) => {
+      dispatch(setRssUpdates(id, json.result));
+      dispatch(setRssUpdatesDetails(id, json.display));
+      dispatch(setRssDetailsId(id));
+    })
+    .catch(ex => dispatch(setErrorMessage(ex)));
+  };
 }
 
 export function fetchRssUpdates() {

@@ -32,6 +32,7 @@ module.exports = {
     'babel-polyfill',
     './src/index.js',
     './static-resources/default.png',
+    './static-resources/sub.png',
   ],
 
   output: {
