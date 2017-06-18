@@ -8,6 +8,7 @@ import { Route, Redirect } from 'react-router-dom';
 import Layout from '../pages/Layout';
 import Login from '../pages/Login';
 import PortalPage from '../pages/PortalPage';
+import TagPage from '../pages/TagPage';
 import Impressum from '../pages/Impressum';
 
 const isAuth = (store) => {
@@ -48,17 +49,24 @@ const Routing = ({ store }) => (
     <CategorizedRoute
       store={store}
       authReq={false}
-      authFailTarget="/portalPage"
+      authFailTarget="/links/portal"
       exact
       path="/"
       component={Login}
     />
     <CategorizedRoute
       store={store}
+      authFailTarget="/"
+      exact
+      path="/links/:tag"
+      component={PortalPage}
+    />
+    <CategorizedRoute
+      store={store}
       exact
       authFailTarget="/"
-      path="/portalPage"
-      component={PortalPage}
+      path="/tags"
+      component={TagPage}
     />
     <Route exact path="/impressum" component={Impressum} />
   </Layout>

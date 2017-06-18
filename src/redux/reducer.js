@@ -2,6 +2,7 @@
 import { combineForms } from 'react-redux-form';
 import { combineReducers } from 'redux';
 import Immutable from 'immutable';
+import { routerReducer } from 'react-router-redux';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DETAILS_ID,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES, RSS_UPDATES_DETAILS,
@@ -164,4 +165,5 @@ export default combineReducers({
   menuBar,
   login: combineForms(loginForm, 'login'),
   addUrl: combineForms(addUrlForm, 'addUrl'),
+  router: routerReducer,
 });

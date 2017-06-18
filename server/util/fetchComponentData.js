@@ -11,7 +11,7 @@ export default (dispatch, req, res) => {
     winston.loggers.get('application').debug(`authToken = ${authToken}`);
     return jwt.verify(authToken)
       .then(() => dispatch(setAuthToken(authToken)))
-      .then(() => dispatch(initialLoad(authToken)))
+      .then(() => dispatch(initialLoad(req.url.substring(req.url.lastIndexOf('/') + 1))))
       .catch((e) => {
         if (e.name !== 'TokenExpiredError' && e.name !== 'JsonWebTokenError') {
           winston.loggers.get('application').error(e);

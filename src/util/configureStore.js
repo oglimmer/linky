@@ -1,15 +1,16 @@
 
 import thunkMiddleware from 'redux-thunk';
-import { createLogger } from 'redux-logger';
+// import { createLogger } from 'redux-logger';
 
 import { createStore, applyMiddleware } from 'redux';
 
 import combineReducers from '../redux/reducer';
+import history from '../util/history';
 
-const middlewares = [thunkMiddleware];
+const middlewares = [thunkMiddleware, history.historyMiddleware];
 
-const logger = createLogger();
-middlewares.push(logger);
+// const logger = createLogger();
+// middlewares.push(logger);
 
 function configureStore(state) {
   const store = createStore(combineReducers, state, applyMiddleware(...middlewares));

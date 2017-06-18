@@ -95,7 +95,7 @@ if (!debugMode || debugMode !== 'rest') {
   if (process.env.NODE_ENV === 'development') {
     const staticFiles = path.join(__dirname, '../static-resources');
     winston.loggers.get('application').info(`Serving static files from ${staticFiles}`);
-    app.use(express.static(staticFiles));
+    app.use(express.static(staticFiles, { maxAge: '1d' }));
     /* eslint-disable global-require */
     const config = require('../build/webpack.dev.config');
     /* eslint-enable global-require */

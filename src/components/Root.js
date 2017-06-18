@@ -3,12 +3,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { Provider } from 'react-redux';
+import { ConnectedRouter } from 'react-router-redux';
 
-import { BrowserRouter } from 'react-router-dom';
 import { startRssUpdates } from '../redux/actions';
 
 import Routing from '../routes/Routing';
 
+import history from '../util/history';
 
 class Root extends React.Component {
 
@@ -24,9 +25,9 @@ class Root extends React.Component {
   render() {
     return (
       <Provider store={this.store}>
-        <BrowserRouter>
+        <ConnectedRouter history={history.history}>
           <Routing store={this.store} />
-        </BrowserRouter>
+        </ConnectedRouter>
       </Provider>
     );
   }

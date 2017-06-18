@@ -3,8 +3,8 @@ import React from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
+import NavItem from './NavItem';
 import LogoutButton from './LogoutButton';
-import ToggleAddLinkMenuButton from './ToggleAddLinkMenuButton';
 
 const Header = () => (
   <Navbar collapseOnSelect>
@@ -16,7 +16,7 @@ const Header = () => (
     </Navbar.Header>
     <Navbar.Collapse>
       <Nav>
-        <ToggleAddLinkMenuButton />
+        <NavItem to="/tags">Tags</NavItem>
       </Nav>
       <Nav pullRight>
         <LogoutButton />

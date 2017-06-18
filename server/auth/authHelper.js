@@ -24,7 +24,7 @@ const addCookieAndForward = (req, res, token, type, remoteUserId) => {
     res.cookie('vistorToken', visitorId, { maxAge: 31536000000, httpOnly: true, secure: properties.server.jwt.httpsOnly });
   }
   res.cookie('authToken', token, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
-  res.redirect('/portalPage');
+  res.redirect('/links/portal');
   return returnPromise;
 };
 

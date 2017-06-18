@@ -61,7 +61,7 @@ const Login = ({ dispatch, history }) => (
           model="login"
           onSubmit={(formData) => {
             dispatch(checkAuth(formData.email, formData.password)).then(() => {
-              history.replace('/portalPage');
+              history.replace('/links/portal');
             }, () => {});
           }}
         >

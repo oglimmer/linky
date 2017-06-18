@@ -12,12 +12,14 @@ const TagList = ({ tagList, onClick, selectedTag }) => (
   <div style={divStyle}>
     { tagList.map(tag => (
       <span key={Math.random()}>
-        <textbox
+        <span
+          role="link"
+          tabIndex="0"
           onClick={() => onClick(tag[0])}
           className={tag[0] === selectedTag ? 'label label-primary' : 'label label-default'}
         >
           {tag[0]} ({tag[1]})
-        </textbox>
+        </span>
         {' '}
       </span>),
     ) }

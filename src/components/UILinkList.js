@@ -44,7 +44,7 @@ const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, onClickLink, feed
         key={link.id}
         id={link.id}
         linkUrl={`${link.linkUrl} [${getSortingInfo(sortingByColumn, link)}]`}
-        pageTitle={`${link.pageTitle} [${getSortingInfo(sortingByColumn, link)}]`}
+        pageTitle={`${link.pageTitle}`}
         onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '), link.rssUrl, link.pageTitle, link.notes)}
         onClickLink={onClickLink}
         faviconUrl={link.faviconUrl}

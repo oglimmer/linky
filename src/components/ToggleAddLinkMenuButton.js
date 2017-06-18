@@ -1,7 +1,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { NavItem } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
 import { toggleVisibilityMenuBar } from '../redux/actions';
@@ -11,10 +11,7 @@ const ToggleAddLinkMenuButton = ({ onClick, isAddEnabled, authToken }) => {
     return null;
   }
   return (
-    <NavItem
-      eventKey={1}
-      onClick={onClick}
-    >{isAddEnabled ? 'Hide `Add Link`' : 'Add Link'}</NavItem>
+    <Button onClick={onClick}>{isAddEnabled ? 'Hide `Add Link`' : 'Add Link'}</Button>
   );
 };
 

@@ -10,7 +10,7 @@ console.log('Using webpack.dev.config.js');
 
 module.exports = {
 
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'source-map',
 
   entry: [
     './dynamic-resources/css/bootstrap-theme.min.css',

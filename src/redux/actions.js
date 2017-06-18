@@ -1,6 +1,6 @@
 
 import { actions } from 'react-redux-form';
-
+import { push } from 'react-router-redux';
 import assert from 'assert';
 
 import fetch from '../util/fetch';
@@ -41,7 +41,7 @@ export function changeSortingLink(byColumn) {
   return { type: CHANGE_SORTING_LINKS, byColumn };
 }
 
-function selectTag(tag) {
+export function selectTag(tag) {
   return { type: SELECT_TAG, tag };
 }
 
@@ -195,8 +195,8 @@ function fetchLinks(tag) {
 
 function changeTag(tag) {
   return (dispatch) => {
-    dispatch(selectTag(tag));
     dispatch(fetchLinks(tag));
+    dispatch(push(tag));
   };
 }
 
@@ -289,9 +289,9 @@ export function fetchLinksAndSelectTag(tag) {
   return dispatch => dispatch(changeTag(tag));
 }
 
-export function initialLoad() {
+export function initialLoad(tag) {
   return dispatch => Promise.all([
-    dispatch(fetchLinks('portal', dispatch)),
+    dispatch(fetchLinks(tag, dispatch)),
     dispatch(loadTags()),
   ]);
 }
@@ -323,7 +323,7 @@ export function checkAuth(email, password) {
       if (responseCode === 200) {
         return Promise.all([
           dispatch(setAuthToken(json.token)),
-          dispatch(initialLoad()),
+          dispatch(initialLoad('portal')),
         ]).then(() => dispatch(startRssUpdates()));
       }
       throw json.message;
