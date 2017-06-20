@@ -26,7 +26,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, '../static-resources/'),
     filename: 'js/bundle-[name].js',
-    publicPath: '/',
+    publicPath: '/static/',
   },
 
   plugins: [

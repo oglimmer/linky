@@ -59,7 +59,6 @@ app.use(expressWinston.logger({
   winstonInstance: winston.loggers.get('http'),
 }));
 
-const serverDirectory = process.env.NODE_ENV === 'production' ? '../dist' : '../dynamic-resources';
 const debugMode = process.env.DEBUG_MODE;
 
 // load-balancer health check
@@ -81,7 +80,7 @@ if (!debugMode || debugMode !== 'web') {
 }
 
 if (process.env.NODE_ENV === 'production') {
-  const staticFiles = path.join(__dirname, serverDirectory);
+  const staticFiles = path.join(__dirname, '../dist');
   winston.loggers.get('application').info(`Serving static files from ${staticFiles}`);
   app.use(express.static(staticFiles));
 }
@@ -89,13 +88,16 @@ if (process.env.NODE_ENV === 'production') {
 if (!debugMode || debugMode !== 'rest') {
   // Set view path
   // set up ejs for templating. You can use whatever
-  app.set('views', path.join(__dirname, serverDirectory));
+  const ejsPath = process.env.NODE_ENV === 'production' ? '../dist/static' : '../dynamic-resources';
+  const pathViews = path.join(__dirname, ejsPath);
+  winston.loggers.get('application').info(`Serving ejs files from ${pathViews}`);
+  app.set('views', pathViews);
   app.set('view engine', 'ejs');
 
   if (process.env.NODE_ENV === 'development') {
     const staticFiles = path.join(__dirname, '../static-resources');
     winston.loggers.get('application').info(`Serving static files from ${staticFiles}`);
-    app.use(express.static(staticFiles, { maxAge: '1d' }));
+    app.use('/static', express.static(staticFiles, { maxAge: '1d' }));
     /* eslint-disable global-require */
     const config = require('../build/webpack.dev.config');
     /* eslint-enable global-require */

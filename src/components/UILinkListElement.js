@@ -16,7 +16,7 @@ const UILinkListElement = ({ id, pageTitle, onUpdateLink, onClickLink, faviconUr
   feedUpdates, hasRssUrl, onShowRssDetails, rssDetails, selectedLinkForDetails }) => (
     <span>
       <ListGroupItem onClick={() => onClickLink(id)} href={`/leave?target=${id}`} target="_blank">
-        <img width="16" src={faviconUrl || '/default.png'} alt="favicon" />
+        <img width="16" src={faviconUrl || '/static/default.png'} alt="favicon" />
         {' '}
         {pageTitle}
         {' '}
@@ -38,7 +38,7 @@ const UILinkListElement = ({ id, pageTitle, onUpdateLink, onClickLink, faviconUr
       </ListGroupItem>
       { id === selectedLinkForDetails ? rssDetails.map(e => (
         <ListGroupItem key={Math.random()} href={e.link} target="_blank">
-          <img width="16" src="sub.png" alt="sub item" />
+          <img width="16" src="/static/sub.png" alt="sub item" />
           {e.title}
         </ListGroupItem>
       )) : '' }

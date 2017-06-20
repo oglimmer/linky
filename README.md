@@ -106,3 +106,19 @@ A file path to a json formatted property file. Is this parameter undefined the s
 ## LINKY_SERVER
 
 Special parameter only used in integration tests. Defines the protocol, server and port for the linky server. Default: http://localhost:8080
+
+# URL MAP
+
+- HEAD: *, delivers just 200:
+- NODE
+  - /auth
+  - /authback
+  - /leave
+  - /rest/*
+- STATIC_FILES
+  - /static/*
+- everthing else delivers the server-side pre-rendered html page from NODE
+  - /
+  - /links/:tag
+  - /impressum
+  - /tags

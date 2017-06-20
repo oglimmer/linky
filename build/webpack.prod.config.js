@@ -36,9 +36,9 @@ module.exports = {
   ],
 
   output: {
-    path: path.join(__dirname, '../dist/'),
+    path: path.join(__dirname, '../dist/static'),
     filename: 'js/bundle-[name]-[chunkhash].js',
-    publicPath: '/',
+    publicPath: '/static/',
   },
 
   plugins: [
@@ -64,7 +64,7 @@ module.exports = {
       // https://github.com/webpack/webpack/issues/1385
       sourceMap: true,
     }),
-    new ExtractTextPlugin('./css/[name]-[chunkhash].css'),
+    new ExtractTextPlugin('css/[name]-[chunkhash].css'),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
       minChunks: module => module.context && module.context.indexOf('node_modules') !== -1,
