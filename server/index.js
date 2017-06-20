@@ -82,7 +82,7 @@ if (!debugMode || debugMode !== 'web') {
 if (process.env.NODE_ENV === 'production') {
   const staticFiles = path.join(__dirname, '../dist');
   winston.loggers.get('application').info(`Serving static files from ${staticFiles}`);
-  app.use(express.static(staticFiles));
+  app.use(express.static(staticFiles, { maxAge: '1d' }));
 }
 
 if (!debugMode || debugMode !== 'rest') {
