@@ -57,7 +57,7 @@ const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, isAddEnabled }) 
           cols={11}
         />
       </FormGroup>
-      <FormGroup controlId="row4controls">
+      <div>
         <Button type="submit">{ linkId === null ? 'Create' : 'Update' } Link</Button>
 
         { linkId !== null ?
@@ -72,7 +72,7 @@ const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, isAddEnabled }) 
           </span> : '' }
         {' '}
         <Button onClick={onClose} type="button">Cancel</Button>
-      </FormGroup>
+      </div>
 
     </Form>
   );
