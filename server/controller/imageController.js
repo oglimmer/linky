@@ -27,6 +27,7 @@ class GetFaviconProcessor extends BaseProcessor {
         yield fs.stat(file);
         const contentType = fs.readFileSync(`${file}.contentType`);
         this.res.append('content-type', contentType);
+        this.res.append('Cache-Control', 'max-age=31536000');
         const inputStream = fs.createReadStream(file);
         inputStream.on('open', () => {
           inputStream.pipe(this.res);
@@ -42,6 +43,7 @@ class GetFaviconProcessor extends BaseProcessor {
           .on('response', (response) => {
             const contentType = response.headers['content-type'];
             this.res.append('content-type', contentType);
+            this.res.append('Cache-Control', 'max-age=31536000');
             fs.writeFileSync(`${file}.contentType`, contentType);
           })
           .on('data', (data) => {
