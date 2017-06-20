@@ -102,7 +102,7 @@ function setRssDetailsId(id) {
 }
 
 export function toggleVisibilityMenuBar(forceShow) {
-  return { type: TOGGLE_VISIBILITY, forceShow };
+  return { type: TOGGLE_VISIBILITY, forceShow: forceShow || false };
 }
 
 // ---------------------------

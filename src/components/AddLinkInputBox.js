@@ -5,7 +5,7 @@ import { Button, FormGroup } from 'react-bootstrap';
 import { Form } from 'react-redux-form';
 import { connect } from 'react-redux';
 
-import { persistLink, delLink, resetAddLinkFields } from '../redux/actions';
+import { persistLink, delLink, resetAddLinkFields, toggleVisibilityMenuBar } from '../redux/actions';
 import UIInputElement from '../components/UIInputElement';
 
 const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, isAddEnabled }) => {
@@ -69,9 +69,9 @@ const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, isAddEnabled }) 
             >
               Del
             </Button>
-            {' '}
-            <Button onClick={onClose} type="button">Done</Button>
           </span> : '' }
+        {' '}
+        <Button onClick={onClose} type="button">Cancel</Button>
       </FormGroup>
 
     </Form>
@@ -106,7 +106,10 @@ const mapDispatchToProps = dispatch => ({
       dispatch(resetAddLinkFields());
     }
   },
-  onClose: () => dispatch(resetAddLinkFields()),
+  onClose: () => {
+    dispatch(toggleVisibilityMenuBar());
+    dispatch(resetAddLinkFields());
+  },
   onDelete: (linkId) => {
     dispatch(delLink(linkId));
     dispatch(resetAddLinkFields());

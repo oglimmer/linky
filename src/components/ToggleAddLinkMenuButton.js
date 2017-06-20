@@ -7,11 +7,11 @@ import { connect } from 'react-redux';
 import { toggleVisibilityMenuBar } from '../redux/actions';
 
 const ToggleAddLinkMenuButton = ({ onClick, isAddEnabled, authToken }) => {
-  if (!authToken) {
+  if (!authToken || isAddEnabled) {
     return null;
   }
   return (
-    <Button onClick={onClick}>{isAddEnabled ? 'Hide `Add Link`' : 'Add Link'}</Button>
+    <Button onClick={onClick}>Add Link</Button>
   );
 };
 
