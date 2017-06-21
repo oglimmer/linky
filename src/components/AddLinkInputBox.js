@@ -104,6 +104,7 @@ const mapDispatchToProps = dispatch => ({
         persistLink(linkId, formData.url.trim(), formData.tags.trim(),
           formData.rssUrl.trim(), formData.pageTitle.trim(), formData.notes.trim()));
       dispatch(resetAddLinkFields());
+      dispatch(toggleVisibilityMenuBar());
     }
   },
   onClose: () => {
@@ -113,6 +114,7 @@ const mapDispatchToProps = dispatch => ({
   onDelete: (linkId) => {
     dispatch(delLink(linkId));
     dispatch(resetAddLinkFields());
+    dispatch(toggleVisibilityMenuBar());
   },
 });
 
