@@ -52,6 +52,9 @@ const Login = ({ dispatch, history }) => (
         <button className="btn btn-block btn-yahoo" onClick={() => click('yahoo')}>
           <i className="ion-logo-yahoo" /> Sign in with Yahoo
         </button>
+        <button className="btn btn-block btn-reddit" onClick={() => click('reddit')}>
+          <i className="ion-logo-reddit" /> Sign in with Reddit
+        </button>
       </div>
     </div>
     { showUserPasswordLogin ? (<div className="center-form panel">

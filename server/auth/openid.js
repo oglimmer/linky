@@ -50,16 +50,18 @@ const getIdToken = (code, type) => {
         Accept: 'application/json',
         'User-Agent': 'linky.oglimmer.de',
       },
-    }))
-    .then(jsonBody => jsonBody.id_token);
+    }));
 };
 
-const decodeIdToken = (type, idToken) =>
-  JwtUtil.verifyOpenId(idToken, properties.server.auth[type].openIdConfigUri)
+const decodeIdToken = (type, tokenResponse) =>
+  JwtUtil.verifyOpenId(tokenResponse.id_token, properties.server.auth[type].openIdConfigUri)
     .then((claim) => {
       const copyOfClaim = claim;
       copyOfClaim.id = copyOfClaim.sub;
-      return copyOfClaim;
+      return {
+        user: copyOfClaim,
+        tokenResponse,
+      };
     });
 
 const back = (req, res) => {
@@ -73,8 +75,8 @@ const back = (req, res) => {
     assert(state, 'Failed to get state from path');
     authHelper.verifyState(req, res, state)
       .then(() => getIdToken(code, type))
-      .then(idToken => decodeIdToken(type, idToken))
-      .then(remoteUserJson => authHelper.forward(req, res, type, remoteUserJson))
+      .then(tokenResponse => decodeIdToken(type, tokenResponse))
+      .then(data => authHelper.forward(req, res, type, data.user, data.tokenResponse))
       .catch((error) => {
         winston.loggers.get('application').error('Failed to oauth2Back');
         winston.loggers.get('application').error(error);

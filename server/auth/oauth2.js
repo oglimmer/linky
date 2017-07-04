@@ -1,6 +1,5 @@
 
 import request from 'request-promise';
-import crypto from 'crypto';
 import assert from 'assert';
 import winston from 'winston';
 import randomstring from 'randomstring';
@@ -21,9 +20,10 @@ const init = (req, res) => {
   const redirectUri = `redirect_uri=${encodeURIComponent(`${redirectTarget}/${type}`)}`;
   const loginHint = hint ? `login_hint=${encodeURIComponent(hint)}` : '';
   const randomToken = randomstring.generate();
+  const duration = type === 'reddit' ? 'duration=permanent' : '';
   JwtUtil.sign({ randomToken }, '15m').then((claim) => {
     const state = `state=${encodeURIComponent(claim)}`;
-    const url = `${properties.server.auth[type].authUri}?${responseType}&${clientId}&${scope}&${redirectUri}&${state}&${loginHint}`;
+    const url = `${properties.server.auth[type].authUri}?${responseType}&${clientId}&${scope}&${redirectUri}&${state}&${loginHint}&${duration}`;
     winston.loggers.get('application').debug(`redirect to ${url}`);
     res.cookie('stateClaim', claim, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
     res.redirect(url);
@@ -38,43 +38,18 @@ const getAuthToken = (code, type) => {
     grant_type: 'authorization_code',
     redirect_uri: `${redirectTarget}/${type}`,
   };
+  const headers = {
+    Accept: 'application/json',
+    'User-Agent': 'linky.oglimmer.de',
+  };
+  if (type === 'reddit') {
+    headers.authorization = `Basic ${new Buffer(`${properties.server.auth[type].clientId}:${properties.server.auth[type].clientSecret}`).toString('base64')}`;
+  }
   return request.post({ url: properties.server.auth[type].tokenUri,
     json: true,
     form,
-    headers: {
-      Accept: 'application/json',
-      'User-Agent': 'linky.oglimmer.de',
-    },
-  })
-  .then(jsonBody => jsonBody.access_token);
-};
-
-const addIdIfMissing = (remoteUserJson, type) => {
-  const idKeyName = properties.server.auth[type].userIdKey;
-  if (!idKeyName) {
-    return remoteUserJson;
-  }
-  const fixedJson = remoteUserJson;
-  fixedJson.id = fixedJson[idKeyName];
-  return fixedJson;
-};
-
-const getRemoteUserJson = (type, accessToken) => {
-  let userUri = properties.server.auth[type].userUri;
-  if (type === 'facebook') {
-    const hmac = crypto.createHmac('sha256', properties.server.auth[type].clientSecret);
-    const hash = hmac.update(accessToken).digest('hex');
-    userUri += `?appsecret_proof=${hash}`;
-  }
-  return request.get({
-    url: userUri,
-    json: true,
-    headers: {
-      authorization: `Bearer ${accessToken}`,
-      Accept: 'application/json',
-      'User-Agent': 'linky.oglimmer.de',
-    },
-  }).then(bodyUser => addIdIfMissing(bodyUser, type));
+    headers,
+  });
 };
 
 const back = (req, res) => {
@@ -88,8 +63,8 @@ const back = (req, res) => {
     assert(state, 'Failed to get state from path');
     authHelper.verifyState(req, res, state)
       .then(() => getAuthToken(code, type))
-      .then(accessToken => getRemoteUserJson(type, accessToken))
-      .then(remoteUserJson => authHelper.forward(req, res, type, remoteUserJson))
+      .then(authTokenResponse => authHelper.getRemoteUserJson(type, authTokenResponse))
+      .then(data => authHelper.forward(req, res, type, data.user, data.authTokenResponse))
       .catch((error) => {
         winston.loggers.get('application').error('Failed to oauth2Back');
         winston.loggers.get('application').error(error);

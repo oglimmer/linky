@@ -249,3 +249,14 @@
   color: #fff;
   background-color: #215D83;
 }
+
+.btn-reddit {
+  color: #fff;
+  background-color: #ff4400;
+}
+
+.btn-reddit:hover,
+.btn-reddit:focus {
+  color: #fff;
+  background-color: #ff733f;
+}
