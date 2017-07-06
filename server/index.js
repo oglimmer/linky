@@ -56,8 +56,15 @@ const accessLogStream = rfs('access.log', {
   path: logDirectory,
   compress: 'gzip',
 });
+morgan.token('remote-addr', (req) => {
+  const ffHeaderValue = req.headers['x-forwarded-for'];
+  return ffHeaderValue || req.connection.remoteAddress;
+});
 
-app.use(morgan('combined', { stream: accessLogStream }));
+app.use(morgan('combined', {
+  stream: accessLogStream,
+  skip: req => req.method === 'HEAD',
+}));
 app.use(responseTime());
 app.use(bodyParser.json());
 app.use(compression());
