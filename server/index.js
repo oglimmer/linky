@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import responseTime from 'response-time';
 
 import path from 'path';
+import fs from 'fs';
 
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
@@ -17,8 +18,13 @@ import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 
-import winstonConf from 'winston-config';
+import winston from 'winston';
 import expressWinston from 'express-winston';
+import morgan from 'morgan';
+import rfs from 'rotating-file-stream';
+
+// must be the first relative import
+import './util/LogInit';
 
 import { webpack, webpackDevMiddleware, webpackHotMiddleware, emptyCache, proxy } from './debug-mode';
 
@@ -28,21 +34,30 @@ import combinedReducers from '../src/redux/reducer';
 
 import fetchComponentData from './util/fetchComponentData';
 
-import properties from './util/linkyproperties';
-
 import Routing from '../src/routes/Routing';
 
 import serverPropsLoader from './util/serverPropsLoader';
 import BuildInfo from '../src/util/BuildInfo';
 
-serverPropsLoader(BuildInfo);
+import properties from './util/linkyproperties';
 
-const logConfig = path.resolve(__dirname, properties.server.log.path);
-console.log(`Using logConfig from ${logConfig}`);
-const winston = winstonConf.fromFileSync(logConfig);
+serverPropsLoader(BuildInfo);
 
 const app = express();
 
+const logDirectory = path.resolve(__dirname, properties.server.log.access.targetDir);
+if (!fs.existsSync(logDirectory)) {
+  console.log(`TARGET DIR FOR ACCESS-LOG DOES NOT EXIST!!! ${logDirectory}`);
+} else {
+  console.log(`Using ${logDirectory} for access logs`);
+}
+const accessLogStream = rfs('access.log', {
+  interval: '1d',
+  path: logDirectory,
+  compress: 'gzip',
+});
+
+app.use(morgan('combined', { stream: accessLogStream }));
 app.use(responseTime());
 app.use(bodyParser.json());
 app.use(compression());

@@ -3,6 +3,8 @@ import properties from 'properties';
 import fs from 'fs';
 import path from 'path';
 
+// MUST NOT USE WINSTON!!!
+
 let fileName = process.env.LINKY_PROPERTIES;
 if (!fileName) {
   fileName = path.resolve(__dirname, 'linky_default.properties');
