@@ -51,10 +51,20 @@ if (!fs.existsSync(logDirectory)) {
 } else {
   console.log(`Using ${logDirectory} for access logs`);
 }
-const accessLogStream = rfs('access.log', {
+const accessLogStream = rfs((time, index) => {
+  if (!time) {
+    return 'access.log';
+  }
+  const pad = num => (num > 9 ? '' : '0') + num;
+  const month = `${time.getFullYear()}${pad(time.getMonth() + 1)}`;
+  const day = pad(time.getDate());
+  const hour = pad(time.getHours());
+  const minute = pad(time.getMinutes());
+  return `access-${month}${day}-${hour}${minute}-${pad(index)}.log.gz`;
+}, {
   interval: '1d',
   path: logDirectory,
-  compress: 'gzip',
+  compress: true,
 });
 morgan.token('remote-addr', (req) => {
   const ffHeaderValue = req.headers['x-forwarded-for'];
