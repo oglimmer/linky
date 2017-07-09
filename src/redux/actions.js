@@ -290,10 +290,17 @@ export function fetchLinksAndSelectTag(tag) {
 }
 
 export function initialLoad(tag) {
-  return dispatch => Promise.all([
-    dispatch(fetchLinks(tag, dispatch)),
-    dispatch(loadTags()),
-  ]);
+  return (dispatch, getState) => {
+    // HACK: we assume an empty list means it wasn't loaded yet, while this won't harm
+    // it might not be true and thus an unnecessary action
+    if (getState().mainData.linkList.size === 0) {
+      return Promise.all([
+        dispatch(fetchLinks(tag)),
+        dispatch(loadTags()),
+      ]);
+    }
+    return Promise.resolve();
+  };
 }
 
 export function startRssUpdates() {

@@ -66,7 +66,6 @@ UILinkList.propTypes = {
 const mapStateToProps = state => ({
   linkList: state.mainData.linkList,
   feedUpdatesList: state.mainData.feedUpdatesList,
-  authToken: state.auth.token,
   sortingByColumn: state.mainData.sortingByColumn,
 });
 

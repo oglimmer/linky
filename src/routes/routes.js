@@ -76,7 +76,7 @@ const routes = auth => [
     exact: true,
     path: '/tags',
     component: TagPage,
-    loadData: dispatch => dispatch(initialLoad('portal')),
+    loadData: null,
   },
   {
     tagName: Route,

@@ -11,7 +11,7 @@ import authHelper from '../auth/authHelper';
 export default (dispatch, req, res) => {
   if (req.cookies.authToken) {
     const { authToken } = req.cookies;
-    winston.loggers.get('application').debug(`FetchComponentData::authToken = ${authToken}`);
+    winston.loggers.get('application').debug(`FetchComponentData::AUTH_TOKEN=${authToken}`);
     let dataLoadFnt = null;
     // some only matches once
     routes.routesFromToken(authToken).some((route) => {
