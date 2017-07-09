@@ -310,24 +310,18 @@ export function startRssUpdates() {
 export function checkAuth(email, password) {
   return (dispatch) => {
     dispatch(setErrorMessage(''));
-    let responseCode;
     return fetch.postCredentials('/rest/authenticate', {
       email,
       password,
     })
-    .then((response) => {
-      responseCode = response.status;
-      return response.json();
-    })
-    .then((json) => {
-      if (responseCode === 200) {
-        return Promise.all([
-          dispatch(setAuthToken(json.token)),
-          dispatch(initialLoad('portal')),
-        ]).then(() => dispatch(startRssUpdates()));
+    .then(response => response.json().then((json) => {
+      if (response.status !== 200) {
+        throw json.message;
       }
-      throw json.message;
-    })
+      return dispatch(setAuthToken(json.token));
+    }))
+    .then(() => dispatch(initialLoad('portal')))
+    .then(() => dispatch(startRssUpdates()))
     .catch((ex) => {
       dispatch(setErrorMessage(ex));
       throw ex;
