@@ -8,6 +8,10 @@ class TagDao extends BaseDataAccessObject {
       .then(data => data.map(e => [e.key[1], e.value]));
   }
 
+  getHierachyByUser(userid) {
+    return this.listByView('hierachy', 'byUserId', userid);
+  }
+
 }
 
 export default new TagDao();

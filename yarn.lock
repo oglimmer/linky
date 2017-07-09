@@ -2873,17 +2873,7 @@ he@1.1.x:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/he/-/he-1.1.1.tgz#93410fd21b009735151f8868c2f271f3427e23fd"
 
-history@^4.5.1, history@^4.6.0:
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/history/-/history-4.6.1.tgz#911cf8eb65728555a94f2b12780a0c531a14d2fd"
-  dependencies:
-    invariant "^2.2.1"
-    loose-envify "^1.2.0"
-    resolve-pathname "^2.0.0"
-    value-equal "^0.2.0"
-    warning "^3.0.0"
-
-history@^4.6.2:
+history@^4.5.1, history@^4.6.0, history@^4.6.2:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/history/-/history-4.6.2.tgz#716e863e1da0e97a028eed6da644061dd1e1ed1d"
   dependencies:
@@ -3615,6 +3605,10 @@ js-base64@^2.1.9:
 js-tokens@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-3.0.1.tgz#08e9f132484a2c45a30907e9dc4d5567b7f114d7"
+
+js-tree@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/js-tree/-/js-tree-1.1.0.tgz#087ee3ec366a5b74eb14f486016c5e0e631f1670"
 
 js-yaml@^3.5.1, js-yaml@^3.7.0:
   version "3.8.4"
@@ -5173,6 +5167,13 @@ react-router@^4.1.1:
     path-to-regexp "^1.5.3"
     prop-types "^15.5.4"
     warning "^3.0.0"
+
+react-ui-tree@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/react-ui-tree/-/react-ui-tree-2.6.0.tgz#cd110a5eee925c49694927c0c81416cf44fdca9c"
+  dependencies:
+    classnames "^2.2.5"
+    js-tree "^1.1.0"
 
 react@^15.4.2:
   version "15.5.4"

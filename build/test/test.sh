@@ -42,3 +42,7 @@ fi
 if [ "$1" == "portalpage" ]; then
   curl -b "authToken=$AUTH_TOKEN" "$BASE_URL/portalPage"
 fi
+
+if [ "$1" == "hierachy" ]; then
+  curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/tags/hierachy
+fi

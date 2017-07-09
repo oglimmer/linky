@@ -4,7 +4,7 @@
 import request from 'request';
 
 import favicon from '../server/util/favicon';
-import linkDao from '../server/dao/linkDao';
+import linkDao, { LinkDao } from '../server/dao/linkDao';
 import { removeTrailingSlash } from '../server/util/StringUtil';
 
 /* eslint-disable no-param-reassign */
@@ -60,7 +60,7 @@ const processRows = (recs) => {
 };
 
 console.log(`${new Date()}: starting link-check-server`);
-linkDao.listAll().then(processRows);
+LinkDao.listAll().then(processRows);
 
 process.on('exit', () => {
   console.log(`${new Date()}: exiting link-check-server`);

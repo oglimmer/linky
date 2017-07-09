@@ -7,13 +7,11 @@ import linkyDb from './NanoConnection';
 
 const view = Promise.promisify(linkyDb.view);
 
-class LinkDao extends BaseDataAccessObject {
+export class LinkDao extends BaseDataAccessObject {
 
-  /* eslint-disable class-methods-use-this */
-  listAll() {
+  static listAll() {
     return view('links', 'byUserid').then(body => body.rows.map(e => e.value));
   }
-  /* eslint-enable class-methods-use-this */
 
   listByUserid(userid) {
     return this.listByView('links', 'byUserid', userid);

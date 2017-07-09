@@ -28,6 +28,37 @@ class GetTagProcessor extends BaseProcessor {
 
 }
 
+class GetTagHierachyProcessor extends BaseProcessor {
+
+  constructor(req, res, next) {
+    super(req, res, next, true);
+  }
+
+  * process() {
+    try {
+      let hierachy = yield tagDao.getHierachyByUser(this.data.userid);
+      if (hierachy.length === 0) {
+        const rows = yield tagDao.listAllTags(this.data.userid);
+        if (!rows.find(e => e[0].toLowerCase() === 'portal')) {
+          rows.push(['portal', 0]);
+        }
+        hierachy = rows.map(e => ({
+          module: e[0],
+          count: e[1],
+          collapsed: true,
+          children: [],
+        }));
+      }
+      this.res.send(hierachy);
+    } catch (err) {
+      winston.loggers.get('application').error(err);
+      ResponseUtil.sendErrorResponse500(err, this.res);
+    }
+    this.res.end();
+  }
+
+}
+
 export default {
 
   getTagCollection: function getTagCollection(req, res, next) {
@@ -35,5 +66,9 @@ export default {
     glp.doProcess();
   },
 
+  getTagHierachy: function getTagHierachy(req, res, next) {
+    const glp = new GetTagHierachyProcessor(req, res, next);
+    glp.doProcess();
+  },
 
 };
