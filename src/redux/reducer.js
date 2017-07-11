@@ -7,11 +7,12 @@ import { routerReducer } from 'react-router-redux';
 import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DETAILS_ID,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES, RSS_UPDATES_DETAILS,
   CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG,
-  TOGGLE_VISIBILITY } from './actions';
+  TOGGLE_VISIBILITY, SET_TAG_HIERACHY } from './actions';
 
 import { initialStateAuth, initialStateMainData, loginForm, addUrlForm,
-  DEFAULT_LINK, initialMenuBar } from './DataModels';
+  DEFAULT_LINK, initialMenuBar, initialStateTagData } from './DataModels';
 
+import immutableConverter from '../util/ImmutableConverter';
 
 function auth(state = initialStateAuth, action) {
   switch (action.type) {
@@ -159,8 +160,20 @@ function mainData(state = initialStateMainData, action) {
   }
 }
 
+function tagHierachyData(state = initialStateTagData, action) {
+  switch (action.type) {
+    case SET_TAG_HIERACHY:
+      return Object.assign({}, state, {
+        tagHierachy: immutableConverter(action.tagHierachy),
+      });
+    default:
+      return state;
+  }
+}
+
 export default combineReducers({
   mainData,
+  tagHierachyData,
   auth,
   menuBar,
   login: combineForms(loginForm, 'login'),

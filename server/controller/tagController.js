@@ -42,12 +42,14 @@ class GetTagHierachyProcessor extends BaseProcessor {
         if (!rows.find(e => e[0].toLowerCase() === 'portal')) {
           rows.push(['portal', 0]);
         }
-        hierachy = rows.map(e => ({
-          module: e[0],
-          count: e[1],
-          collapsed: true,
-          children: [],
-        }));
+        hierachy = {
+          module: 'root',
+          children: rows.map(e => ({
+            module: e[0],
+            collapsed: false,
+            children: [],
+          })),
+        };
       }
       this.res.send(hierachy);
     } catch (err) {

@@ -28,6 +28,7 @@ export const RSS_UPDATES = 'RSS_UPDATES';
 export const RSS_UPDATES_DETAILS = 'RSS_UPDATES_DETAILS';
 export const RSS_SET_DETAILS_ID = 'RSS_SET_DETAILS_ID';
 export const TOGGLE_VISIBILITY = 'TOGGLE_VISIBILITY';
+export const SET_TAG_HIERACHY = 'SET_TAG_HIERACHY';
 
 /*
  * action creators
@@ -47,6 +48,10 @@ export function selectTag(tag) {
 
 export function setAuthToken(authToken) {
   return { type: SET_AUTH_TOKEN, authToken };
+}
+
+function setTagHierachy(tagHierachy) {
+  return { type: SET_TAG_HIERACHY, tagHierachy };
 }
 
 function setLinks(linkList) {
@@ -193,6 +198,12 @@ function fetchLinks(tag) {
     .then(linkList => dispatch(setLinks(linkList)));
 }
 
+function fetchTagHierachy() {
+  return (dispatch, getState) => fetch.get('/rest/tags/hierachy', getState().auth.token)
+    .then(response => response.json())
+    .then(tagHierachy => dispatch(setTagHierachy(tagHierachy)));
+}
+
 function changeTag(tag) {
   return (dispatch) => {
     dispatch(fetchLinks(tag));
@@ -289,7 +300,7 @@ export function fetchLinksAndSelectTag(tag) {
   return dispatch => dispatch(changeTag(tag));
 }
 
-export function initialLoad(tag) {
+export function initialLoadLinks(tag) {
   return (dispatch, getState) => {
     // HACK: we assume an empty list means it wasn't loaded yet, while this won't harm
     // it might not be true and thus an unnecessary action
@@ -298,6 +309,15 @@ export function initialLoad(tag) {
         dispatch(fetchLinks(tag)),
         dispatch(loadTags()),
       ]);
+    }
+    return Promise.resolve();
+  };
+}
+
+export function initialLoadTags() {
+  return (dispatch, getState) => {
+    if (!getState().tagHierachyData.tagHierachy) {
+      return dispatch(fetchTagHierachy());
     }
     return Promise.resolve();
   };
@@ -327,7 +347,7 @@ export function checkAuth(email, password) {
       }
       return dispatch(setAuthToken(json.token));
     }))
-    .then(() => dispatch(initialLoad('portal')))
+    .then(() => dispatch(initialLoadLinks('portal')))
     .then(() => dispatch(startRssUpdates()))
     .catch((ex) => {
       dispatch(setErrorMessage(ex));

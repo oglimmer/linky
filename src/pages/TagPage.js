@@ -1,30 +1,44 @@
 
 import React from 'react';
 import Tree from 'react-ui-tree';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
-const renderNode = node => (
-  <span>{node.module}</span>
-);
+import { initialLoadTags } from '../redux/actions';
 
-const tree = {
-  module: 'react-ui-tree',
-  children: [{
-    collapsed: true,
-    module: 'dist',
-    children: [{
-      module: 'node.js',
-    }],
-  }],
+class TagPage extends React.Component {
+  static renderNode(node) {
+    return (
+      <span>
+        {node.module}
+      </span>
+    );
+  }
+
+  componentDidMount() {
+    this.props.dispatch(initialLoadTags());
+  }
+
+  render() {
+    const plainObject = JSON.parse(JSON.stringify(this.props.tree));
+    return (
+      <div>
+        <Tree
+          paddingLeft={20}
+          tree={plainObject}
+          renderNode={TagPage.renderNode}
+        />
+      </div>
+    );
+  }
+}
+TagPage.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  tree: PropTypes.shape().isRequired,
 };
 
-const TagPage = () => (
-  <div>
-    <Tree
-      paddingLeft={20}
-      tree={tree}
-      renderNode={renderNode}
-    />
-  </div>
-);
+const mapStateToProps = state => ({
+  tree: state.tagHierachyData.tagHierachy || {},
+});
 
-export default TagPage;
+export default connect(mapStateToProps)(TagPage);

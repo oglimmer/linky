@@ -6,6 +6,7 @@ import Immutable from 'immutable';
 import { AppContainer } from 'react-hot-loader';
 
 import configureStore from './util/configureStore';
+import immutableConverter from './util/ImmutableConverter';
 
 let state;
 if (window.$REDUX_STATE) {
@@ -14,6 +15,7 @@ if (window.$REDUX_STATE) {
   state.mainData.tagList = Immutable.List(state.mainData.tagList);
   state.mainData.feedUpdatesList = Immutable.List(state.mainData.feedUpdatesList);
   state.mainData.feedUpdatesDetails = Immutable.List(state.mainData.feedUpdatesDetails);
+  state.tagHierachyData.tagHierachy = immutableConverter(state.tagHierachyData.tagHierachy);
 }
 
 const store = configureStore(state);

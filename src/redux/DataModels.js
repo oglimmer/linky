@@ -27,6 +27,10 @@ export const initialStateMainData = {
   selectedTag: 'portal',
 };
 
+export const initialStateTagData = {
+  tagHierachy: null,
+};
+
 export const initialMenuBar = {
   addEnabled: false,
 };

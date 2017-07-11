@@ -9,7 +9,7 @@ import PortalPage from '../pages/PortalPage';
 import TagPage from '../pages/TagPage';
 import Impressum from '../pages/Impressum';
 
-import { initialLoad } from '../../src/redux/actions';
+import { initialLoadLinks, initialLoadTags } from '../../src/redux/actions';
 
 const isAuth = (store) => {
   const { auth } = store.getState();
@@ -66,7 +66,7 @@ const routes = auth => [
     exact: true,
     path: '/links/:tag',
     component: PortalPage,
-    loadData: (dispatch, match) => dispatch(initialLoad(match.params.tag)),
+    loadData: (dispatch, match) => dispatch(initialLoadLinks(match.params.tag)),
   },
   {
     tagName: CategorizedRoute,
@@ -76,7 +76,7 @@ const routes = auth => [
     exact: true,
     path: '/tags',
     component: TagPage,
-    loadData: null,
+    loadData: dispatch => dispatch(initialLoadTags()),
   },
   {
     tagName: Route,

@@ -85,7 +85,7 @@ app.use(responseTime((req, res, time) => {
   if (req.method === 'HEAD') {
     return;
   }
-  winston.loggers.get('application').debug('Request %s for %s took %d millis', req.method, req.url, Math.round(time));
+  winston.loggers.get('application').debug('Request %s for %s took %d millis from `%s`', req.method, req.url, Math.round(time), req.headers['user-agent']);
 }));
 
 app.use(expressWinston.logger({
