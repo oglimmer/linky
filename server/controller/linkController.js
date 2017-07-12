@@ -22,6 +22,16 @@ const ensureAllTag = (tagsArr) => {
   }
   return tagsArr;
 };
+const ensureRssTag = (tagsArr, rssUrl) => {
+  const findFctn = e => e.toLowerCase() === 'rss';
+  if (rssUrl && tagsArr && !tagsArr.find(findFctn)) {
+    tagsArr.push('rss');
+  }
+  if (!rssUrl && tagsArr && tagsArr.find(findFctn)) {
+    tagsArr.splice(tagsArr.findIndex(findFctn), 1);
+  }
+  return tagsArr;
+};
 
 // FAVICON
 const rewriteFavicon = (rec) => {
@@ -84,7 +94,7 @@ class CreateLinkProcessor extends BaseProcessor {
   collectBodyParameters() {
     const url = fixUrl(this.req.body.url);
     const rssUrl = fixUrl(this.req.body.rssUrl);
-    const tags = ensureAllTag(getTags(this.req.body.tags));
+    const tags = ensureRssTag(ensureAllTag(getTags(this.req.body.tags)), rssUrl);
     const { pageTitle, notes } = this.req.body;
     return resolveUrl(url, pageTitle)
       .then(({ linkUrl, title }) => favicon(linkUrl)
@@ -133,7 +143,7 @@ class UpdateLinkProcessor extends BaseProcessor {
     const { linkid } = this.req.params;
     const linkUrl = fixUrl(this.req.body.url);
     const rssUrl = fixUrl(this.req.body.rssUrl);
-    const tags = ensureAllTag(getTags(this.req.body.tags));
+    const tags = ensureRssTag(ensureAllTag(getTags(this.req.body.tags)), rssUrl);
     const { pageTitle, notes } = this.req.body;
     this.data = {
       linkid,
