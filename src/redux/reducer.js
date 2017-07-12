@@ -7,7 +7,7 @@ import { routerReducer } from 'react-router-redux';
 import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DETAILS_ID,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES, RSS_UPDATES_DETAILS,
   CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG,
-  TOGGLE_VISIBILITY, SET_TAG_HIERACHY } from './actions';
+  TOGGLE_VISIBILITY, SET_TAG_HIERARCHY, SELECT_NODE } from './actions';
 
 import { initialStateAuth, initialStateMainData, loginForm, addUrlForm,
   DEFAULT_LINK, initialMenuBar, initialStateTagData } from './DataModels';
@@ -160,11 +160,16 @@ function mainData(state = initialStateMainData, action) {
   }
 }
 
-function tagHierachyData(state = initialStateTagData, action) {
+function tagHierarchyData(state = initialStateTagData, action) {
+  console.log(`action = ${action.type}`);
   switch (action.type) {
-    case SET_TAG_HIERACHY:
+    case SET_TAG_HIERARCHY:
       return Object.assign({}, state, {
-        tagHierachy: immutableConverter(action.tagHierachy),
+        tagHierarchy: immutableConverter(action.tagHierarchy),
+      });
+    case SELECT_NODE:
+      return Object.assign({}, state, {
+        selectedNode: action.node,
       });
     default:
       return state;
@@ -173,7 +178,7 @@ function tagHierachyData(state = initialStateTagData, action) {
 
 export default combineReducers({
   mainData,
-  tagHierachyData,
+  tagHierarchyData,
   auth,
   menuBar,
   login: combineForms(loginForm, 'login'),

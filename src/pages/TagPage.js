@@ -4,19 +4,34 @@ import Tree from 'react-ui-tree';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { initialLoadTags } from '../redux/actions';
+import { initialLoadTags, selectNodeInTagHierarchy } from '../redux/actions';
 
 class TagPage extends React.Component {
-  static renderNode(node) {
-    return (
-      <span>
-        {node.module}
-      </span>
-    );
+  constructor(props) {
+    super(props);
+    this.renderNode = this.renderNode.bind(this);
   }
 
   componentDidMount() {
     this.props.dispatch(initialLoadTags());
+  }
+
+  renderNode(node) {
+    const style = {
+      backgroundColor: ['all', 'broken', 'rss', 'untagged', 'urlupdated', 'portal', 'locked']
+        .find(e => node.module === e) ? 'red' : '',
+      border: this.props.selectedNode === node.module ? '1px solid black' : '',
+    };
+    return (
+      <span
+        role="button"
+        tabIndex={0}
+        style={style}
+        onClick={() => this.props.onClick(node.module)}
+      >
+        {node.module} ({node.count})
+      </span>
+    );
   }
 
   render() {
@@ -26,7 +41,7 @@ class TagPage extends React.Component {
         <Tree
           paddingLeft={20}
           tree={plainObject}
-          renderNode={TagPage.renderNode}
+          renderNode={this.renderNode}
         />
       </div>
     );
@@ -34,11 +49,21 @@ class TagPage extends React.Component {
 }
 TagPage.propTypes = {
   dispatch: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
   tree: PropTypes.shape().isRequired,
+  selectedNode: PropTypes.string,
+};
+TagPage.defaultProps = {
+  selectedNode: null,
 };
 
 const mapStateToProps = state => ({
-  tree: state.tagHierachyData.tagHierachy || {},
+  tree: state.tagHierarchyData.tagHierarchy || {},
+  selectedNode: state.tagHierarchyData.selectedNode,
 });
 
-export default connect(mapStateToProps)(TagPage);
+const mapDispatchToProps = dispatch => ({
+  onClick: nodeName => dispatch(selectNodeInTagHierarchy(nodeName)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(TagPage);

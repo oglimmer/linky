@@ -28,7 +28,8 @@ export const initialStateMainData = {
 };
 
 export const initialStateTagData = {
-  tagHierachy: null,
+  tagHierarchy: null,
+  selectedNode: null,
 };
 
 export const initialMenuBar = {

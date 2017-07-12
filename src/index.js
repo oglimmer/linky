@@ -15,7 +15,7 @@ if (window.$REDUX_STATE) {
   state.mainData.tagList = Immutable.List(state.mainData.tagList);
   state.mainData.feedUpdatesList = Immutable.List(state.mainData.feedUpdatesList);
   state.mainData.feedUpdatesDetails = Immutable.List(state.mainData.feedUpdatesDetails);
-  state.tagHierachyData.tagHierachy = immutableConverter(state.tagHierachyData.tagHierachy);
+  state.tagHierarchyData.tagHierarchy = immutableConverter(state.tagHierarchyData.tagHierarchy);
 }
 
 const store = configureStore(state);

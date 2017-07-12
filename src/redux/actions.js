@@ -30,7 +30,8 @@ export const RSS_UPDATES = 'RSS_UPDATES';
 export const RSS_UPDATES_DETAILS = 'RSS_UPDATES_DETAILS';
 export const RSS_SET_DETAILS_ID = 'RSS_SET_DETAILS_ID';
 export const TOGGLE_VISIBILITY = 'TOGGLE_VISIBILITY';
-export const SET_TAG_HIERACHY = 'SET_TAG_HIERACHY';
+export const SET_TAG_HIERARCHY = 'SET_TAG_HIERARCHY';
+export const SELECT_NODE = 'SELECT_NODE';
 
 /*
  * action creators
@@ -52,8 +53,12 @@ export function setAuthToken(authToken) {
   return { type: SET_AUTH_TOKEN, authToken };
 }
 
-function setTagHierachy(tagHierachy) {
-  return { type: SET_TAG_HIERACHY, tagHierachy };
+function setTagHierarchy(tagHierarchy) {
+  return { type: SET_TAG_HIERARCHY, tagHierarchy };
+}
+
+export function selectNodeInTagHierarchy(node) {
+  return { type: SELECT_NODE, node };
 }
 
 function setLinks(linkList) {
@@ -205,10 +210,10 @@ function fetchLinks(tag) {
     .then(linkList => dispatch(setLinks(linkList)));
 }
 
-function fetchTagHierachy() {
-  return (dispatch, getState) => fetch.get('/rest/tags/hierachy', getState().auth.token)
+function fetchTagHierarchy() {
+  return (dispatch, getState) => fetch.get('/rest/tags/hierarchy', getState().auth.token)
     .then(response => response.json())
-    .then(tagHierachy => dispatch(setTagHierachy(tagHierachy)));
+    .then(tagHierarchy => dispatch(setTagHierarchy(tagHierarchy)));
 }
 
 export function changeTag(tag) {
@@ -319,8 +324,8 @@ export function initialLoadLinks(tag) {
 
 export function initialLoadTags() {
   return (dispatch, getState) => {
-    if (!getState().tagHierachyData.tagHierachy) {
-      return dispatch(fetchTagHierachy());
+    if (!getState().tagHierarchyData.tagHierarchy) {
+      return dispatch(fetchTagHierarchy());
     }
     return Promise.resolve();
   };

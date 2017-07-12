@@ -28,7 +28,7 @@ class GetTagProcessor extends BaseProcessor {
 
 }
 
-class GetTagHierachyProcessor extends BaseProcessor {
+class GetTagHierarchyProcessor extends BaseProcessor {
 
   constructor(req, res, next) {
     super(req, res, next, true);
@@ -36,22 +36,23 @@ class GetTagHierachyProcessor extends BaseProcessor {
 
   * process() {
     try {
-      let hierachy = yield tagDao.getHierachyByUser(this.data.userid);
-      if (hierachy.length === 0) {
+      let hierarchy = yield tagDao.getHierarchyByUser(this.data.userid);
+      if (hierarchy.length === 0) {
         const rows = yield tagDao.listAllTags(this.data.userid);
         if (!rows.find(e => e[0].toLowerCase() === 'portal')) {
           rows.push(['portal', 0]);
         }
-        hierachy = {
+        hierarchy = {
           module: 'root',
           children: rows.map(e => ({
             module: e[0],
+            count: e[1],
             collapsed: false,
             children: [],
           })),
         };
       }
-      this.res.send(hierachy);
+      this.res.send(hierarchy);
     } catch (err) {
       winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
@@ -68,8 +69,8 @@ export default {
     glp.doProcess();
   },
 
-  getTagHierachy: function getTagHierachy(req, res, next) {
-    const glp = new GetTagHierachyProcessor(req, res, next);
+  getTagHierarchy: function getTagHierarchy(req, res, next) {
+    const glp = new GetTagHierarchyProcessor(req, res, next);
     glp.doProcess();
   },
 
