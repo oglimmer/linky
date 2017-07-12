@@ -6,6 +6,8 @@ import assert from 'assert';
 import fetch from '../util/fetch';
 import { diff } from '../util/ArrayUtil';
 
+const RSS_UPDATE_FREQUENCY = 1000 * 60 * 5;
+
 /*
  * action types
  */
@@ -156,25 +158,30 @@ export function fetchRssUpdatesDetails(id) {
   };
 }
 
+const lastUpdates = {};
 export function fetchRssUpdates() {
   return (dispatch, getState) => {
     const { linkList } = getState().mainData;
     const ps = [];
     let totalNewUpdates = 0;
     linkList.filter(e => e.rssUrl).forEach((linkElement) => {
-      ps.push(new Promise((resolve, reject) => {
-        fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
-        .then(response => response.json())
-        .then((json) => {
-          totalNewUpdates += json.result;
-          dispatch(setRssUpdates(linkElement.id, json.result));
-          resolve();
-        })
-        .catch((ex) => {
-          dispatch(setErrorMessage(ex));
-          reject(ex);
-        });
-      }));
+      const lastFetch = lastUpdates[linkElement.id];
+      if (!lastFetch || lastFetch < Date.now() - RSS_UPDATE_FREQUENCY) {
+        lastUpdates[linkElement.id] = Date.now();
+        ps.push(new Promise((resolve, reject) => {
+          fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
+          .then(response => response.json())
+          .then((json) => {
+            totalNewUpdates += json.result;
+            dispatch(setRssUpdates(linkElement.id, json.result));
+            resolve();
+          })
+          .catch((ex) => {
+            dispatch(setErrorMessage(ex));
+            reject(ex);
+          });
+        }));
+      }
     });
     Promise.all(ps).then(() => {
       if (totalNewUpdates > 0) {
@@ -204,11 +211,11 @@ function fetchTagHierachy() {
     .then(tagHierachy => dispatch(setTagHierachy(tagHierachy)));
 }
 
-function changeTag(tag) {
-  return (dispatch) => {
-    dispatch(fetchLinks(tag));
-    dispatch(push(tag));
-  };
+export function changeTag(tag) {
+  return dispatch => Promise.all([
+    dispatch(fetchLinks(tag)),
+    dispatch(push(tag)),
+  ]).then(() => dispatch(fetchRssUpdates()));
 }
 
 function decreaseTagCounter(tagNamesToDecrease) {
@@ -296,10 +303,6 @@ export function editLink(id, url, tags, rssUrl, pageTitle, notes) {
   };
 }
 
-export function fetchLinksAndSelectTag(tag) {
-  return dispatch => dispatch(changeTag(tag));
-}
-
 export function initialLoadLinks(tag) {
   return (dispatch, getState) => {
     // HACK: we assume an empty list means it wasn't loaded yet, while this won't harm
@@ -329,7 +332,7 @@ export function startRssUpdates() {
       dispatch(fetchRssUpdates());
       setTimeout(() => {
         dispatch(startRssUpdates());
-      }, 1000 * 60 * 5);
+      }, RSS_UPDATE_FREQUENCY);
     }
   };
 }

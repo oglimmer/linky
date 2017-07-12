@@ -18,8 +18,7 @@ class PortalPage extends React.Component {
     this.props.dispatch(initialLoadLinks(this.props.match.params.tag));
   }
 
-  shouldComponentUpdate(nextProps) {
-    this.props.dispatch(selectTag(nextProps.match.params.tag));
+  shouldComponentUpdate() {
     return false;
   }
 

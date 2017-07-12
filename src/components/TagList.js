@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 // import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
-import { fetchLinksAndSelectTag } from '../redux/actions';
+import { changeTag } from '../redux/actions';
 
 const divStyle = { marginTop: 9, marginBottom: 9 };
 
@@ -40,7 +40,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onClick: tag => dispatch(fetchLinksAndSelectTag(tag)),
+  onClick: tag => dispatch(changeTag(tag)),
 });
 
 export default connect(
