@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 // import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
-import { Immutable } from 'immutable';
+import Immutable from 'immutable';
 
 import { changeTag } from '../redux/actions';
 

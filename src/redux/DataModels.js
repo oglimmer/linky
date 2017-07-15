@@ -24,7 +24,7 @@ export const initialStateMainData = {
   selectedLinkForDetails: null,
   errorMessage: '',
   sortingByColumn: 'mostUsed',
-  selectedTag: 'portal',
+  selectedTag: null,
 };
 
 export const initialStateTagData = {
