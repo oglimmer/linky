@@ -12,7 +12,7 @@ let state;
 if (window.$REDUX_STATE) {
   state = window.$REDUX_STATE;
   state.mainData.linkList = Immutable.List(state.mainData.linkList);
-  state.mainData.tagList = Immutable.List(state.mainData.tagList);
+  state.mainData.tagList = state.mainData.tagList ? Immutable.List(state.mainData.tagList) : null;
   state.mainData.feedUpdatesList = Immutable.List(state.mainData.feedUpdatesList);
   state.mainData.feedUpdatesDetails = Immutable.List(state.mainData.feedUpdatesDetails);
   state.tagHierarchyData.tagHierarchy = immutableConverter(state.tagHierarchyData.tagHierarchy);

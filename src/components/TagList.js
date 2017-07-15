@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 // import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
+import { Immutable } from 'immutable';
+
 import { changeTag } from '../redux/actions';
 
 const divStyle = { marginTop: 9, marginBottom: 9 };
@@ -34,7 +36,7 @@ TagList.propTypes = {
 // ---------------------------------------------------------------------------------
 
 const mapStateToProps = state => ({
-  tagList: state.mainData.tagList,
+  tagList: state.mainData.tagList || Immutable.List(),
   selectedTag: state.mainData.selectedTag,
   authToken: state.auth.token,
 });

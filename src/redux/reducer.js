@@ -42,8 +42,13 @@ const selectTagStateUpdate = (state, action) => {
   const stateUpdate = {
     selectedTag: action.tag,
   };
-  if (!state.tagList.find(e => e[0] === action.tag)) {
-    const clone = state.tagList.slice(0);
+  let clone = null;
+  if (!state.tagList) {
+    clone = Immutable.List();
+  } else if (!state.tagList.find(e => e[0] === action.tag)) {
+    clone = state.tagList.slice(0);
+  }
+  if (clone) {
     clone.push([action.tag, 0]);
     stateUpdate.tagList = clone;
   }
@@ -161,7 +166,6 @@ function mainData(state = initialStateMainData, action) {
 }
 
 function tagHierarchyData(state = initialStateTagData, action) {
-  console.log(`action = ${action.type}`);
   switch (action.type) {
     case SET_TAG_HIERARCHY:
       return Object.assign({}, state, {

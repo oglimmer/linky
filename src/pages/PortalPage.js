@@ -10,16 +10,12 @@ import UILinkList from '../components/UILinkList';
 import TagList from '../components/TagList';
 import AlertAdapter from '../components/AlertAdapter';
 import ToggleAddLinkMenuButton from '../components/ToggleAddLinkMenuButton';
-import { selectTag, initialLoadLinks } from '../redux/actions';
+import { completeChangeTag } from '../redux/actions';
 
 class PortalPage extends React.Component {
-  componentDidMount() {
-    this.props.dispatch(selectTag(this.props.match.params.tag));
-    this.props.dispatch(initialLoadLinks(this.props.match.params.tag));
-  }
 
-  shouldComponentUpdate() {
-    return false;
+  componentDidMount() {
+    this.props.dispatch(completeChangeTag(this.props.match.params.tag));
   }
 
   render() {

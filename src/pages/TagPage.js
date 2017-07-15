@@ -13,7 +13,7 @@ class TagPage extends React.Component {
   }
 
   componentDidMount() {
-    this.props.dispatch(initialLoadTags());
+    this.props.initialLoadTags();
   }
 
   renderNode(node) {
@@ -27,7 +27,7 @@ class TagPage extends React.Component {
         role="button"
         tabIndex={0}
         style={style}
-        onClick={() => this.props.onClick(node.module)}
+        onClick={() => this.props.onClick(node)}
       >
         {node.module} ({node.count})
       </span>
@@ -38,6 +38,7 @@ class TagPage extends React.Component {
     const plainObject = JSON.parse(JSON.stringify(this.props.tree));
     return (
       <div>
+        <button>add</button>
         <Tree
           paddingLeft={20}
           tree={plainObject}
@@ -48,7 +49,7 @@ class TagPage extends React.Component {
   }
 }
 TagPage.propTypes = {
-  dispatch: PropTypes.func.isRequired,
+  initialLoadTags: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   tree: PropTypes.shape().isRequired,
   selectedNode: PropTypes.string,
@@ -64,6 +65,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   onClick: nodeName => dispatch(selectNodeInTagHierarchy(nodeName)),
+  initialLoadTags: () => dispatch(initialLoadTags()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(TagPage);

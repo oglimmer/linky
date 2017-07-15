@@ -85,7 +85,7 @@ app.use(responseTime((req, res, time) => {
   if (req.method === 'HEAD') {
     return;
   }
-  winston.loggers.get('application').debug('Request %s for %s took %d millis from `%s`', req.method, req.url, Math.round(time), req.headers['user-agent']);
+  winston.loggers.get('application').debug('Request %s for %s took %d millis', req.method, req.url, Math.round(time));
 }));
 
 app.use(expressWinston.logger({
@@ -106,10 +106,15 @@ if (!debugMode || debugMode !== 'web') {
   const proxyPort = process.env.PROXY_PORT || '8081';
   const proxyBind = process.env.PROXY_BIND || '127.0.0.1';
   winston.loggers.get('application').info(`Using proxy ${proxyBind}:${proxyPort} to REST endpoints`);
-  app.use('/rest', proxy(`${proxyBind}:${proxyPort}`, { proxyReqPathResolver: req => `/rest${req.url}` }));
-  app.use('/leave', proxy(`${proxyBind}:${proxyPort}`, { proxyReqPathResolver: req => `/leave${req.url}` }));
-  app.use('/auth', proxy(`${proxyBind}:${proxyPort}`, { proxyReqPathResolver: req => `/auth${req.url}` }));
-  app.use('/authback', proxy(`${proxyBind}:${proxyPort}`, { proxyReqPathResolver: req => `/authback${req.url}` }));
+  /* eslint-disable no-param-reassign */
+  ['/rest', '/leave', '/auth', '/authback'].forEach((restPath) => {
+    app.use(restPath, proxy(`${proxyBind}:${proxyPort}`, {
+      // express-http-proxy cuts off the prefix of the url matching restPath
+      proxyReqPathResolver: req => `${restPath}${req.url}`,
+      userResDecorator: (proxyRes, proxyResData, userReq) => { userReq.url = `${restPath}${userReq.url}`; return proxyResData; },
+    }));
+  });
+  /* eslint-enable no-param-reassign */
 }
 
 if (process.env.NODE_ENV === 'production') {

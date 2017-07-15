@@ -18,7 +18,7 @@ export const addUrlForm = {
 
 export const initialStateMainData = {
   linkList: Immutable.List(),
-  tagList: Immutable.List(),
+  tagList: null,
   feedUpdatesList: Immutable.List(),
   feedUpdatesDetails: Immutable.List(),
   selectedLinkForDetails: null,

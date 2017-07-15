@@ -164,7 +164,7 @@ export function fetchRssUpdatesDetails(id) {
 }
 
 const lastUpdates = {};
-export function fetchRssUpdates() {
+function fetchRssUpdates() {
   return (dispatch, getState) => {
     const { linkList } = getState().mainData;
     const ps = [];
@@ -204,7 +204,7 @@ export function fetchRssUpdates() {
   };
 }
 
-function fetchLinks(tag) {
+export function fetchLinks(tag) {
   return (dispatch, getState) => fetch.get(`/rest/links/${tag}`, getState().auth.token)
     .then(response => response.json())
     .then(linkList => dispatch(setLinks(linkList)));
@@ -217,10 +217,7 @@ function fetchTagHierarchy() {
 }
 
 export function changeTag(tag) {
-  return dispatch => Promise.all([
-    dispatch(fetchLinks(tag)),
-    dispatch(push(tag)),
-  ]).then(() => dispatch(fetchRssUpdates()));
+  return dispatch => dispatch(push(tag));
 }
 
 function decreaseTagCounter(tagNamesToDecrease) {
@@ -310,13 +307,23 @@ export function editLink(id, url, tags, rssUrl, pageTitle, notes) {
 
 export function initialLoadLinks(tag) {
   return (dispatch, getState) => {
-    // HACK: we assume an empty list means it wasn't loaded yet, while this won't harm
-    // it might not be true and thus an unnecessary action
-    if (getState().mainData.linkList.size === 0) {
-      return Promise.all([
-        dispatch(fetchLinks(tag)),
-        dispatch(loadTags()),
-      ]);
+    const shouldInitTags = !getState().mainData.tagList;
+    dispatch(selectTag(tag));
+    const promises = [
+      dispatch(fetchLinks(tag)),
+    ];
+    if (shouldInitTags) {
+      promises.push(dispatch(loadTags()));
+    }
+    return Promise.all(promises);
+  };
+}
+
+export function completeChangeTag(tag) {
+  return (dispatch, getState) => {
+    if (getState().mainData.selectedTag !== tag) {
+      return dispatch(initialLoadLinks(tag))
+        .then(() => dispatch(fetchRssUpdates()));
     }
     return Promise.resolve();
   };
@@ -331,6 +338,7 @@ export function initialLoadTags() {
   };
 }
 
+// client-side only
 export function startRssUpdates() {
   return (dispatch, getState) => {
     if (getState().auth.token) {
@@ -355,8 +363,6 @@ export function checkAuth(email, password) {
       }
       return dispatch(setAuthToken(json.token));
     }))
-    .then(() => dispatch(initialLoadLinks('portal')))
-    .then(() => dispatch(startRssUpdates()))
     .catch((ex) => {
       dispatch(setErrorMessage(ex));
       throw ex;
