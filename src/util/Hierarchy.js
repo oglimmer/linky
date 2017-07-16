@@ -11,7 +11,7 @@ const isIterable = (obj) => {
   return typeof obj[Symbol.iterator] === 'function';
 };
 
-const getNodeByName = (obj, tagName) => {
+export const getNodeByName = (obj, tagName) => {
   assert(typeof tagName === 'string', `${tagName} is not a string!`);
   let retNode = null;
   if (obj.children && isIterable(obj.children)) {
@@ -28,7 +28,7 @@ const getNodeByName = (obj, tagName) => {
   return retNode;
 };
 
-const getParent = (obj, tagName) => {
+export const getParent = (obj, tagName) => {
   assert(typeof tagName === 'string', `${tagName} is not a string!`);
   let retNode = null;
   if (obj.children && isIterable(obj.children)) {
@@ -65,6 +65,8 @@ export const getChildren = (tagHierarchy, tagName) => {
 };
 
 export default {
+  getNodeByName,
+  getParent,
   getSiblings,
   getChildren,
 };
