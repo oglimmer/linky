@@ -4,6 +4,10 @@
   color: transparent!important;
 }
 
+input {
+  font-size: 16px;
+}
+
 .panel {
   border-color: #cfd9D7;
   border-radius: 2px;
