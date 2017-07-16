@@ -25,13 +25,15 @@ fi
 if [ "$1" == "createlink" ]; then
   [ -z "$AUTH_TOKEN" ] && echo "AUTH_TOKEN not set" && exit 1
   curl -s -X POST \
-    --data '{"url":"http://oglimmer.de","tags":"","notes":"","pageTitle":"","rssUrl":""}' \
+    --data '{"url":"http://oglimmer.de","tags":"portal","notes":"","pageTitle":"","rssUrl":""}' \
     -H "Content-Type: application/json" -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/links
 fi
 
 if [ "$1" == "getlinks" ]; then
   [ -z "$AUTH_TOKEN" ] && echo "AUTH_TOKEN not set" && exit 1
-  curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/links/all
+  tag=$2
+  [ -z "$tag" ] && tag=all
+  curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" "$REST_URL/links/$tag"
 fi
 
 if [ "$1" == "deletelink" ]; then
@@ -46,7 +48,20 @@ if [ "$1" == "html" ]; then
   curl --cookie "authToken=$AUTH_TOKEN" "$BASE_URL/$url"
 fi
 
-if [ "$1" == "hierachy" ]; then
+if [ "$1" == "hierarchy" ]; then
   [ -z "$AUTH_TOKEN" ] && echo "AUTH_TOKEN not set" && exit 1
-  curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/tags/hierachy
+  curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/tags/hierarchy
 fi
+
+if [ -z "$1" ]; then
+  AUTH_AVAIL=$(if [ -z ${AUTH_TOKEN} ]; then echo "empty"; else echo "set"; fi)
+  echo "AVAILABLE COMMANDS: (USING BASE_URL=$BASE_URL | AUTH_TOKEN is $AUTH_AVAIL)"
+  echo "createuser"
+  echo "authenticate"
+  echo "createlink"
+  echo "getlinks [tag]"
+  echo "deletelink id"
+  echo "html [url]"
+  echo "hierarchy"
+fi
+
