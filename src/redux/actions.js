@@ -71,13 +71,9 @@ function setLinks(linkList) {
   return { type: SET_LINKS, linkList };
 }
 
-function setTags(tagList) {
-  return { type: SET_TAGS, tagList };
-}
-
-function removeTag(tagName) {
-  return { type: DEL_TAG, tagName };
-}
+// function removeTag(tagName) {
+//   return { type: DEL_TAG, tagName };
+// }
 
 function manipulateTagCounter(tagName, val) {
   return { type: MANIPULATE_TAG, tagName, val };
@@ -142,13 +138,6 @@ export function logout() {
       dispatch(clearAuthToken());
       dispatch(reset());
     });
-}
-
-function loadTags() {
-  return (dispatch, getState) => fetch.get('/rest/tags', getState().auth.token)
-    .then(response => response.json())
-    .then(tagList => dispatch(setTags(tagList)))
-    .catch(error => console.log(error));
 }
 
 export function fetchRssUpdatesDetails(id) {
@@ -225,22 +214,22 @@ export function changeTag(tag) {
   return dispatch => dispatch(push(tag));
 }
 
-function decreaseTagCounter(tagNamesToDecrease) {
-  return (dispatch, getState) => {
-    tagNamesToDecrease.forEach((tagName) => {
-      const { tagList, selectedTag } = getState().mainData;
-      const tagElement = tagList.find(e => e[0] === tagName);
-      assert(tagName === tagElement[0] && tagElement[1] !== 0);
-      if (tagElement[1] > 1 || tagName === 'portal') {
-        dispatch(manipulateTagCounter(tagName, -1));
-      } else {
-        dispatch(removeTag(tagName));
-        if (selectedTag === tagName) {
-          dispatch(changeTag('portal'));
-        }
-      }
-    });
-  };
+function decreaseTagCounter() {
+  // return (dispatch, getState) => {
+  //   tagNamesToDecrease.forEach((tagName) => {
+  //     const { tagList, selectedTag } = getState().mainData;
+  //     const tagElement = tagList.find(e => e[0] === tagName);
+  //     assert(tagName === tagElement[0] && tagElement[1] !== 0);
+  //     if (tagElement[1] > 1 || tagName === 'portal') {
+  //       dispatch(manipulateTagCounter(tagName, -1));
+  //     } else {
+  //       dispatch(removeTag(tagName));
+  //       if (selectedTag === tagName) {
+  //         dispatch(changeTag('portal'));
+  //       }
+  //     }
+  //   });
+  // };
 }
 
 function handlingLinkListChange(linkId, newLink, selectedTag) {
@@ -312,13 +301,13 @@ export function editLink(id, url, tags, rssUrl, pageTitle, notes) {
 
 export function initialLoadLinks(tag) {
   return (dispatch, getState) => {
-    const shouldInitTags = !getState().mainData.tagList;
+    const shouldInitTags = !getState().tagHierarchyData.tagHierarchy;
     dispatch(selectTag(tag));
     const promises = [
       dispatch(fetchLinks(tag)),
     ];
     if (shouldInitTags) {
-      promises.push(dispatch(loadTags()));
+      promises.push(dispatch(fetchTagHierarchy()));
     }
     return Promise.all(promises);
   };

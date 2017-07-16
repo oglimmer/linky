@@ -3,24 +3,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 // import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
-import ImmutablePropTypes from 'react-immutable-proptypes';
+// import ImmutablePropTypes from 'react-immutable-proptypes';
 import Immutable from 'immutable';
 
 import { changeTag } from '../redux/actions';
+import { getSiblings } from '../util/Hierarchy';
 
 const divStyle = { marginTop: 9, marginBottom: 9 };
 
-const TagList = ({ tagList, onClick, selectedTag }) => (
+const TagList = ({ tagHierarchy, onClick, selectedTag }) => (
   <div style={divStyle}>
-    { tagList.map(tag => (
+    { getSiblings(tagHierarchy, selectedTag).map(tag => (
       <span key={Math.random()}>
         <span
           role="link"
           tabIndex="0"
-          onClick={() => onClick(tag[0])}
-          className={tag[0] === selectedTag ? 'label label-primary' : 'label label-default'}
+          onClick={() => onClick(tag.module)}
+          className={tag.module === selectedTag ? 'label label-primary' : 'label label-default'}
         >
-          {tag[0]} ({tag[1]})
+          {tag.module} ({tag.count})
         </span>
         {' '}
       </span>),
@@ -28,7 +29,7 @@ const TagList = ({ tagList, onClick, selectedTag }) => (
   </div>
 );
 TagList.propTypes = {
-  tagList: ImmutablePropTypes.listOf(PropTypes.array).isRequired,
+  tagHierarchy: PropTypes.shape().isRequired,
   onClick: PropTypes.func.isRequired,
   selectedTag: PropTypes.string.isRequired,
 };
@@ -36,7 +37,7 @@ TagList.propTypes = {
 // ---------------------------------------------------------------------------------
 
 const mapStateToProps = state => ({
-  tagList: state.mainData.tagList || Immutable.List(),
+  tagHierarchy: state.tagHierarchyData.tagHierarchy || { children: Immutable.List() },
   selectedTag: state.mainData.selectedTag,
   authToken: state.auth.token,
 });
