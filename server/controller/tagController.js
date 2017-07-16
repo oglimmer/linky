@@ -46,9 +46,9 @@ class GetTagHierarchyProcessor extends BaseProcessor {
           rows.push(['portal', 0]);
         }
         responseData = {
-          module: 'root',
+          hierarchyLevelName: 'root',
           children: rows.map(e => ({
-            module: e[0],
+            hierarchyLevelName: e[0],
             count: e[1],
             collapsed: false,
             children: [],

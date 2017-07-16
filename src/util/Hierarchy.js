@@ -16,7 +16,7 @@ const getNodeByName = (obj, tagName) => {
   let retNode = null;
   if (obj.children && isIterable(obj.children)) {
     obj.children.forEach((ele) => {
-      if (ele.module === tagName) {
+      if (ele.hierarchyLevelName === tagName) {
         retNode = ele;
       }
       const f = getNodeByName(ele, tagName);
@@ -33,7 +33,7 @@ const getParent = (obj, tagName) => {
   let retNode = null;
   if (obj.children && isIterable(obj.children)) {
     obj.children.forEach((ele) => {
-      if (ele.module === tagName) {
+      if (ele.hierarchyLevelName === tagName) {
         retNode = obj;
       }
       const f = getParent(ele, tagName);
@@ -48,7 +48,7 @@ const getParent = (obj, tagName) => {
 export const getSiblings = (tagHierarchy, tagName) => {
   const targetNode = getNodeByName(tagHierarchy, tagName);
   if (targetNode) {
-    const parent = getParent(tagHierarchy, targetNode.module);
+    const parent = getParent(tagHierarchy, targetNode.hierarchyLevelName);
     if (parent) {
       return parent.children;
     }

@@ -20,10 +20,10 @@ class TagPage extends React.Component {
   renderNode(node) {
     const fallbackColor = node.count === 0 ? 'green' : '';
     const color = ['all', 'broken', 'rss', 'untagged', 'urlupdated', 'portal', 'locked']
-        .find(e => node.module === e) ? 'red' : fallbackColor;
+        .find(e => node.hierarchyLevelName === e) ? 'red' : fallbackColor;
     const style = {
       color,
-      backgroundColor: this.props.selectedNode && this.props.selectedNode.module === node.module ? '#bbbbbb' : '',
+      backgroundColor: this.props.selectedNode && this.props.selectedNode.hierarchyLevelName === node.hierarchyLevelName ? '#bbbbbb' : '',
     };
     return (
       <span
@@ -32,7 +32,7 @@ class TagPage extends React.Component {
         style={style}
         onClick={() => this.props.onClick(node)}
       >
-        {node.module} ({node.count})
+        {node.hierarchyLevelName} ({node.count})
       </span>
     );
   }

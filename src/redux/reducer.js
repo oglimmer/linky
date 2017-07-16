@@ -6,7 +6,7 @@ import { routerReducer } from 'react-router-redux';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DETAILS_ID,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES, RSS_UPDATES_DETAILS,
-  CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG, ADD_TAG_HIERARCHY,
+  CHANGE_SORTING_LINKS, CLICK_LINK, SELECT_TAG, ADD_TAG_HIERARCHY,
   TOGGLE_VISIBILITY, SET_TAG_HIERARCHY, SELECT_NODE, REMOVE_TAG_HIERARCHY, RESET } from './actions';
 
 import { initialStateAuth, initialStateMainData, loginForm, addUrlForm,
@@ -123,10 +123,6 @@ function mainData(state = initialStateMainData, action) {
       return Object.assign({}, state, {
         linkList: Immutable.List(action.linkList),
       });
-    case SET_TAGS:
-      return Object.assign({}, state, {
-        tagList: Immutable.List(action.tagList),
-      });
     case SELECT_TAG:
       return Object.assign({}, state, selectTagStateUpdate(state, action));
     case DEL_TAG:
@@ -175,14 +171,14 @@ function mainData(state = initialStateMainData, action) {
 }
 
 const removeTagHierarchyUpdateState = (state) => {
-  const toDel = state.selectedNode ? state.selectedNode.module : null;
+  const toDel = state.selectedNode ? state.selectedNode.hierarchyLevelName : null;
   if (!toDel || toDel === 'root') {
     return state.tagHierarchy;
   }
   const clone = JSON.parse(JSON.stringify(state.tagHierarchy));
   const searchAndDestroy = (obj) => {
     obj.children.forEach((ele, index) => {
-      if (ele.count === 0 && ele.module === toDel) {
+      if (ele.count === 0 && ele.hierarchyLevelName === toDel) {
         obj.children.splice(index, 1);
       } else {
         searchAndDestroy(ele);
@@ -208,9 +204,9 @@ function tagHierarchyData(state = initialStateTagData, action) {
     case ADD_TAG_HIERARCHY:
       return Object.assign({}, state, {
         tagHierarchy: {
-          module: 'root',
+          hierarchyLevelName: 'root',
           children: state.tagHierarchy.children.push({
-            module: action.name,
+            hierarchyLevelName: action.name,
             children: Immutable.List(),
             count: 0,
             collapsed: false,

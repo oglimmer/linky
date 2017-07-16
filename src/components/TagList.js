@@ -18,10 +18,10 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => (
         <span
           role="link"
           tabIndex="0"
-          onClick={() => onClick(tag.module)}
-          className={tag.module === selectedTag ? 'label label-primary' : 'label label-default'}
+          onClick={() => onClick(tag.hierarchyLevelName)}
+          className={tag.hierarchyLevelName === selectedTag ? 'label label-primary' : 'label label-default'}
         >
-          {tag.module} ({tag.count})
+          {tag.hierarchyLevelName} ({tag.count})
         </span>
         {' '}
       </span>),
