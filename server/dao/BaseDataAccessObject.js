@@ -19,7 +19,7 @@ class BaseDataAccessObject {
       if (rows.length === 0) {
         fulfill(null);
       } else {
-        fulfill(rows[0]);
+        fulfill(rows[0].value);
       }
     });
   }

@@ -12,6 +12,7 @@ const RSS_UPDATE_FREQUENCY = 1000 * 60 * 5;
  * action types
  */
 
+export const RESET = 'RESET';
 export const ADD_LINK = 'ADD_LINK';
 export const UPDATE_LINK = 'UPDATE_LINK';
 export const DEL_LINK = 'DEL_LINK';
@@ -32,10 +33,15 @@ export const RSS_SET_DETAILS_ID = 'RSS_SET_DETAILS_ID';
 export const TOGGLE_VISIBILITY = 'TOGGLE_VISIBILITY';
 export const SET_TAG_HIERARCHY = 'SET_TAG_HIERARCHY';
 export const SELECT_NODE = 'SELECT_NODE';
+export const ADD_TAG_HIERARCHY = 'ADD_TAG_HIERARCHY';
+export const REMOVE_TAG_HIERARCHY = 'REMOVE_TAG_HIERARCHY';
 
 /*
  * action creators
  */
+export function reset() {
+  return { type: RESET };
+}
 
 export function clickLink(id) {
   return { type: CLICK_LINK, id };
@@ -134,8 +140,7 @@ export function logout() {
   return dispatch => fetch.postCredentials('/rest/logout')
     .then(() => {
       dispatch(clearAuthToken());
-      dispatch(setLinks([]));
-      dispatch(setTags([]));
+      dispatch(reset());
     });
 }
 
@@ -348,6 +353,26 @@ export function startRssUpdates() {
       }, RSS_UPDATE_FREQUENCY);
     }
   };
+}
+
+export function addTagHierarchyNode() {
+  /* eslint-disable no-alert */
+  const name = prompt('Enter the node`s name');
+  /* eslint-enable no-alert */
+  return { type: ADD_TAG_HIERARCHY, name };
+}
+
+export function removeTagHierarchyNode() {
+  return { type: REMOVE_TAG_HIERARCHY };
+}
+
+export function saveTagHierarchy(tree) {
+  return (dispatch, getState) => fetch.put('/rest/tags/hierarchy', { tree }, getState().auth.token)
+      .then(response => response.json())
+      .then(() => {
+        dispatch(setTagHierarchy(tree));
+      })
+      .catch(error => console.log(error));
 }
 
 export function checkAuth(email, password) {

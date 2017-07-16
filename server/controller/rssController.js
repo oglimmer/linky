@@ -187,8 +187,6 @@ class GetRssUpdatesProcessor extends BaseProcessor {
               createdDate: new Date(),
               lastUpdated: new Date(),
             };
-          } else {
-            feedUpdatesRec = feedUpdatesRec.value;
           }
           const newFeedData = currentFeedData.filter(e => feedUpdatesRec.data.indexOf(e) === -1);
           winston.loggers.get('application').debug('RssUpdates for %s = %j', rec.rssUrl, newFeedData);

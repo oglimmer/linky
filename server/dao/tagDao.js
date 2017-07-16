@@ -9,7 +9,7 @@ class TagDao extends BaseDataAccessObject {
   }
 
   getHierarchyByUser(userid) {
-    return this.listByView('hierarchy', 'byUserId', userid);
+    return this.listByView('hierarchy', 'byUserId', userid).then(this.getFirstElement);
   }
 
 }

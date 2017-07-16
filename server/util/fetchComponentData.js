@@ -37,7 +37,7 @@ export default (dispatch, req, res) => {
     return visitorDao.getByVisitorId(vistorToken)
       .then((vistorRec) => {
         if (vistorRec) {
-          const { authType, hint, refreshToken } = vistorRec.value;
+          const { authType, hint, refreshToken } = vistorRec;
           // some providers ask for user permission again unless you use the refresh token
           if (refreshToken) {
             const promise = authHelper.processRefresh(req, res, refreshToken, authType);

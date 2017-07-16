@@ -4,7 +4,8 @@ import Tree from 'react-ui-tree';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { initialLoadTags, selectNodeInTagHierarchy } from '../redux/actions';
+import { initialLoadTags, selectNodeInTagHierarchy, addTagHierarchyNode,
+  removeTagHierarchyNode, saveTagHierarchy } from '../redux/actions';
 
 class TagPage extends React.Component {
   constructor(props) {
@@ -17,10 +18,12 @@ class TagPage extends React.Component {
   }
 
   renderNode(node) {
+    const fallbackColor = node.count === 0 ? 'green' : '';
+    const color = ['all', 'broken', 'rss', 'untagged', 'urlupdated', 'portal', 'locked']
+        .find(e => node.module === e) ? 'red' : fallbackColor;
     const style = {
-      backgroundColor: ['all', 'broken', 'rss', 'untagged', 'urlupdated', 'portal', 'locked']
-        .find(e => node.module === e) ? 'red' : '',
-      border: this.props.selectedNode === node.module ? '1px solid black' : '',
+      color,
+      backgroundColor: this.props.selectedNode && this.props.selectedNode.module === node.module ? '#bbbbbb' : '',
     };
     return (
       <span
@@ -36,13 +39,16 @@ class TagPage extends React.Component {
 
   render() {
     const plainObject = JSON.parse(JSON.stringify(this.props.tree));
+    const isRemoveAvail = this.props.selectedNode && this.props.selectedNode.count === 0;
     return (
       <div>
-        <button>add</button>
+        { this.props.onAdd ? (<button onClick={this.props.onAdd}>add</button>) : ''}
+        { isRemoveAvail ? (<button onClick={this.props.onRemove}>remove</button>) : ''}
         <Tree
           paddingLeft={20}
           tree={plainObject}
           renderNode={this.renderNode}
+          onChange={this.props.onChange}
         />
       </div>
     );
@@ -52,10 +58,15 @@ TagPage.propTypes = {
   initialLoadTags: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
   tree: PropTypes.shape().isRequired,
-  selectedNode: PropTypes.string,
+  selectedNode: PropTypes.shape(),
+  onAdd: PropTypes.func,
+  onRemove: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
 };
 TagPage.defaultProps = {
   selectedNode: null,
+  onAdd: null,
+  onRemove: null,
 };
 
 const mapStateToProps = state => ({
@@ -66,6 +77,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   onClick: nodeName => dispatch(selectNodeInTagHierarchy(nodeName)),
   initialLoadTags: () => dispatch(initialLoadTags()),
+  onAdd: () => dispatch(addTagHierarchyNode()),
+  onRemove: () => dispatch(removeTagHierarchyNode()),
+  onChange: tree => dispatch(saveTagHierarchy(tree)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(TagPage);

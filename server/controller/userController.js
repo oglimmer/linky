@@ -76,7 +76,7 @@ class AuthenticateProcessor extends BaseProcessor {
         ResponseUtil.sendErrorResponse(401, 'Wrong user or password!', this.res);
         this.res.end();
       } else {
-        const { _id, hash } = user.value;
+        const { _id, hash } = user;
         const result = yield BcryptUtil.compare(this.data.password, hash);
         if (result) {
           const claim = {
@@ -120,7 +120,7 @@ export default {
       .then((vistorRec) => {
         if (vistorRec) {
           /* eslint-disable no-underscore-dangle */
-          visitorDao.delete(vistorRec.value._id, vistorRec.value._rev);
+          visitorDao.delete(vistorRec._id, vistorRec._rev);
           /* eslint-enable no-underscore-dangle */
         }
       });

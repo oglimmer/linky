@@ -6,8 +6,8 @@ import { routerReducer } from 'react-router-redux';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DETAILS_ID,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES, RSS_UPDATES_DETAILS,
-  CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG,
-  TOGGLE_VISIBILITY, SET_TAG_HIERARCHY, SELECT_NODE } from './actions';
+  CHANGE_SORTING_LINKS, CLICK_LINK, SET_TAGS, SELECT_TAG, ADD_TAG_HIERARCHY,
+  TOGGLE_VISIBILITY, SET_TAG_HIERARCHY, SELECT_NODE, REMOVE_TAG_HIERARCHY, RESET } from './actions';
 
 import { initialStateAuth, initialStateMainData, loginForm, addUrlForm,
   DEFAULT_LINK, initialMenuBar, initialStateTagData } from './DataModels';
@@ -16,6 +16,8 @@ import immutableConverter from '../util/ImmutableConverter';
 
 function auth(state = initialStateAuth, action) {
   switch (action.type) {
+    case RESET:
+      return initialStateAuth;
     case SET_AUTH_TOKEN:
       return Object.assign({}, state, {
         token: action.authToken,
@@ -29,6 +31,8 @@ function auth(state = initialStateAuth, action) {
 
 function menuBar(state = initialMenuBar, action) {
   switch (action.type) {
+    case RESET:
+      return initialMenuBar;
     case TOGGLE_VISIBILITY:
       return Object.assign({}, state, {
         addEnabled: !state.addEnabled || action.forceShow,
@@ -81,6 +85,8 @@ const updateFeedUpdatesList = (state, action) => {
 
 function mainData(state = initialStateMainData, action) {
   switch (action.type) {
+    case RESET:
+      return initialStateMainData;
     case ADD_LINK:
       return Object.assign({}, state, {
         linkList: state.linkList.push(Object.assign({}, DEFAULT_LINK, {
@@ -111,6 +117,9 @@ function mainData(state = initialStateMainData, action) {
         linkList: state.linkList.filter(ele => ele.id !== action.id),
       });
     case SET_LINKS:
+      if (!Array.isArray(action.linkList)) {
+        throw Error('action.linkList is NOT an array!');
+      }
       return Object.assign({}, state, {
         linkList: Immutable.List(action.linkList),
       });
@@ -165,8 +174,29 @@ function mainData(state = initialStateMainData, action) {
   }
 }
 
+const removeTagHierarchyUpdateState = (state) => {
+  const toDel = state.selectedNode ? state.selectedNode.module : null;
+  if (!toDel || toDel === 'root') {
+    return state.tagHierarchy;
+  }
+  const clone = JSON.parse(JSON.stringify(state.tagHierarchy));
+  const searchAndDestroy = (obj) => {
+    obj.children.forEach((ele, index) => {
+      if (ele.count === 0 && ele.module === toDel) {
+        obj.children.splice(index, 1);
+      } else {
+        searchAndDestroy(ele);
+      }
+    });
+  };
+  searchAndDestroy(clone);
+  return immutableConverter(clone);
+};
+
 function tagHierarchyData(state = initialStateTagData, action) {
   switch (action.type) {
+    case RESET:
+      return initialStateTagData;
     case SET_TAG_HIERARCHY:
       return Object.assign({}, state, {
         tagHierarchy: immutableConverter(action.tagHierarchy),
@@ -174,6 +204,23 @@ function tagHierarchyData(state = initialStateTagData, action) {
     case SELECT_NODE:
       return Object.assign({}, state, {
         selectedNode: action.node,
+      });
+    case ADD_TAG_HIERARCHY:
+      return Object.assign({}, state, {
+        tagHierarchy: {
+          module: 'root',
+          children: state.tagHierarchy.children.push({
+            module: action.name,
+            children: Immutable.List(),
+            count: 0,
+            collapsed: false,
+          }),
+        },
+      });
+    case REMOVE_TAG_HIERARCHY:
+      return Object.assign({}, state, {
+        tagHierarchy: removeTagHierarchyUpdateState(state),
+        selectedNode: null,
       });
     default:
       return state;

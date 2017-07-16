@@ -39,7 +39,9 @@ const generateJwtToken = (res, localUserId) => {
 
 const insertUserIntoDBIfNeeded = (type, remoteUserJson, localUserObj) => {
   if (localUserObj) {
-    return localUserObj;
+    /* eslint-disable no-underscore-dangle */
+    return localUserObj._id;
+    /* eslint-enable no-underscore-dangle */
   }
   winston.loggers.get('application').debug('authHelper::Insert new user into DB: %j', remoteUserJson);
   return userDao.insert({
@@ -48,7 +50,7 @@ const insertUserIntoDBIfNeeded = (type, remoteUserJson, localUserObj) => {
     sourceId: remoteUserJson.id,
     sourceData: remoteUserJson,
     createdDate: new Date(),
-  });
+  }).then(newObj => newObj.id);
 };
 
 const loadUserFromDB = (type, id) => userDao.getBySourceId(type + id);
@@ -58,7 +60,7 @@ const getLocalUserObject = (type, remoteUserJson) => loadUserFromDB(type, remote
 
 const forward = (req, res, type, remoteUserJson, authTokenResponse) =>
   getLocalUserObject(type, remoteUserJson)
-    .then(localUserId => generateJwtToken(res, localUserId.id))
+    .then(localUserId => generateJwtToken(res, localUserId))
     .then(token =>
       addCookieAndForward(req, res, token, type, remoteUserJson.id,
         authTokenResponse ? authTokenResponse.refresh_token : null));

@@ -29,9 +29,8 @@ const leave = (req, res) => {
           winston.loggers.get('application').debug(`Failed to update link.callcounter for ${loadedLinkObj._id}`);
         }
 
-        const feedUpdatesResult = yield feedUpdatesDao.getByLinkId(target);
-        if (feedUpdatesResult) {
-          const feedUpdatesRec = feedUpdatesResult.value;
+        const feedUpdatesRec = yield feedUpdatesDao.getByLinkId(target);
+        if (feedUpdatesRec) {
           if (feedUpdatesRec.latestData) {
             feedUpdatesRec.data = feedUpdatesRec.latestData;
             feedUpdatesRec.latestData = null;

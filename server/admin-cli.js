@@ -64,10 +64,9 @@ const listSummaryUserById = (id, user) => {
 };
 
 const deleteUserByEmail = (email) => {
-  userDao.getByEmail(email).then((rowRaw) => {
-    if (rowRaw) {
+  userDao.getByEmail(email).then((row) => {
+    if (row) {
       console.log(`Delete user = ${email}`);
-      const row = rowRaw.value;
       deleteUserById(row._id, row._rev);
     } else {
       console.error(`User ${email} not found!`);
@@ -76,10 +75,9 @@ const deleteUserByEmail = (email) => {
 };
 
 const deleteUserBySourceId = (sourceId) => {
-  userDao.getBySourceId(sourceId).then((rowRaw) => {
-    if (rowRaw) {
+  userDao.getBySourceId(sourceId).then((row) => {
+    if (row) {
       console.log(`Delete user = ${sourceId}`);
-      const row = rowRaw.value;
       deleteUserById(row._id, row._rev);
     } else {
       console.error(`User ${sourceId} not found!`);
