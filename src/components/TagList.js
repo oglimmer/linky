@@ -12,6 +12,9 @@ import { getSiblings, getChildren, getParent } from '../util/Hierarchy';
 const divStyle = { marginTop: 9, marginBottom: 9 };
 
 const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
+  if (!selectedTag) {
+    return null;
+  }
   const parent = getParent(tagHierarchy, selectedTag);
   const children = getChildren(tagHierarchy, selectedTag);
   return (
@@ -60,7 +63,10 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
 TagList.propTypes = {
   tagHierarchy: PropTypes.shape().isRequired,
   onClick: PropTypes.func.isRequired,
-  selectedTag: PropTypes.string.isRequired,
+  selectedTag: PropTypes.string,
+};
+TagList.defaultProps = {
+  selectedTag: null,
 };
 
 // ---------------------------------------------------------------------------------
