@@ -341,13 +341,6 @@ export function startRssUpdates() {
   };
 }
 
-export function addTagHierarchyNode() {
-  /* eslint-disable no-alert */
-  const name = prompt('Enter the node`s name');
-  /* eslint-enable no-alert */
-  return { type: ADD_TAG_HIERARCHY, name };
-}
-
 export function removeTagHierarchyNode() {
   return { type: REMOVE_TAG_HIERARCHY };
 }
@@ -355,10 +348,24 @@ export function removeTagHierarchyNode() {
 export function saveTagHierarchy(tree) {
   return (dispatch, getState) => fetch.put('/rest/tags/hierarchy', { tree }, getState().auth.token)
       .then(response => response.json())
-      .then(() => {
-        dispatch(setTagHierarchy(tree));
-      })
+      .then(() => dispatch(setTagHierarchy(tree)))
       .catch(error => console.log(error));
+}
+
+export function addTagHierarchyNode() {
+  /* eslint-disable no-alert */
+  const name = prompt('Enter the node`s name ([a-z0-9])');
+  /* eslint-enable no-alert */
+  const simpleWordRegex = new RegExp('^[a-z0-9]*$');
+  const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
+  if (split[0]) {
+    return (dispatch, getState) =>
+      Promise.resolve(dispatch({ type: ADD_TAG_HIERARCHY, name: split[0] }))
+      .then(() => dispatch(saveTagHierarchy(getState().tagHierarchyData.tagHierarchy)));
+  }
+  return () => {
+    // nop
+  };
 }
 
 export function checkAuth(email, password) {

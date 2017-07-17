@@ -91,3 +91,36 @@ it('conv array in object in array in array', () => {
   const result = conv(a);
   expect(result).toEqual(expected);
 });
+
+it('conv object with Immutable instead of arrays', () => {
+  const a = {
+    hierarchyLevelName: 'root',
+    children: Immutable.List([{
+      hierarchyLevelName: 'portal',
+      count: 0,
+      collapsed: false,
+      children: Immutable.List(),
+    }, {
+      hierarchyLevelName: 'foo',
+      children: Immutable.List(),
+      count: 0,
+      collapsed: false,
+    }]),
+  };
+  const expected = {
+    hierarchyLevelName: 'root',
+    children: Immutable.List([{
+      hierarchyLevelName: 'portal',
+      count: 0,
+      collapsed: false,
+      children: Immutable.List(),
+    }, {
+      hierarchyLevelName: 'foo',
+      children: Immutable.List(),
+      count: 0,
+      collapsed: false,
+    }]),
+  };
+  const result = conv(a);
+  expect(result).toEqual(expected);
+});

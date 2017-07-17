@@ -41,5 +41,5 @@ export default (obj) => {
   if (!obj) {
     return obj;
   }
-  return processNonArray(obj);
+  return processNonArray(JSON.parse(JSON.stringify(obj)));
 };
