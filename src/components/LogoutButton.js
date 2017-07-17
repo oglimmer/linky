@@ -5,7 +5,7 @@ import { NavItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
-import { logout } from '../redux/actions';
+import { logout, reset } from '../redux/actions';
 
 const LogoutButton = ({ dispatch, history, authToken }) => {
   if (!authToken) {
@@ -15,7 +15,7 @@ const LogoutButton = ({ dispatch, history, authToken }) => {
     <NavItem
       eventKey={1}
       onClick={() => {
-        dispatch(logout()).then(() => { history.replace('/'); });
+        dispatch(logout()).then(() => { history.replace('/'); dispatch(reset()); });
       }}
     >Log out</NavItem>
   );

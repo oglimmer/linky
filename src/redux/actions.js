@@ -134,10 +134,7 @@ export function resetAddLinkFields() {
 
 export function logout() {
   return dispatch => fetch.postCredentials('/rest/logout')
-    .then(() => {
-      dispatch(clearAuthToken());
-      dispatch(reset());
-    });
+    .then(() => dispatch(clearAuthToken()));
 }
 
 export function fetchRssUpdatesDetails(id) {
@@ -375,7 +372,8 @@ export function checkAuth(email, password) {
       if (response.status !== 200) {
         throw json.message;
       }
-      return dispatch(setAuthToken(json.token));
+      dispatch(setAuthToken(json.token));
+      return dispatch(initialLoadLinks('portal'));
     }))
     .catch((ex) => {
       dispatch(setErrorMessage(ex));
