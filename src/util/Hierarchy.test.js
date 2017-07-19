@@ -3,51 +3,33 @@ import Immutable from 'immutable';
 import { getChildren, getSiblings, toHierarchy, flatten } from './Hierarchy';
 
 it('getSiblings: a', () => {
-  const children = [{ hierarchyLevelName: 'a', children: [] }];
-  const a = { children };
+  const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }];
   const result = getSiblings(a, 'a');
-  expect(result).toEqual(children);
+  expect(result).toEqual([{ name: 'a', parent: 'root' }]);
 });
 
 it('getSiblings: a-b1', () => {
-  const children = [{ hierarchyLevelName: 'a', children: [] }, { hierarchyLevelName: 'b', children: [] }];
-  const a = { children };
+  const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }, { name: 'b', parent: 'root', count: 1 }];
   const result = getSiblings(a, 'a');
-  expect(result).toEqual(children);
+  expect(result).toEqual([{ name: 'a', parent: 'root' }, { name: 'b', parent: 'root', count: 1 }]);
 });
 
 it('getSiblings: a-b2', () => {
-  const children = [{ hierarchyLevelName: 'a', children: [] }, { hierarchyLevelName: 'b', children: [] }];
-  const a = { children };
+  const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root', count: 1 }, { name: 'b', parent: 'root' }];
   const result = getSiblings(a, 'b');
-  expect(result).toEqual(children);
-});
-
-it('getSiblings: a-b2 (Immutable)', () => {
-  const children = Immutable.List([{ hierarchyLevelName: 'a', children: Immutable.List() }, { hierarchyLevelName: 'b', children: Immutable.List() }]);
-  const a = { children };
-  const result = getSiblings(a, 'b');
-  expect(result).toEqual(children);
+  expect(result).toEqual([{ name: 'a', parent: 'root', count: 1 }, { name: 'b', parent: 'root' }]);
 });
 
 it('getChildren: a', () => {
-  const a = { children: [{ hierarchyLevelName: 'a', children: [] }] };
+  const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }];
   const result = getChildren(a, 'a');
   expect(result).toEqual([]);
 });
 
 it('getChildren: a-aa', () => {
-  const children = [{ hierarchyLevelName: 'aa', children: [] }];
-  const a = { children: [{ hierarchyLevelName: 'a', children }] };
+  const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }, { name: 'aa', parent: 'a', count: 1 }];
   const result = getChildren(a, 'a');
-  expect(result).toEqual(children);
-});
-
-it('getChildren: a-aa (Immutable)', () => {
-  const children = Immutable.List([{ hierarchyLevelName: 'aa', children: Immutable.List() }]);
-  const a = { children: Immutable.List([{ hierarchyLevelName: 'a', children }]) };
-  const result = getChildren(a, 'a');
-  expect(result).toEqual(children);
+  expect(result).toEqual([{ name: 'aa', parent: 'a', count: 1 }]);
 });
 
 it('toHierarchy: simple', () => {
