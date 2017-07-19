@@ -22,7 +22,7 @@ const processNonArray = (varObject) => {
   if (Array.isArray(varObject)) {
     throw new Error('Assertion failed! Array is not allowed here!');
   }
-  if (typeof varObject !== 'object') {
+  if (typeof varObject !== 'object' || varObject == null) {
     return varObject;
   }
   const newObj = {};
@@ -41,5 +41,9 @@ export default (obj) => {
   if (!obj) {
     return obj;
   }
-  return processNonArray(JSON.parse(JSON.stringify(obj)));
+  const root = JSON.parse(JSON.stringify(obj));
+  if (Array.isArray(root)) {
+    return processArray(root);
+  }
+  return processNonArray(root);
 };

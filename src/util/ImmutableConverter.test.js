@@ -13,19 +13,13 @@ it('convert undefined', () => {
   expect(result).toBeUndefined();
 });
 
-it('error on array', () => {
-  expect(() => {
-    conv([1, 2, 3]);
-  }).toThrow();
-});
-
 it('no conv in very simple object', () => {
   const a = { name: 'foo' };
   const result = conv(a);
   expect(result).toEqual(a);
 });
 
-it('no conv in very 2-level object', () => {
+it('no conv in 2-level object', () => {
   const a = { name: 'foo', achild: { name: 'bar' } };
   const result = conv(a);
   expect(result).toEqual(a);
@@ -38,7 +32,7 @@ it('conv very simple object', () => {
   expect(result).toEqual(expected);
 });
 
-it('conv very 2-level object', () => {
+it('conv 2-level object', () => {
   const a = { name: 'foo', achild: { anArray: ['ele1', 'ele2', 3, 4, false, true] } };
   const expected = { name: 'foo', achild: { anArray: Immutable.List(['ele1', 'ele2', 3, 4, false, true]) } };
   const result = conv(a);
@@ -121,6 +115,51 @@ it('conv object with Immutable instead of arrays', () => {
       collapsed: false,
     }]),
   };
+  const result = conv(a);
+  expect(result).toEqual(expected);
+});
+
+it('array as root (simple)', () => {
+  const a = [{ name: 'foo' }, { name: 'bar' }];
+  const expected = Immutable.List([{ name: 'foo' }, { name: 'bar' }]);
+  const result = conv(a);
+  expect(result).toEqual(expected);
+});
+
+it('array as root (nested)', () => {
+  const a = [{ name: 'foo' }, { name: 'bar', children: [{ name: 'foo' }, { name: 'bar' }] }];
+  const expected = Immutable.List([{ name: 'foo' }, { name: 'bar', children: Immutable.List([{ name: 'foo' }, { name: 'bar' }]) }]);
+  const result = conv(a);
+  expect(result).toEqual(expected);
+});
+
+it('array as root (real)', () => {
+  const a = [{
+    name: 'all',
+    count: 1,
+    parent: 'root',
+  }, {
+    name: 'portal',
+    count: 1,
+    parent: 'root',
+  }, {
+    name: 'root',
+    count: 0,
+    parent: null,
+  }];
+  const expected = Immutable.List([{
+    name: 'all',
+    count: 1,
+    parent: 'root',
+  }, {
+    name: 'portal',
+    count: 1,
+    parent: 'root',
+  }, {
+    name: 'root',
+    count: 0,
+    parent: null,
+  }]);
   const result = conv(a);
   expect(result).toEqual(expected);
 });

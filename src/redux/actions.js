@@ -25,7 +25,6 @@ export const CHANGE_SORTING_LINKS = 'CHANGE_SORTING_LINKS';
 export const CLICK_LINK = 'CLICK_LINK';
 export const SELECT_TAG = 'SELECT_TAG';
 export const EDIT_LINK = 'EDIT_LINK';
-export const DEL_TAG = 'DEL_TAG';
 export const MANIPULATE_TAG = 'MANIPULATE_TAG';
 export const RSS_UPDATES = 'RSS_UPDATES';
 export const RSS_UPDATES_DETAILS = 'RSS_UPDATES_DETAILS';
@@ -70,10 +69,6 @@ export function selectNodeInTagHierarchy(node) {
 function setLinks(linkList) {
   return { type: SET_LINKS, linkList };
 }
-
-// function removeTag(tagName) {
-//   return { type: DEL_TAG, tagName };
-// }
 
 function manipulateTagCounter(tagName, val) {
   return { type: MANIPULATE_TAG, tagName, val };
@@ -211,24 +206,6 @@ export function changeTag(tag) {
   return dispatch => dispatch(push(tag));
 }
 
-function decreaseTagCounter() {
-  // return (dispatch, getState) => {
-  //   tagNamesToDecrease.forEach((tagName) => {
-  //     const { tagList, selectedTag } = getState().mainData;
-  //     const tagElement = tagList.find(e => e[0] === tagName);
-  //     assert(tagName === tagElement[0] && tagElement[1] !== 0);
-  //     if (tagElement[1] > 1 || tagName === 'portal') {
-  //       dispatch(manipulateTagCounter(tagName, -1));
-  //     } else {
-  //       dispatch(removeTag(tagName));
-  //       if (selectedTag === tagName) {
-  //         dispatch(changeTag('portal'));
-  //       }
-  //     }
-  //   });
-  // };
-}
-
 function handlingLinkListChange(linkId, newLink, selectedTag) {
   return (dispatch) => {
     if (!linkId) {
@@ -250,9 +227,11 @@ function handlingLinkListChange(linkId, newLink, selectedTag) {
 function handlingTagListChange(newLink, oldTags) {
   return (dispatch) => {
     // in old but not in new => deleted
-    dispatch(decreaseTagCounter(diff(oldTags, newLink.tags)));
+    const toBeRemoved = diff(oldTags, newLink.tags);
+    toBeRemoved.forEach(tagName => dispatch(manipulateTagCounter(tagName, -1)));
     // in new but not in old => add
-    diff(newLink.tags, oldTags).forEach(tagName => dispatch(manipulateTagCounter(tagName, 1)));
+    const toBeAdded = diff(newLink.tags, oldTags);
+    toBeAdded.forEach(tagName => dispatch(manipulateTagCounter(tagName, 1)));
   };
 }
 
@@ -279,7 +258,7 @@ export function delLink(id) {
     return fetch.delete(`/rest/links/${id}`, getState().auth.token)
     .then(() => {
       dispatch(delLinkPost(id));
-      dispatch(decreaseTagCounter(linkToDelete.tags));
+      linkToDelete.tags.forEach(tagName => dispatch(manipulateTagCounter(tagName, -1)));
     })
     .catch(error => console.log(error));
   };
@@ -341,15 +320,17 @@ export function startRssUpdates() {
   };
 }
 
-export function removeTagHierarchyNode() {
-  return { type: REMOVE_TAG_HIERARCHY };
-}
-
 export function saveTagHierarchy(tree) {
   return (dispatch, getState) => fetch.put('/rest/tags/hierarchy', { tree }, getState().auth.token)
       .then(response => response.json())
       .then(() => dispatch(setTagHierarchy(tree)))
       .catch(error => console.log(error));
+}
+
+export function removeTagHierarchyNode() {
+  return (dispatch, getState) =>
+      Promise.resolve(dispatch({ type: REMOVE_TAG_HIERARCHY }))
+      .then(() => dispatch(saveTagHierarchy(getState().tagHierarchyData.tagHierarchy)));
 }
 
 export function addTagHierarchyNode() {

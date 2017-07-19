@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import Immutable from 'immutable';
 
 import { changeTag } from '../redux/actions';
-import { getSiblings, getChildren, getParent } from '../util/Hierarchy';
+import { getSiblings, getChildren, getParent, getParentSiblings } from '../util/Hierarchy';
 
 const divStyle = { marginTop: 9, marginBottom: 9 };
 
@@ -15,29 +15,58 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
   if (!selectedTag) {
     return null;
   }
-  const parent = getParent(tagHierarchy, selectedTag);
-  const children = getChildren(tagHierarchy, selectedTag);
+  let parentTagName = getParent(tagHierarchy, selectedTag);
+  let parents = getParentSiblings(tagHierarchy, parentTagName);
+  let siblings = getSiblings(tagHierarchy, selectedTag);
+  let children = getChildren(tagHierarchy, selectedTag);
+  let originalParentTagName;
+  if (children.size === 0) {
+    const parentOfParentName = getParent(tagHierarchy, parentTagName);
+    if (parentOfParentName && parentOfParentName !== 'root') {
+      originalParentTagName = parentTagName;
+      parentTagName = parentOfParentName;
+      children = siblings;
+      siblings = parents;
+      parents = getParentSiblings(tagHierarchy, parentTagName);
+    }
+  }
+  const getLabel = (tagName, warningLabel) => {
+    if (tagName === selectedTag) {
+      return 'label label-primary';
+    } else if (tagName === warningLabel) {
+      return 'label label-warning';
+    }
+    return 'label label-default';
+  };
   return (
     <div style={divStyle}>
-      { parent && parent.hierarchyLevelName !== 'root' ? (
-        <div>Parent: <span
-          role="link"
-          tabIndex="0"
-          onClick={() => onClick(parent.hierarchyLevelName)}
-          className="label label-default"
-        >
-          {parent.hierarchyLevelName} ({parent.count})
-        </span></div>) : '' }
+      <div>
+        { parents.size === 1 && parents.get(0).name === 'root' ? '' : (
+          <span>Parent: { parents.map(tag => (
+            <span key={Math.random()}>
+              <span
+                role="link"
+                tabIndex="0"
+                onClick={() => onClick(tag.name)}
+                className={getLabel(tag.name, parentTagName)}
+              >
+                {tag.name} ({tag.count})
+              </span>
+              {' '}
+            </span>))}
+          </span>
+        ) }
+      </div>
       <div> Siblings:
-      { getSiblings(tagHierarchy, selectedTag).map(tag => (
+      { siblings.map(tag => (
         <span key={Math.random()}>
           <span
             role="link"
             tabIndex="0"
-            onClick={() => onClick(tag.hierarchyLevelName)}
-            className={tag.hierarchyLevelName === selectedTag ? 'label label-primary' : 'label label-default'}
+            onClick={() => onClick(tag.name)}
+            className={getLabel(tag.name, originalParentTagName)}
           >
-            {tag.hierarchyLevelName} ({tag.count})
+            {tag.name} ({tag.count})
           </span>
           {' '}
         </span>),
@@ -49,10 +78,10 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
             <span
               role="link"
               tabIndex="0"
-              onClick={() => onClick(tag.hierarchyLevelName)}
-              className={tag.hierarchyLevelName === selectedTag ? 'label label-primary' : 'label label-default'}
+              onClick={() => onClick(tag.name)}
+              className={getLabel(tag.name)}
             >
-              {tag.hierarchyLevelName} ({tag.count})
+              {tag.name} ({tag.count})
             </span>
             {' '}
           </span>),

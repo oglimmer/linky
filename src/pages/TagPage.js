@@ -7,6 +7,8 @@ import { connect } from 'react-redux';
 import { initialLoadTags, selectNodeInTagHierarchy, addTagHierarchyNode,
   removeTagHierarchyNode, saveTagHierarchy } from '../redux/actions';
 
+import { toHierarchy, flatten } from '../util/Hierarchy';
+
 class TagPage extends React.Component {
   constructor(props) {
     super(props);
@@ -38,7 +40,7 @@ class TagPage extends React.Component {
   }
 
   render() {
-    const plainObject = JSON.parse(JSON.stringify(this.props.tree));
+    const tree = toHierarchy(this.props.tree);
     const isRemoveAvail = this.props.selectedNode && this.props.selectedNode.count === 0;
     return (
       <div>
@@ -46,7 +48,7 @@ class TagPage extends React.Component {
         { isRemoveAvail ? (<button onClick={this.props.onRemove}>remove</button>) : ''}
         <Tree
           paddingLeft={20}
-          tree={plainObject}
+          tree={tree}
           renderNode={this.renderNode}
           onChange={this.props.onChange}
         />
@@ -79,7 +81,7 @@ const mapDispatchToProps = dispatch => ({
   initialLoadTags: () => dispatch(initialLoadTags()),
   onAdd: () => dispatch(addTagHierarchyNode()),
   onRemove: () => dispatch(removeTagHierarchyNode()),
-  onChange: tree => dispatch(saveTagHierarchy(tree)),
+  onChange: tree => dispatch(saveTagHierarchy(flatten(tree))),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(TagPage);

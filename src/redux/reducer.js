@@ -4,7 +4,7 @@ import { combineReducers } from 'redux';
 import Immutable from 'immutable';
 import { routerReducer } from 'react-router-redux';
 
-import { ADD_LINK, DEL_LINK, SET_LINKS, DEL_TAG, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DETAILS_ID,
+import { ADD_LINK, DEL_LINK, SET_LINKS, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DETAILS_ID,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES, RSS_UPDATES_DETAILS,
   CHANGE_SORTING_LINKS, CLICK_LINK, SELECT_TAG, ADD_TAG_HIERARCHY,
   TOGGLE_VISIBILITY, SET_TAG_HIERARCHY, SELECT_NODE, REMOVE_TAG_HIERARCHY, RESET } from './actions';
@@ -13,6 +13,9 @@ import { initialStateAuth, initialStateMainData, loginForm, addUrlForm,
   DEFAULT_LINK, initialMenuBar, initialStateTagData } from './DataModels';
 
 import immutableConverter from '../util/ImmutableConverter';
+import { getNodeByName } from '../util/Hierarchy';
+
+import { assert } from '../util/Assert';
 
 function auth(state = initialStateAuth, action) {
   switch (action.type) {
@@ -41,34 +44,6 @@ function menuBar(state = initialMenuBar, action) {
       return state;
   }
 }
-
-const selectTagStateUpdate = (state, action) => {
-  const stateUpdate = {
-    selectedTag: action.tag,
-  };
-  let clone = null;
-  if (!state.tagList) {
-    clone = Immutable.List();
-  } else if (!state.tagList.find(e => e[0] === action.tag)) {
-    clone = state.tagList.slice(0);
-  }
-  if (clone) {
-    clone.push([action.tag, 0]);
-    stateUpdate.tagList = clone;
-  }
-  return stateUpdate;
-};
-
-const manipulateTagStateUpdate = (state, action) => {
-  const index = state.tagList.findIndex(ele => ele[0] === action.tagName);
-  return {
-    tagList: state.tagList.update(
-      index === -1 ? state.tagList.size : index,
-      [action.tagName, 0],
-      val => [val[0], val[1] + action.val],
-    ),
-  };
-};
 
 const updateFeedUpdatesList = (state, action) => {
   const index = state.feedUpdatesList.findIndex(ele => ele.id === action.linkId);
@@ -124,13 +99,9 @@ function mainData(state = initialStateMainData, action) {
         linkList: Immutable.List(action.linkList),
       });
     case SELECT_TAG:
-      return Object.assign({}, state, selectTagStateUpdate(state, action));
-    case DEL_TAG:
       return Object.assign({}, state, {
-        tagList: state.tagList.filter(ele => ele[0] !== action.tagName),
+        selectedTag: action.tag,
       });
-    case MANIPULATE_TAG:
-      return Object.assign({}, state, manipulateTagStateUpdate(state, action));
     case SET_ERROR_MESSAGE:
       return Object.assign({}, state, {
         errorMessage: action.errorMessage,
@@ -170,23 +141,48 @@ function mainData(state = initialStateMainData, action) {
   }
 }
 
+/* eslint-disable no-nested-ternary */
+const getNextIndex = (state) => {
+  const sortedRootElements = state.tagHierarchy
+  .filter(e => e.parent === 'root')
+  .sort((a, b) => (a.index < b.index ? 1 : (a.index === b.index ? 0 : -1)));
+  if (sortedRootElements.size > 0) {
+    return sortedRootElements.get(0).index + 1;
+  }
+  return 0;
+};
+/* eslint-enable no-nested-ternary */
+
+const addTagStateUpdate = (state, newTagName, initialCount) => state.tagHierarchy.push({
+  name: newTagName,
+  count: initialCount,
+  parent: 'root',
+  index: getNextIndex(state),
+});
+
+const manipulateTagStateUpdate = (state, action) => {
+  const tagName = action.tagName;
+  if (action.val < 0) {
+    assert(getNodeByName(state.tagHierarchy, tagName).count > 0, `Count of ${tagName} was 0`);
+  }
+  const index = state.tagHierarchy.findIndex(ele => ele.name === tagName);
+  if (index === -1) {
+    return addTagStateUpdate(state, tagName, action.val);
+  }
+  return state.tagHierarchy.update(
+    index,
+    val => Object.assign({}, val, {
+      count: val.count + action.val,
+    }),
+  );
+};
+
 const removeTagHierarchyUpdateState = (state) => {
   const toDel = state.selectedNode ? state.selectedNode.hierarchyLevelName : null;
-  if (!toDel || toDel === 'root') {
+  if (!toDel || toDel === 'root' || toDel === 'portal') {
     return state.tagHierarchy;
   }
-  const clone = JSON.parse(JSON.stringify(state.tagHierarchy));
-  const searchAndDestroy = (obj) => {
-    obj.children.forEach((ele, index) => {
-      if (ele.count === 0 && ele.hierarchyLevelName === toDel) {
-        obj.children.splice(index, 1);
-      } else {
-        searchAndDestroy(ele);
-      }
-    });
-  };
-  searchAndDestroy(clone);
-  return immutableConverter(clone);
+  return state.tagHierarchy.filter(ele => ele.name !== toDel);
 };
 
 function tagHierarchyData(state = initialStateTagData, action) {
@@ -201,17 +197,13 @@ function tagHierarchyData(state = initialStateTagData, action) {
       return Object.assign({}, state, {
         selectedNode: action.node,
       });
+    case MANIPULATE_TAG:
+      return Object.assign({}, state, {
+        tagHierarchy: manipulateTagStateUpdate(state, action),
+      });
     case ADD_TAG_HIERARCHY:
       return Object.assign({}, state, {
-        tagHierarchy: {
-          hierarchyLevelName: 'root',
-          children: state.tagHierarchy.children.push({
-            hierarchyLevelName: action.name,
-            children: Immutable.List(),
-            count: 0,
-            collapsed: false,
-          }),
-        },
+        tagHierarchy: addTagStateUpdate(state, action.name, 0),
       });
     case REMOVE_TAG_HIERARCHY:
       return Object.assign({}, state, {
