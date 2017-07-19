@@ -5,8 +5,10 @@ import { AllHtmlEntities } from 'html-entities';
 
 import favicon from '../util/favicon';
 import linkDao from '../dao/linkDao';
+import tagDao from '../dao/tagDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
+import TagHierarchyLogic from '../logic/TagHierarchy';
 
 import { DEFAULT_LINK } from '../../src/redux/DataModels';
 import { removeTrailingSlash } from '../util/StringUtil';
@@ -85,6 +87,33 @@ const resolveUrl = (url, pageTitle) => new Promise((resolve) => {
   });
 });
 
+/* eslint-disable no-nested-ternary */
+const getNextIndex = (tagHierarchy) => {
+  const sortedRootElements = tagHierarchy
+  .filter(e => e.parent === 'root')
+  .sort((a, b) => (a.index < b.index ? 1 : (a.index === b.index ? 0 : -1)));
+  if (sortedRootElements.size > 0) {
+    return sortedRootElements.get(0).index + 1;
+  }
+  return 0;
+};
+/* eslint-enable no-nested-ternary */
+
+function updateTagHierarchy(userid, tags) {
+  TagHierarchyLogic.load(userid).then((tagHierarchyRec) => {
+    tags.forEach((tag) => {
+      if (!tagHierarchyRec.tree.find(e => e.name === tag)) {
+        tagHierarchyRec.tree.push({
+          name: tag,
+          parent: 'root',
+          index: getNextIndex(tagHierarchyRec.tree),
+        });
+      }
+    });
+    tagDao.insert(tagHierarchyRec);
+  });
+}
+
 class CreateLinkProcessor extends BaseProcessor {
 
   constructor(req, res, next) {
@@ -123,6 +152,7 @@ class CreateLinkProcessor extends BaseProcessor {
       this.data.id = id;
       rewriteFavicon(this.data);
       this.res.send(this.data);
+      updateTagHierarchy(this.data.userid, this.data.tags);
       winston.loggers.get('application').debug('Create link id=%s to db: %j', id, this.data);
     } catch (err) {
       winston.loggers.get('application').error('Failed to create link. Error = %j', err);
@@ -177,6 +207,7 @@ class UpdateLinkProcessor extends BaseProcessor {
       rewriteFavicon(recToWrite);
       /* eslint-enable no-underscore-dangle */
       this.res.send(recToWrite);
+      updateTagHierarchy(this.data.userid, this.data.tags);
       winston.loggers.get('application').debug('Update link: %j', recToWrite);
     } catch (err) {
       winston.loggers.get('application').error('Failed to create link. Error = %j', err);
