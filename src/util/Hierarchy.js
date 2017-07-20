@@ -38,7 +38,7 @@ export const getSiblings = (tagHierarchy, tagName) => {
   return Immutable.List();
 };
 
-export const getParentName = (tagHierarchy, tagName) => getNodeByName(tagName).parent;
+export const getParentName = (tagHierarchy, tagName) => getNodeByName(tagHierarchy, tagName).parent;
 
 export const getParentSiblings = (tagHierarchy, parentName) =>
   getSiblings(tagHierarchy, parentName);

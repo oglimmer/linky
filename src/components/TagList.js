@@ -12,7 +12,6 @@ import { getSiblings, getChildren, getParentName, getParentSiblings } from '../u
 const divStyle = { marginTop: 9, marginBottom: 9 };
 
 const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
-  console.log(`selectedTag=${selectedTag}`);
   if (!selectedTag) {
     return null;
   }
