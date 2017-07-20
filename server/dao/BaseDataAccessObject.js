@@ -9,6 +9,7 @@ const insert = Promise.promisify(linkyDb.insert);
 const view = Promise.promisify(linkyDb.view);
 const get = Promise.promisify(linkyDb.get);
 const destroy = Promise.promisify(linkyDb.destroy);
+const bulk = Promise.promisify(linkyDb.bulk);
 
 class BaseDataAccessObject {
 
@@ -26,6 +27,10 @@ class BaseDataAccessObject {
 
   insert(obj) {
     return insert(obj);
+  }
+
+  bulk(obj) {
+    return bulk(obj);
   }
 
   listByViewMultiParams(ddoc, viewName, start, end, params) {

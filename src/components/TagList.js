@@ -7,27 +7,30 @@ import { connect } from 'react-redux';
 import Immutable from 'immutable';
 
 import { changeTag } from '../redux/actions';
-import { getSiblings, getChildren, getParent, getParentSiblings } from '../util/Hierarchy';
+import { getSiblings, getChildren, getParentName, getParentSiblings } from '../util/Hierarchy';
 
 const divStyle = { marginTop: 9, marginBottom: 9 };
 
 const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
+  console.log(`selectedTag=${selectedTag}`);
   if (!selectedTag) {
     return null;
   }
-  let parentTagName = getParent(tagHierarchy, selectedTag);
+  let parentTagName = getParentName(tagHierarchy, selectedTag);
   let parents = getParentSiblings(tagHierarchy, parentTagName);
   let siblings = getSiblings(tagHierarchy, selectedTag);
   let children = getChildren(tagHierarchy, selectedTag);
   let originalParentTagName;
+  let labels = ['Parents', 'Siblings', 'Children'];
   if (children.size === 0) {
-    const parentOfParentName = getParent(tagHierarchy, parentTagName);
+    const parentOfParentName = getParentName(tagHierarchy, parentTagName);
     if (parentOfParentName && parentOfParentName !== 'root') {
       originalParentTagName = parentTagName;
       parentTagName = parentOfParentName;
       children = siblings;
       siblings = parents;
       parents = getParentSiblings(tagHierarchy, parentTagName);
+      labels = ['Grandparents', 'Parents', 'Siblings'];
     }
   }
   const getLabel = (tagName, warningLabel) => {
@@ -42,7 +45,7 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
     <div style={divStyle}>
       <div>
         { parents.size === 1 && parents.get(0).name === 'root' ? '' : (
-          <span>Parent: { parents.map(tag => (
+          <span>{labels[0]}: { parents.map(tag => (
             <span key={Math.random()}>
               <span
                 role="link"
@@ -57,7 +60,7 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
           </span>
         ) }
       </div>
-      <div> Siblings:
+      <div>{labels[1]}:
       { siblings.map(tag => (
         <span key={Math.random()}>
           <span
@@ -72,7 +75,7 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
         </span>),
       ) }
       </div>
-      { children && children.size > 0 ? (<span>Children:
+      { children && children.size > 0 ? (<span>{labels[2]}:
         { children.map(tag => (
           <span key={Math.random()}>
             <span

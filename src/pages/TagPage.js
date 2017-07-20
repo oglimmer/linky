@@ -5,9 +5,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { initialLoadTags, selectNodeInTagHierarchy, addTagHierarchyNode,
-  removeTagHierarchyNode, saveTagHierarchy } from '../redux/actions';
+  removeTagHierarchyNode, saveTagHierarchy, renameTagHierarchyNode } from '../redux/actions';
 
-import { toHierarchy, flatten } from '../util/Hierarchy';
+import { toHierarchy, flatten, getChildren } from '../util/Hierarchy';
+
+import { TAGS, READONLY_TAGS } from '../util/TagRegistry';
 
 class TagPage extends React.Component {
   constructor(props) {
@@ -21,8 +23,7 @@ class TagPage extends React.Component {
 
   renderNode(node) {
     const fallbackColor = node.count === 0 ? 'green' : '';
-    const color = ['all', 'broken', 'rss', 'untagged', 'urlupdated', 'portal', 'locked']
-        .find(e => node.hierarchyLevelName === e) ? 'red' : fallbackColor;
+    const color = TAGS.find(e => node.hierarchyLevelName === e) ? 'red' : fallbackColor;
     const style = {
       color,
       backgroundColor: this.props.selectedNode && this.props.selectedNode.hierarchyLevelName === node.hierarchyLevelName ? '#bbbbbb' : '',
@@ -40,12 +41,18 @@ class TagPage extends React.Component {
   }
 
   render() {
+    console.log(JSON.stringify(this.props.tree));
     const tree = toHierarchy(this.props.tree);
-    const isRemoveAvail = this.props.selectedNode && this.props.selectedNode.count === 0;
+    const isRemoveAvail = this.props.selectedNode && this.props.selectedNode.count === 0
+      && getChildren(this.props.tree, this.props.selectedNode.hierarchyLevelName).size === 0
+      && READONLY_TAGS.findIndex(e => e === this.props.selectedNode.hierarchyLevelName) === -1;
+    const isRenameAvail = this.props.selectedNode
+      && TAGS.findIndex(e => e === this.props.selectedNode.hierarchyLevelName) === -1;
     return (
       <div>
-        { this.props.onAdd ? (<button onClick={this.props.onAdd}>add</button>) : ''}
-        { isRemoveAvail ? (<button onClick={this.props.onRemove}>remove</button>) : ''}
+        { this.props.onAdd ? (<button onClick={this.props.onAdd}>Add hierarchy level</button>) : ''}
+        { isRemoveAvail ? (<button onClick={this.props.onRemove}>Remove selected level</button>) : ''}
+        { isRenameAvail ? (<button onClick={() => this.props.onRename(this.props.selectedNode.hierarchyLevelName)}>Rename selected level</button>) : ''}
         <Tree
           paddingLeft={20}
           tree={tree}
@@ -63,12 +70,14 @@ TagPage.propTypes = {
   selectedNode: PropTypes.shape(),
   onAdd: PropTypes.func,
   onRemove: PropTypes.func,
+  onRename: PropTypes.func,
   onChange: PropTypes.func.isRequired,
 };
 TagPage.defaultProps = {
   selectedNode: null,
   onAdd: null,
   onRemove: null,
+  onRename: null,
 };
 
 const mapStateToProps = state => ({
@@ -82,6 +91,7 @@ const mapDispatchToProps = dispatch => ({
   onAdd: () => dispatch(addTagHierarchyNode()),
   onRemove: () => dispatch(removeTagHierarchyNode()),
   onChange: tree => dispatch(saveTagHierarchy(flatten(tree))),
+  onRename: nodeName => dispatch(renameTagHierarchyNode(nodeName)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(TagPage);

@@ -54,6 +54,17 @@ export default {
     });
   },
 
+  patch: function patch(url, obj, authToken) {
+    return fetch(baseUrl + url, {
+      method: 'PATCH',
+      body: JSON.stringify(obj),
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${authToken}`,
+      },
+    });
+  },
+
   delete: function deleteObj(url, authToken) {
     return fetch(baseUrl + url, {
       method: 'DELETE',

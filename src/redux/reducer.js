@@ -6,8 +6,9 @@ import { routerReducer } from 'react-router-redux';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DETAILS_ID,
   SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, SET_ERROR_MESSAGE, RSS_UPDATES, RSS_UPDATES_DETAILS,
-  CHANGE_SORTING_LINKS, CLICK_LINK, SELECT_TAG, ADD_TAG_HIERARCHY,
-  TOGGLE_VISIBILITY, SET_TAG_HIERARCHY, SELECT_NODE, REMOVE_TAG_HIERARCHY, RESET } from './actions';
+  CHANGE_SORTING_LINKS, CLICK_LINK, SELECT_TAG, ADD_TAG_HIERARCHY, RENAME_TAG_HIERARCHY,
+  TOGGLE_VISIBILITY, SET_TAG_HIERARCHY, SELECT_NODE, REMOVE_TAG_HIERARCHY, RESET,
+  RENAME_TAG_LINKLIST } from './actions';
 
 import { initialStateAuth, initialStateMainData, loginForm, addUrlForm,
   DEFAULT_LINK, initialMenuBar, initialStateTagData } from './DataModels';
@@ -56,6 +57,19 @@ const updateFeedUpdatesList = (state, action) => {
       }),
     ),
   };
+};
+
+const renameTagLinklistUpdateState = (state, action) => {
+  const linkList = state.linkList.toArray();
+  linkList.forEach((ele) => {
+    const currentTags = ele.tags.split(' ');
+    const index = currentTags.findIndex(tag => tag === action.oldTagName);
+    if (index !== -1) {
+      currentTags.remove(index, 1);
+      currentTags.push(action.newTagName);
+    }
+  });
+  return Immutable.List(linkList);
 };
 
 function mainData(state = initialStateMainData, action) {
@@ -136,6 +150,10 @@ function mainData(state = initialStateMainData, action) {
       return Object.assign({}, state, {
         selectedLinkForDetails: action.id,
       });
+    case RENAME_TAG_LINKLIST:
+      return Object.assign({}, state, {
+        linkList: renameTagLinklistUpdateState(state, action),
+      });
     default:
       return state;
   }
@@ -185,6 +203,19 @@ const removeTagHierarchyUpdateState = (state) => {
   return state.tagHierarchy.filter(ele => ele.name !== toDel);
 };
 
+const renameTagHierarchyUpdateState = (state, oldName, newName) => {
+  const tagHierarchy = state.tagHierarchy.toArray();
+  tagHierarchy.forEach((ele) => {
+    const elementToUpdate = ele;
+    if (elementToUpdate.name === oldName) {
+      elementToUpdate.name = newName;
+    } else if (ele.parent === oldName) {
+      elementToUpdate.parent = newName;
+    }
+  });
+  return Immutable.List(tagHierarchy);
+};
+
 function tagHierarchyData(state = initialStateTagData, action) {
   switch (action.type) {
     case RESET:
@@ -208,7 +239,10 @@ function tagHierarchyData(state = initialStateTagData, action) {
     case REMOVE_TAG_HIERARCHY:
       return Object.assign({}, state, {
         tagHierarchy: removeTagHierarchyUpdateState(state),
-        selectedNode: null,
+      });
+    case RENAME_TAG_HIERARCHY:
+      return Object.assign({}, state, {
+        tagHierarchy: renameTagHierarchyUpdateState(state, action.oldTagName, action.newTagName),
       });
     default:
       return state;

@@ -34,6 +34,8 @@ export const SET_TAG_HIERARCHY = 'SET_TAG_HIERARCHY';
 export const SELECT_NODE = 'SELECT_NODE';
 export const ADD_TAG_HIERARCHY = 'ADD_TAG_HIERARCHY';
 export const REMOVE_TAG_HIERARCHY = 'REMOVE_TAG_HIERARCHY';
+export const RENAME_TAG_HIERARCHY = 'RENAME_TAG_HIERARCHY';
+export const RENAME_TAG_LINKLIST = 'RENAME_TAG_LINKLIST';
 
 /*
  * action creators
@@ -112,6 +114,19 @@ function setRssDetailsId(id) {
 
 export function toggleVisibilityMenuBar(forceShow) {
   return { type: TOGGLE_VISIBILITY, forceShow: forceShow || false };
+}
+
+function renameTagHierarchy(oldTagName, newTagName) {
+  return { type: RENAME_TAG_HIERARCHY, oldTagName, newTagName };
+}
+
+function renameTagInLinks(oldTagName, newTagName) {
+  return (dispatch, getState) => {
+    if (getState().mainData.linkList) {
+      return { type: RENAME_TAG_LINKLIST, oldTagName, newTagName };
+    }
+    return Promise.resolve();
+  };
 }
 
 // ---------------------------
@@ -322,8 +337,13 @@ export function startRssUpdates() {
 
 export function saveTagHierarchy(tree) {
   return (dispatch, getState) => fetch.put('/rest/tags/hierarchy', { tree }, getState().auth.token)
-      .then(response => response.json())
-      .then(() => dispatch(setTagHierarchy(tree)))
+    .then(response => response.json())
+    .then(() => dispatch(setTagHierarchy(tree)))
+    .catch(error => console.log(error));
+}
+
+export function saveChangedLinklist(oldTagName, newTagName) {
+  return (dispatch, getState) => fetch.patch('/rest/links/tags', { oldTagName, newTagName }, getState().auth.token)
       .catch(error => console.log(error));
 }
 
@@ -343,6 +363,27 @@ export function addTagHierarchyNode() {
     return (dispatch, getState) =>
       Promise.resolve(dispatch({ type: ADD_TAG_HIERARCHY, name: split[0] }))
       .then(() => dispatch(saveTagHierarchy(getState().tagHierarchyData.tagHierarchy)));
+  }
+  return () => {
+    // nop
+  };
+}
+
+export function renameTagHierarchyNode(nodeName) {
+  /* eslint-disable no-alert */
+  const name = prompt('Enter the new node`s name ([a-z0-9])', nodeName);
+  /* eslint-enable no-alert */
+  const simpleWordRegex = new RegExp('^[a-z0-9]*$');
+  const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
+  const newTagName = split[0];
+  if (newTagName) {
+    return (dispatch, getState) => Promise.resolve(dispatch(selectTag(null)))
+      .then(() => Promise.all([
+        dispatch(renameTagInLinks(nodeName, newTagName)),
+        dispatch(saveChangedLinklist(nodeName, newTagName)),
+        Promise.resolve(dispatch(renameTagHierarchy(nodeName, newTagName)))
+          .then(() => dispatch(saveTagHierarchy(getState().tagHierarchyData.tagHierarchy))),
+      ]));
   }
   return () => {
     // nop

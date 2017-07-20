@@ -12,20 +12,21 @@ import TagHierarchyLogic from '../logic/TagHierarchy';
 
 import { DEFAULT_LINK } from '../../src/redux/DataModels';
 import { removeTrailingSlash } from '../util/StringUtil';
+import { UNTAGGED, ALL, RSS, READONLY_TAGS } from '../../src/util/TagRegistry';
 
 // TAGS
 
 const simpleWordRegex = new RegExp('^[a-z0-9]*$');
 const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
-const getTags = (rawTags) => { if (!rawTags) return ['untagged']; return split(rawTags); };
+const getTags = (rawTags) => { if (!rawTags) return [UNTAGGED]; return split(rawTags); };
 const ensureAllTag = (tagsArr) => {
-  if (tagsArr && !tagsArr.find(e => e.toLowerCase() === 'all')) {
+  if (tagsArr && !tagsArr.find(e => e.toLowerCase() === ALL)) {
     tagsArr.push('all');
   }
   return tagsArr;
 };
 const ensureRssTag = (tagsArr, rssUrl) => {
-  const findFctn = e => e.toLowerCase() === 'rss';
+  const findFctn = e => e.toLowerCase() === RSS;
   if (rssUrl && tagsArr && !tagsArr.find(findFctn)) {
     tagsArr.push('rss');
   }
@@ -218,6 +219,50 @@ class UpdateLinkProcessor extends BaseProcessor {
 
 }
 
+class BatchUpdateLinkChangeTagProcessor extends BaseProcessor {
+
+  constructor(req, res, next) {
+    super(req, res, next, true);
+  }
+
+  collectBodyParameters() {
+    const oldTagName = this.req.body.oldTagName.toLowerCase();
+    const newTagName = this.req.body.newTagName.toLowerCase();
+    this.data = {
+      oldTagName,
+      newTagName,
+    };
+  }
+
+  /* eslint-disable class-methods-use-this */
+  propertiesToValidate() {
+    return ['oldTagName', 'newTagName'];
+  }
+  /* eslint-enable class-methods-use-this */
+
+  * process() {
+    try {
+      if (READONLY_TAGS.findIndex(e => e === this.data.oldTagName) === -1) {
+        const rawRows = yield linkDao.listByUseridAndTag(this.data.userid, this.data.oldTagName);
+        const docs = rawRows.map((row) => {
+          const rec = row.value;
+          const index = rec.tags.findIndex(e => e === this.data.oldTagName);
+          rec.tags.splice(index, 1, this.data.newTagName);
+          return rec;
+        });
+        linkDao.bulk({ docs });
+        this.res.send('ok');
+        winston.loggers.get('application').debug('Updated %i links from %s to %s', docs.length, this.data.oldTagName, this.data.newTagName);
+      }
+    } catch (err) {
+      winston.loggers.get('application').error('Failed to create link. Error = %j', err);
+      ResponseUtil.sendErrorResponse500(err, this.res);
+    }
+    this.res.end();
+  }
+
+}
+
 class GetLinkProcessor extends BaseProcessor {
 
   constructor(req, res, next) {
@@ -285,6 +330,11 @@ export default {
 
   updateLink: function updateLink(req, res, next) {
     const crp = new UpdateLinkProcessor(req, res, next);
+    crp.doProcess();
+  },
+
+  batchModifyLinksForTag: function batchModifyLinksForTag(req, res, next) {
+    const crp = new BatchUpdateLinkChangeTagProcessor(req, res, next);
     crp.doProcess();
   },
 

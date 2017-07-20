@@ -9,4 +9,5 @@ export default (app) => {
   app.get('/rest/links/:tags', authorizationController.checkAuthorization, linkController.getLinkCollection);
   app.delete('/rest/links/:linkid', authorizationController.checkAuthorization, linkController.deleteLink);
   app.get('/rest/links/:linkid/favicon', authorizationController.checkAuthorization, imageController.getFavicon);
+  app.patch('/rest/links/tags', authorizationController.checkAuthorization, linkController.batchModifyLinksForTag);
 };

@@ -8,34 +8,43 @@ export const getNodeByName = (tagHierarchy, tagName) => {
   return tagHierarchy.find(e => e.name === tagName);
 };
 
-export const getSiblings = (tagHierarchy, tagName) => {
+export const getChildren = (tagHierarchy, tagName) => {
   const targetNode = getNodeByName(tagHierarchy, tagName);
   if (targetNode) {
-    return tagHierarchy.filter(e => e.count > 0 || e.name === tagName || e.name === 'root')
-      .filter(e => e.parent === targetNode.parent);
+    /* eslint-disable no-use-before-define */
+    return tagHierarchy.filter(e => e.parent === targetNode.name)
+      .filter(child => filterExpressionVisible(child, tagName, tagHierarchy));
+    /* eslint-ensable no-use-before-define */
   }
   return Immutable.List();
 };
 
-export const getParent = (tagHierarchy, tagName) => {
-  assert(typeof tagName === 'string', `${tagName} is not a string!`);
-  return tagHierarchy.find(e => e.name === tagName).parent;
+const filterExpressionVisible = (node, tagName, tagHierarchy) => {
+  // show a node if it has links or it is the selected node
+  if (node.count > 0 || node.name === tagName) {
+    return true;
+  }
+  // also show it if it has at least 1 valid child
+  const childrenOfSibling = getChildren(tagHierarchy, node.name);
+  return childrenOfSibling.size > 0;
 };
+
+export const getSiblings = (tagHierarchy, tagName) => {
+  const targetNode = getNodeByName(tagHierarchy, tagName);
+  if (targetNode) {
+    return tagHierarchy.filter(e => e.parent === targetNode.parent)
+      .filter(sibling => filterExpressionVisible(sibling, tagName, tagHierarchy));
+  }
+  return Immutable.List();
+};
+
+export const getParentName = (tagHierarchy, tagName) => getNodeByName(tagName).parent;
 
 export const getParentSiblings = (tagHierarchy, parentName) =>
   getSiblings(tagHierarchy, parentName);
 
-export const getChildren = (tagHierarchy, tagName) => {
-  const targetNode = getNodeByName(tagHierarchy, tagName);
-  if (targetNode) {
-    return tagHierarchy.filter(e => e.count > 0 || e.name === tagName)
-      .filter(e => e.parent === targetNode.name);
-  }
-  return Immutable.List();
-};
 
 /*
- * METHOD: flatToMap
  * INPUT:
  *   PARENT,NAME
  *   ===========
@@ -64,21 +73,6 @@ export const getChildren = (tagHierarchy, tagName) => {
  *   b = [
  *     { name: c },
  *   ]
- *
- * METHOD: addChildrenToMap
- * INPUT: [parentToElementMap, elementNameToParentMap]
- * OUTPUT:
- * ======
- *   PARENT_OF_ROOT = [
- *     { name: root , children: [a,b] }
- *   ]
- *   root = [
- *     { name: a, children: [] },
- *     { name: b, children: [c] }
- *   ]
- *   b = [
- *     { name: c, children: [] },
- *   ]
  */
 const flatToMap = (flatTagHierarchy) => {
   const parentToElementMap = {};
@@ -103,6 +97,21 @@ const flatToMap = (flatTagHierarchy) => {
   return { parentToElementMap, elementNameToParentMap };
 };
 
+/*
+ * INPUT: [parentToElementMap, elementNameToParentMap]
+ * OUTPUT:
+ * ======
+ *   PARENT_OF_ROOT = [
+ *     { name: root , children: [a,b] }
+ *   ]
+ *   root = [
+ *     { name: a, children: [] },
+ *     { name: b, children: [c] }
+ *   ]
+ *   b = [
+ *     { name: c, children: [] },
+ *   ]
+ */
 const addChildrenToMap = ({ parentToElementMap, elementNameToParentMap }) => {
   Object.keys(elementNameToParentMap).filter(n => n !== 'root').forEach((elementName) => {
     const parentName = elementNameToParentMap[elementName];
@@ -113,6 +122,39 @@ const addChildrenToMap = ({ parentToElementMap, elementNameToParentMap }) => {
   return parentToElementMap;
 };
 
+/*
+ * INPUT: addChildrenToMap
+ * OUTPUT:
+ * ======
+ * {
+ *   hierarchyLevelName: 'root',
+ *   count: 0,
+ *   collapsed: false,
+ *   children: [
+ *     {
+ *       hierarchyLevelName: 'a',
+ *       count: 2,
+ *       collapsed: false,
+ *       children: [
+ *       ]
+ *     },
+ *     {
+ *       hierarchyLevelName: 'b',
+ *       count: 3,
+ *       collapsed: false,
+ *       children: [
+ *         {
+ *           hierarchyLevelName: 'c',
+ *           count: 2,
+ *           collapsed: false,
+ *           children: [
+ *           ]
+ *         }
+ *       ]
+ *     }
+ *   ]
+ * }
+ */
 const mapToHierarchy = (parentToElementMap) => {
   const conv = (element) => {
     /* eslint-disable no-nested-ternary */
@@ -155,7 +197,7 @@ export const flatten = (hierarchy) => {
 
 export default {
   getNodeByName,
-  getParent,
+  getParentName,
   getSiblings,
   getChildren,
   toHierarchy,
