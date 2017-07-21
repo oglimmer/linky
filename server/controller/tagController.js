@@ -45,8 +45,39 @@ class PersistTagHierarchyProcessor extends BaseProcessor {
   }
   /* eslint-enable class-methods-use-this */
 
+  validateData() {
+    const usedNames = {};
+    const usedIndexs = {};
+    this.data.tree.forEach((treeElement) => {
+      if (usedNames[treeElement.name]) {
+        throw new Error(`Failed to persist due to duplicate name=${treeElement.name}`);
+      }
+      if (treeElement.name === 'root' && treeElement.parent === null) {
+        return;
+      }
+      if (treeElement.parent === null) {
+        throw new Error(`Failed to persist due to null === parent=${treeElement.name}`);
+      }
+      let usedIndexForParent = usedIndexs[treeElement.parent];
+      if (!usedIndexForParent) {
+        usedIndexForParent = {};
+        usedIndexs[treeElement.parent] = usedIndexForParent;
+      }
+      const index = `INDEX${treeElement.index}`;
+      if (usedIndexForParent[index]) {
+        throw new Error(`Failed to persist due to duplicate index=${treeElement.index},name=${treeElement.name},parent=${treeElement.parent}`);
+      }
+      usedNames[treeElement.name] = true;
+      usedIndexForParent[index] = true;
+      if (this.data.tree.findIndex(e => e.name === treeElement.parent) === -1) {
+        throw new Error(`Failed to persist due to missing parent=${treeElement.parent}`);
+      }
+    });
+  }
+
   * process() {
     try {
+      this.validateData();
       const rec = yield tagDao.getHierarchyByUser(this.data.userid);
       let recToWrite;
       if (!rec) {

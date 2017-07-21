@@ -171,12 +171,17 @@ const getNextIndex = (state) => {
 };
 /* eslint-enable no-nested-ternary */
 
-const addTagStateUpdate = (state, newTagName, initialCount) => state.tagHierarchy.push({
-  name: newTagName,
-  count: initialCount,
-  parent: 'root',
-  index: getNextIndex(state),
-});
+const addTagStateUpdate = (state, newTagName, initialCount) => {
+  if (state.tagHierarchy.findIndex(e => e.name === newTagName) !== -1) {
+    return state.tagHierarchy;
+  }
+  return state.tagHierarchy.push({
+    name: newTagName,
+    count: initialCount,
+    parent: 'root',
+    index: getNextIndex(state),
+  });
+};
 
 const manipulateTagStateUpdate = (state, action) => {
   const tagName = action.tagName;
