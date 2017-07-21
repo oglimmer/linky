@@ -1,12 +1,14 @@
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Navbar, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
 
 import NavItem from './NavItem';
 import LogoutButton from './LogoutButton';
 
-const Header = () => (
+const Header = ({ authToken }) => (
   <Navbar collapseOnSelect>
     <Navbar.Header>
       <Navbar.Brand>
@@ -16,7 +18,7 @@ const Header = () => (
     </Navbar.Header>
     <Navbar.Collapse>
       <Nav>
-        <NavItem to="/tags">Tags</NavItem>
+        { authToken ? <NavItem to="/tags">Tags</NavItem> : '' }
       </Nav>
       <Nav pullRight>
         <LogoutButton />
@@ -24,5 +26,13 @@ const Header = () => (
     </Navbar.Collapse>
   </Navbar>
 );
+Header.propTypes = {
+  authToken: PropTypes.string.isRequired,
+};
 
-export default Header;
+const mapStateToProps = state => ({
+  authToken: state.auth.token,
+});
+
+
+export default connect(mapStateToProps)(Header);
