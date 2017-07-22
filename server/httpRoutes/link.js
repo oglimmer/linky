@@ -1,5 +1,6 @@
 
 import linkController from '../controller/linkController';
+import importExportController from '../controller/importExportController';
 import authorizationController from '../controller/authorizationController';
 import imageController from '../controller/imageController';
 
@@ -10,4 +11,5 @@ export default (app) => {
   app.delete('/rest/links/:linkid', authorizationController.checkAuthorization, linkController.deleteLink);
   app.get('/rest/links/:linkid/favicon', authorizationController.checkAuthorization, imageController.getFavicon);
   app.patch('/rest/links/tags', authorizationController.checkAuthorization, linkController.batchModifyLinksForTag);
+  app.patch('/rest/links/import', authorizationController.checkAuthorization, importExportController.import);
 };

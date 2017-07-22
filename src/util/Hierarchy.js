@@ -170,7 +170,10 @@ const mapToHierarchy = (parentToElementMap) => {
     /* eslint-enable no-nested-ternary */
     return newElement;
   };
-  return conv(parentToElementMap.$$PARENT_OF_ROOT$$[0]);
+  if (parentToElementMap.$$PARENT_OF_ROOT$$) {
+    return conv(parentToElementMap.$$PARENT_OF_ROOT$$[0]);
+  }
+  return {};
 };
 
 export const toHierarchy =

@@ -16,6 +16,12 @@ export const addUrlForm = {
   notes: '',
 };
 
+export const importExportForm = {
+  bookmarks: '',
+  tagPrefix: '',
+  importNode: 'import',
+};
+
 export const initialStateMainData = {
   linkList: Immutable.List(),
   feedUpdatesList: Immutable.List(),

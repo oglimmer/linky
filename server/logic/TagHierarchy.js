@@ -9,13 +9,13 @@ const getCountForNode = (allTags, nodeName) => {
   return 0;
 };
 
-const init = (allTags) => {
+const init = (allTags, parent = 'root') => {
   if (!allTags.find(e => e[0].toLowerCase() === 'portal')) {
     allTags.push(['portal', 0]);
   }
   const tagHierarchy = allTags.map((e, index) => ({
     name: e[0],
-    parent: 'root',
+    parent,
     index,
   }));
   tagHierarchy.push({
@@ -23,6 +23,13 @@ const init = (allTags) => {
     parent: null,
     index: 0,
   });
+  if (parent !== 'root') {
+    tagHierarchy.push({
+      name: parent,
+      parent: 'root',
+      index: 0,
+    });
+  }
   return tagHierarchy;
 };
 
@@ -39,13 +46,13 @@ const loadResponseData = userid => Promise.all([
   }));
 });
 
-const load = userid => tagDao.getHierarchyByUser(userid)
+const load = (userid, parentForNew = 'root') => tagDao.getHierarchyByUser(userid)
   .then((rec) => {
     if (rec) {
       return rec;
     }
     return tagDao.listAllTags(userid).then(allTags => ({
-      tree: init(allTags),
+      tree: init(allTags, parentForNew),
       userid,
       type: 'hierarchy',
     }));

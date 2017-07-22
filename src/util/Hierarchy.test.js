@@ -32,6 +32,11 @@ it('getChildren: a-aa', () => {
   expect(result).toEqual([{ name: 'aa', parent: 'a', count: 1 }]);
 });
 
+it('toHierarchy: empty', () => {
+  const result = toHierarchy([]);
+  expect(result).toEqual({});
+});
+
 it('toHierarchy: simple', () => {
   const a = [
     {

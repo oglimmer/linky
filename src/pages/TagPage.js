@@ -3,6 +3,8 @@ import React from 'react';
 import Tree from 'react-ui-tree';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import ImmutablePropTypes from 'react-immutable-proptypes';
+import Immutable from 'immutable';
 
 import { initialLoadTags, selectNodeInTagHierarchy, addTagHierarchyNode,
   removeTagHierarchyNode, saveTagHierarchy, renameTagHierarchyNode } from '../redux/actions';
@@ -41,7 +43,6 @@ class TagPage extends React.Component {
   }
 
   render() {
-    console.log(JSON.stringify(this.props.tree));
     const tree = toHierarchy(this.props.tree);
     const isRemoveAvail = this.props.selectedNode && this.props.selectedNode.count === 0
       && getChildren(this.props.tree, this.props.selectedNode.hierarchyLevelName).size === 0
@@ -66,7 +67,7 @@ class TagPage extends React.Component {
 TagPage.propTypes = {
   initialLoadTags: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
-  tree: PropTypes.shape().isRequired,
+  tree: ImmutablePropTypes.listOf(PropTypes.shape()).isRequired,
   selectedNode: PropTypes.shape(),
   onAdd: PropTypes.func,
   onRemove: PropTypes.func,
@@ -81,7 +82,7 @@ TagPage.defaultProps = {
 };
 
 const mapStateToProps = state => ({
-  tree: state.tagHierarchyData.tagHierarchy || {},
+  tree: state.tagHierarchyData.tagHierarchy || Immutable.List(),
   selectedNode: state.tagHierarchyData.selectedNode,
 });
 

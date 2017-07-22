@@ -410,3 +410,8 @@ export function checkAuth(email, password) {
     });
   };
 }
+
+export function importBookmarks(bookmarks, tagPrefix, importNode) {
+  return (dispatch, getState) => fetch.patch('/rest/links/import', { bookmarks, tagPrefix, importNode }, getState().auth.token)
+    .catch(error => console.log(error));
+}

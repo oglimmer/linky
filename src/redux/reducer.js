@@ -11,7 +11,7 @@ import { ADD_LINK, DEL_LINK, SET_LINKS, MANIPULATE_TAG, UPDATE_LINK, RSS_SET_DET
   RENAME_TAG_LINKLIST } from './actions';
 
 import { initialStateAuth, initialStateMainData, loginForm, addUrlForm,
-  DEFAULT_LINK, initialMenuBar, initialStateTagData } from './DataModels';
+  DEFAULT_LINK, initialMenuBar, initialStateTagData, importExportForm } from './DataModels';
 
 import immutableConverter from '../util/ImmutableConverter';
 import { getNodeByName } from '../util/Hierarchy';
@@ -261,5 +261,6 @@ export default combineReducers({
   menuBar,
   login: combineForms(loginForm, 'login'),
   addUrl: combineForms(addUrlForm, 'addUrl'),
+  importExport: combineForms(importExportForm, 'importExport'),
   router: routerReducer,
 });

@@ -1,119 +1,14 @@
 
 import winston from 'winston';
-import requestRaw from 'request';
-import { AllHtmlEntities } from 'html-entities';
 
-import favicon from '../util/favicon';
 import linkDao from '../dao/linkDao';
-import tagDao from '../dao/tagDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
-import TagHierarchyLogic from '../logic/TagHierarchy';
+import { fixUrl, ensureRssTag, ensureAllTag, getTags, rewriteFavicon,
+  createRecord, presistRecord, updateTagHierarchy } from '../logic/Link';
 
-import { DEFAULT_LINK } from '../../src/redux/DataModels';
-import { removeTrailingSlash } from '../util/StringUtil';
-import { UNTAGGED, ALL, RSS, READONLY_TAGS } from '../../src/util/TagRegistry';
+import { READONLY_TAGS } from '../../src/util/TagRegistry';
 
-// TAGS
-
-const simpleWordRegex = new RegExp('^[a-z0-9]*$');
-const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
-const getTags = (rawTags) => { if (!rawTags) return [UNTAGGED]; return split(rawTags); };
-const ensureAllTag = (tagsArr) => {
-  if (tagsArr && !tagsArr.find(e => e.toLowerCase() === ALL)) {
-    tagsArr.push('all');
-  }
-  return tagsArr;
-};
-const ensureRssTag = (tagsArr, rssUrl) => {
-  const findFctn = e => e.toLowerCase() === RSS;
-  if (rssUrl && tagsArr && !tagsArr.find(findFctn)) {
-    tagsArr.push('rss');
-  }
-  if (!rssUrl && tagsArr && tagsArr.find(findFctn)) {
-    tagsArr.splice(tagsArr.findIndex(findFctn), 1);
-  }
-  return tagsArr;
-};
-
-// FAVICON
-const rewriteFavicon = (rec) => {
-  const recToMod = rec;
-  recToMod.faviconUrl = rec.faviconUrl && `https://linky.oglimmer.de/rest/links/${rec.id}/favicon`;
-};
-
-// URL
-const isHtml = (response) => {
-  const contentTypeHeader = response.headers['content-type'];
-  if (!contentTypeHeader) {
-    return false;
-  }
-  return contentTypeHeader.indexOf('text/html') === 0;
-};
-const fixUrl = url => (url && !url.startsWith('http') ? `http://${url}` : url);
-const resolveUrl = (url, pageTitle) => new Promise((resolve) => {
-  const httpGetCall = requestRaw.get({
-    url,
-    followAllRedirects: true,
-    timeout: 500,
-  });
-  let buffer = '';
-  let title = pageTitle || url;
-  let linkUrl = url;
-  httpGetCall.on('response', (response) => {
-    linkUrl = removeTrailingSlash(response.request.href);
-    if (pageTitle || !isHtml(response)) {
-      httpGetCall.abort();
-      resolve({ linkUrl, title });
-    }
-  });
-  httpGetCall.on('data', (data) => {
-    const html = data.toString().replace(/[\n\r]/g, '');
-    buffer += html;
-    const findTitleRegEx = new RegExp('<title>(.*?)</title>', 'g');
-    const match = findTitleRegEx.exec(buffer);
-    if (match && match.length > 1) {
-      const entities = new AllHtmlEntities();
-      title = entities.decode(match[1]);
-      httpGetCall.abort();
-      resolve({ linkUrl, title });
-    }
-  });
-  httpGetCall.on('complete', () => {
-    resolve({ linkUrl, title });
-  });
-  httpGetCall.on('error', () => {
-    httpGetCall.abort();
-    resolve({ linkUrl, title });
-  });
-});
-
-/* eslint-disable no-nested-ternary */
-const getNextIndex = (tagHierarchy) => {
-  const sortedRootElements = tagHierarchy
-  .filter(e => e.parent === 'root')
-  .sort((a, b) => (a.index < b.index ? 1 : (a.index === b.index ? 0 : -1)));
-  if (sortedRootElements.size > 0) {
-    return sortedRootElements.get(0).index + 1;
-  }
-  return 0;
-};
-/* eslint-enable no-nested-ternary */
-
-function updateTagHierarchy(userid, tags) {
-  TagHierarchyLogic.load(userid).then((tagHierarchyRec) => {
-    tags.forEach((tag) => {
-      if (!tagHierarchyRec.tree.find(e => e.name === tag)) {
-        tagHierarchyRec.tree.push({
-          name: tag,
-          parent: 'root',
-          index: getNextIndex(tagHierarchyRec.tree),
-        });
-      }
-    });
-    tagDao.insert(tagHierarchyRec);
-  });
-}
 
 class CreateLinkProcessor extends BaseProcessor {
 
@@ -122,23 +17,9 @@ class CreateLinkProcessor extends BaseProcessor {
   }
 
   collectBodyParameters() {
-    const url = fixUrl(this.req.body.url);
-    const rssUrl = fixUrl(this.req.body.rssUrl);
-    const tags = ensureRssTag(ensureAllTag(getTags(this.req.body.tags)), rssUrl);
-    const { pageTitle, notes } = this.req.body;
-    return resolveUrl(url, pageTitle)
-      .then(({ linkUrl, title }) => favicon(linkUrl)
-      .then((faviconUrl) => {
-        this.data = Object.assign({}, DEFAULT_LINK, {
-          type: 'link',
-          tags,
-          linkUrl,
-          faviconUrl,
-          rssUrl,
-          pageTitle: title,
-          notes,
-        });
-      }));
+    const { url, rssUrl, tags, pageTitle, notes } = this.req.body;
+    return createRecord({ url, rssUrl, tagsAsString: tags, pageTitle, notes })
+      .then((rec) => { this.data = rec; });
   }
 
   /* eslint-disable class-methods-use-this */
@@ -149,7 +30,7 @@ class CreateLinkProcessor extends BaseProcessor {
 
   * process() {
     try {
-      const { id } = yield linkDao.insert(this.data);
+      const { id } = yield presistRecord(this.data);
       this.data.id = id;
       rewriteFavicon(this.data);
       this.res.send(this.data);

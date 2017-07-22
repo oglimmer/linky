@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import NavItem from './NavItem';
 import LogoutButton from './LogoutButton';
 
+
 const Header = ({ authToken }) => (
   <Navbar collapseOnSelect>
     <Navbar.Header>
@@ -19,6 +20,7 @@ const Header = ({ authToken }) => (
     <Navbar.Collapse>
       <Nav>
         { authToken ? <NavItem to="/tags">Tags</NavItem> : '' }
+        { authToken ? <NavItem to="/importExport">Import/Export</NavItem> : '' }
       </Nav>
       <Nav pullRight>
         <LogoutButton />
