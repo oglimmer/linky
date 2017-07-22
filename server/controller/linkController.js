@@ -24,7 +24,7 @@ class CreateLinkProcessor extends BaseProcessor {
 
   /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return ['linkUrl'];
+    return [{ name: 'linkUrl' }];
   }
   /* eslint-enable class-methods-use-this */
 
@@ -69,7 +69,7 @@ class UpdateLinkProcessor extends BaseProcessor {
 
   /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return ['linkUrl', 'linkid'];
+    return [{ name: 'linkUrl' }, { name: 'linkid' }];
   }
   /* eslint-enable class-methods-use-this */
 
@@ -117,7 +117,7 @@ class BatchUpdateLinkChangeTagProcessor extends BaseProcessor {
 
   /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return ['oldTagName', 'newTagName'];
+    return [{ name: 'oldTagName' }, { name: 'newTagName' }];
   }
   /* eslint-enable class-methods-use-this */
 
@@ -184,7 +184,7 @@ class DeleteProcessor extends BaseProcessor {
 
   /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return ['linkid'];
+    return [{ name: 'linkid' }];
   }
   /* eslint-enable class-methods-use-this */
 

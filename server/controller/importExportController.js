@@ -58,7 +58,7 @@ class ImportProcessor extends BaseProcessor {
 
   /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return ['importNode'];
+    return [{ name: 'importNode', default: 'root' }];
   }
   /* eslint-enable class-methods-use-this */
 

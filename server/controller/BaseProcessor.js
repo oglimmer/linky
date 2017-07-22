@@ -33,7 +33,7 @@ import ResponseUtil from '../../src/util/ResponseUtil';
   /* eslint-disable class-methods-use-this */
   /** maybe overwritten */
   propertiesToValidate() {
-    return [];
+    return {};
   }
 
   /** maybe overwritten */
@@ -48,12 +48,16 @@ import ResponseUtil from '../../src/util/ResponseUtil';
 
   /* final*/ isValid() {
     const propertiesToValidate = this.propertiesToValidate();
-    for (let i = 0; i < propertiesToValidate.length; i += 1) {
-      const prop = propertiesToValidate[i];
-      if (!this.data[prop] || (typeof this.data[prop] === 'string' && !this.data[prop].trim())) {
-        ResponseUtil.sendErrorResponseNotEmpty(this.errorCodeWhenInvalid(), prop, this.res);
-        this.res.end();
-        return false;
+    const keysToValidate = Object.keys(propertiesToValidate);
+    for (let i = 0; i < keysToValidate.length; i += 1) {
+      const prop = propertiesToValidate[keysToValidate[i]];
+      if (!this.data[prop.name] || (typeof this.data[prop.name] === 'string' && !this.data[prop.name].trim())) {
+        if (!prop.default) {
+          ResponseUtil.sendErrorResponseNotEmpty(this.errorCodeWhenInvalid(), prop.name, this.res);
+          this.res.end();
+          return false;
+        }
+        this.data[prop.name] = prop.default;
       }
     }
     return true;

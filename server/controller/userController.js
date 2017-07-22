@@ -18,7 +18,7 @@ class CreateUserProcessor extends BaseProcessor {
 
   /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return ['email', 'password'];
+    return [{ name: 'email' }, { name: 'password' }];
   }
   /* eslint-enable class-methods-use-this */
 
@@ -61,7 +61,7 @@ class AuthenticateProcessor extends BaseProcessor {
 
   /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return ['email', 'password'];
+    return [{ name: 'email' }, { name: 'password' }];
   }
 
   errorCodeWhenInvalid() {

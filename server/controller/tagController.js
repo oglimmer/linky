@@ -41,7 +41,7 @@ class PersistTagHierarchyProcessor extends BaseProcessor {
 
   /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return ['tree'];
+    return [{ name: 'tree' }];
   }
   /* eslint-enable class-methods-use-this */
 
