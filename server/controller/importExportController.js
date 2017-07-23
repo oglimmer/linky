@@ -1,7 +1,7 @@
 
 import winston from 'winston';
-
 import cheerio from 'cheerio';
+import BlueBirdPromise from 'bluebird';
 
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
@@ -67,11 +67,11 @@ class ImportProcessor extends BaseProcessor {
     try {
       const $ = cheerio.load(this.data.bookmarks);
       const allTags = new Set();
-      const docsPromises = [];
-      $('a').each((index, a) => {
+      BlueBirdPromise.map($('a').toArray(), (a) => {
         const $a = $(a);
         const title = $a.text();
         const url = $a.attr('href');
+        winston.loggers.get('application').debug(`start to process ${url}...`);
         const categories = getCategories($a).map((c) => {
           let cat = c.replace(/[^a-zA-Z\d]*/g, '').toLowerCase();
           if (!cat) {
@@ -79,7 +79,7 @@ class ImportProcessor extends BaseProcessor {
           }
           return `${this.data.tagPrefix}${cat}`;
         });
-        docsPromises.push(createRecord({
+        return createRecord({
           url,
           rssUrl: null,
           tagsAsArray: categories,
@@ -93,11 +93,11 @@ class ImportProcessor extends BaseProcessor {
             updateObj.notes = `Original url was ${url}`;
           }
           return Object.assign({}, rec, updateObj);
-        }));
-      });
-      Promise.all(docsPromises)
+        });
+      }, { concurrency: 5 })
         .then(docs => linkDao.bulk({ docs }))
-        .then(() => updateTagHierarchy(this.data.userid, allTags, this.data.importNode));
+        .then(() => updateTagHierarchy(this.data.userid, allTags, this.data.importNode))
+        .then(() => winston.loggers.get('application').debug('import done.'));
       this.res.send('ok');
     } catch (err) {
       winston.loggers.get('application').error(err);
