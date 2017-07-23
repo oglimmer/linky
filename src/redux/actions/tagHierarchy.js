@@ -2,7 +2,8 @@
 import fetch from '../../util/fetch';
 
 import { MANIPULATE_TAG, RENAME_TAG_HIERARCHY, SET_TAG_HIERARCHY,
-  SELECT_NODE, REMOVE_TAG_HIERARCHY, ADD_TAG_HIERARCHY } from '../actionTypes';
+  SELECT_NODE, REMOVE_TAG_HIERARCHY, ADD_TAG_HIERARCHY,
+  UPDATE_COUNT_IN_HIERARCHY } from '../actionTypes';
 
 import { selectTag, renameTagInLinks, removeTagFromLinks } from './links';
 
@@ -20,6 +21,10 @@ function setTagHierarchy(tagHierarchy) {
 
 export function selectNodeInTagHierarchy(node) {
   return { type: SELECT_NODE, node };
+}
+
+function updateCountInHierarchy(tagName, count) {
+  return { type: UPDATE_COUNT_IN_HIERARCHY, tagName, count };
 }
 
 export function fetchTagHierarchy() {
@@ -61,6 +66,9 @@ export function removeTagHierarchyNode() {
       if (selectedNode.count > 0) {
         promises.push(dispatch(removeTagFromLinks(tagName)));
       }
+      if (selectedNode.hierarchyLevelName === getState().mainData.selectedTag) {
+        promises.push(dispatch(selectTag('portal')));
+      }
     }
     return Promise.all(promises);
   };
@@ -84,23 +92,25 @@ export function addTagHierarchyNode() {
 
 export function saveChangedLinklist(oldTagName, newTagName) {
   return (dispatch, getState) => fetch.patch('/rest/links/tags', { oldTagName, newTagName }, getState().auth.token)
-      .catch(error => console.log(error));
+    .then(response => response.json())
+    .then(jsonResponse => dispatch(updateCountInHierarchy(newTagName, jsonResponse.count)))
+    .catch(error => console.log(error));
 }
 
+// rename or merge
 export function renameTagHierarchyNode(nodeName) {
   /* eslint-disable no-alert */
-  const name = prompt('Enter the new node`s name ([a-z0-9])', nodeName);
+  const name = prompt('Enter the new/existing node`s name ([a-z0-9])', nodeName);
   /* eslint-enable no-alert */
   const simpleWordRegex = new RegExp('^[a-z0-9]*$');
   const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
   const newTagName = split[0];
   if (newTagName) {
-    return (dispatch, getState) => Promise.resolve(dispatch(selectTag(null)))
+    return dispatch => Promise.resolve(dispatch(selectTag(null)))
       .then(() => Promise.all([
         dispatch(renameTagInLinks(nodeName, newTagName)),
+        Promise.resolve(dispatch(renameTagHierarchy(nodeName, newTagName))),
         dispatch(saveChangedLinklist(nodeName, newTagName)),
-        Promise.resolve(dispatch(renameTagHierarchy(nodeName, newTagName)))
-          .then(() => dispatch(saveTagHierarchy(getState().tagHierarchyData.tagHierarchy))),
       ]));
   }
   return () => {

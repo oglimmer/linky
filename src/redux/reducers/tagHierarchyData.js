@@ -2,7 +2,8 @@
 import Immutable from 'immutable';
 
 import { MANIPULATE_TAG, ADD_TAG_HIERARCHY, RENAME_TAG_HIERARCHY,
-  SET_TAG_HIERARCHY, SELECT_NODE, REMOVE_TAG_HIERARCHY, RESET } from './../actionTypes';
+  SET_TAG_HIERARCHY, SELECT_NODE, REMOVE_TAG_HIERARCHY, RESET,
+  UPDATE_COUNT_IN_HIERARCHY } from './../actionTypes';
 
 import { initialStateTagData } from './../DataModels';
 
@@ -57,11 +58,18 @@ const removeTagHierarchyUpdateState = (state, action) =>
 
 const renameTagHierarchyUpdateState = (state, oldName, newName) => {
   const tagHierarchy = state.tagHierarchy.toArray();
+  const indexTarget = tagHierarchy.findIndex(e => e.name === newName);
+  const indexOld = tagHierarchy.findIndex(e => e.name === oldName);
+  if (indexTarget === -1) {
+    // rename
+    tagHierarchy[indexOld].name = newName;
+  } else {
+    // merge
+    tagHierarchy.splice(indexOld, 1);
+  }
   tagHierarchy.forEach((ele) => {
     const elementToUpdate = ele;
-    if (elementToUpdate.name === oldName) {
-      elementToUpdate.name = newName;
-    } else if (ele.parent === oldName) {
+    if (ele.parent === oldName) {
       elementToUpdate.parent = newName;
     }
   });
@@ -69,7 +77,6 @@ const renameTagHierarchyUpdateState = (state, oldName, newName) => {
 };
 
 export default function tagHierarchyData(state = initialStateTagData, action) {
-  console.log(`action = ${JSON.stringify(action)}`);
   switch (action.type) {
     case RESET:
       return initialStateTagData;
@@ -96,6 +103,15 @@ export default function tagHierarchyData(state = initialStateTagData, action) {
     case RENAME_TAG_HIERARCHY:
       return Object.assign({}, state, {
         tagHierarchy: renameTagHierarchyUpdateState(state, action.oldTagName, action.newTagName),
+      });
+    case UPDATE_COUNT_IN_HIERARCHY:
+      return Object.assign({}, state, {
+        tagHierarchy: state.tagHierarchy.update(
+          state.tagHierarchy.findIndex(ele => ele.name === action.tagName),
+          val => Object.assign({}, val, {
+            count: action.count,
+          }),
+        ),
       });
     default:
       return state;

@@ -11,9 +11,6 @@ import { initialStateAuth, loginForm, addUrlForm, initialMenuBar, importExportFo
 import mainData from './reducers/mainData';
 import tagHierarchyData from './reducers/tagHierarchyData';
 
-console.log('SET_AUTH_TOKEN');
-console.log(SET_AUTH_TOKEN);
-
 function auth(state = initialStateAuth, action) {
   switch (action.type) {
     case RESET:

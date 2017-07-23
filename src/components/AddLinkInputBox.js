@@ -100,7 +100,6 @@ const mapStateToPropsAddLinkInputBox = state => ({
 const mapDispatchToProps = dispatch => ({
   onSubmit: (formData, linkId) => {
     if (formData.url.trim()) {
-      console.log(formData);
       dispatch(
         persistLink(linkId, formData.url.trim(), formData.tags.trim(),
           formData.rssUrl.trim(), formData.pageTitle.trim(), formData.notes.trim()));

@@ -6,6 +6,7 @@ import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 import TagHierarchyLogic from '../logic/TagHierarchy';
+import { READONLY_TAGS } from '../../src/util/TagRegistry';
 
 class GetTagHierarchyProcessor extends BaseProcessor {
 
@@ -118,13 +119,23 @@ class RemoveTagProcessor extends BaseProcessor {
   }
   /* eslint-enable class-methods-use-this */
 
+  validateData(tagHierarchyRec) {
+    if (READONLY_TAGS.findIndex(e => e === this.data.name) !== -1) {
+      throw new Error(`Cannot delete ${this.data.name} because this is a system tag.`);
+    }
+    if (tagHierarchyRec &&
+      tagHierarchyRec.tree.findIndex(e => e.parent === this.data.name) !== -1) {
+      throw new Error(`Cannot delete ${this.data.name} because it has child tags.`);
+    }
+  }
+
   * process() {
     try {
-      // valiate operation (prevent deletion of system tags)
-      const rec = yield tagDao.getHierarchyByUser(this.data.userid);
-      if (rec) {
-        const recToWrite = Object.assign({}, rec, {
-          tree: rec.tree.filter(e => e.name !== this.data.name),
+      const tagHierarchyRec = yield tagDao.getHierarchyByUser(this.data.userid);
+      this.validateData(tagHierarchyRec);
+      if (tagHierarchyRec) {
+        const recToWrite = Object.assign({}, tagHierarchyRec, {
+          tree: tagHierarchyRec.tree.filter(e => e.name !== this.data.name),
         });
         tagDao.insert(recToWrite);
       }

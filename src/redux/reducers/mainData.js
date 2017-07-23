@@ -24,12 +24,11 @@ const updateFeedUpdatesList = (state, action) => {
 const renameTagLinklistUpdateState = (state, action) => {
   const linkList = state.linkList.toArray();
   linkList.forEach((ele) => {
-    const currentTags = ele.tags.split(' ');
-    const index = currentTags.findIndex(tag => tag === action.oldTagName);
+    const index = ele.tags.findIndex(tag => tag === action.oldTagName);
     if (index !== -1) {
-      currentTags.remove(index, 1);
-      if (currentTags.findIndex(tag => tag === action.newTagName) === -1) {
-        currentTags.push(action.newTagName);
+      ele.tags.splice(index, 1);
+      if (ele.tags.findIndex(tag => tag === action.newTagName) === -1) {
+        ele.tags.push(action.newTagName);
       }
     }
   });
@@ -39,10 +38,9 @@ const renameTagLinklistUpdateState = (state, action) => {
 const removeTagLinklistUpdateState = (state, action) => {
   const linkList = state.linkList.toArray();
   linkList.forEach((ele) => {
-    const currentTags = ele.tags.split(' ');
-    const index = currentTags.findIndex(tag => tag === action.tagName);
+    const index = ele.tags.findIndex(tag => tag === action.tagName);
     if (index !== -1) {
-      currentTags.remove(index, 1);
+      ele.tags.splice(index, 1);
     }
   });
   return Immutable.List(linkList);

@@ -139,7 +139,7 @@ export const createRecord = (rec) => {
   const { url, rssUrl, tagsAsString, tagsAsArray, pageTitle, notes } = rec;
   const fixedUrl = fixUrl(url);
   const fixedRssUrl = fixUrl(rssUrl);
-  const fixedTags = tagsAsString ? getTags(tagsAsString) : getTagsFromArray(tagsAsArray);
+  const fixedTags = Object.prototype.hasOwnProperty.call(rec, 'tagsAsString') ? getTags(tagsAsString) : getTagsFromArray(tagsAsArray);
   const tags = ensureRssTag(ensureAllTag(fixedTags), fixedRssUrl);
   return resolveUrl(fixedUrl, pageTitle)
     .then(({ linkUrl, title }) => favicon(linkUrl)
