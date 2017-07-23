@@ -10,7 +10,8 @@ import TagPage from '../pages/TagPage';
 import Impressum from '../pages/Impressum';
 import ImportExport from '../pages/ImportExport';
 
-import { initialLoadLinks, initialLoadTags } from '../../src/redux/actions';
+import { initialLoadLinks } from '../../src/redux/actions/links';
+import { initialLoadTags } from '../../src/redux/actions/tagHierarchy';
 
 const isAuth = (store) => {
   const { auth } = store.getState();

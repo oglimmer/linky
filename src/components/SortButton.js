@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
-import { changeSortingLink } from '../redux/actions';
+import { changeSortingLink } from '../redux/actions/links';
 
 // ----------------------Presentational Component-----------------------------------
 

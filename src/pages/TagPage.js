@@ -6,8 +6,8 @@ import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import Immutable from 'immutable';
 
-import { initialLoadTags, selectNodeInTagHierarchy, addTagHierarchyNode,
-  removeTagHierarchyNode, saveTagHierarchy, renameTagHierarchyNode } from '../redux/actions';
+import { initialLoadTags, selectNodeInTagHierarchy, addTagHierarchyNode, removeTagHierarchyNode,
+  saveTagHierarchy, renameTagHierarchyNode } from '../redux/actions/tagHierarchy';
 
 import { toHierarchy, flatten, getChildren } from '../util/Hierarchy';
 
@@ -44,7 +44,7 @@ class TagPage extends React.Component {
 
   render() {
     const tree = toHierarchy(this.props.tree);
-    const isRemoveAvail = this.props.selectedNode && this.props.selectedNode.count === 0
+    const isRemoveAvail = this.props.selectedNode
       && getChildren(this.props.tree, this.props.selectedNode.hierarchyLevelName).size === 0
       && READONLY_TAGS.findIndex(e => e === this.props.selectedNode.hierarchyLevelName) === -1;
     const isRenameAvail = this.props.selectedNode

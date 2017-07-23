@@ -1,0 +1,32 @@
+
+// global
+
+export const RESET = 'RESET';
+export const TOGGLE_VISIBILITY = 'TOGGLE_VISIBILITY';
+export const SET_AUTH_TOKEN = 'SET_AUTH_TOKEN';
+export const CLEAR_AUTH_TOKEN = 'CLEAR_AUTH_TOKEN';
+
+// mainData
+
+export const ADD_LINK = 'ADD_LINK';
+export const UPDATE_LINK = 'UPDATE_LINK';
+export const DEL_LINK = 'DEL_LINK';
+export const SET_LINKS = 'SET_LINKS';
+export const SELECT_TAG = 'SELECT_TAG';
+export const SET_ERROR_MESSAGE = 'SET_ERROR_MESSAGE';
+export const CHANGE_SORTING_LINKS = 'CHANGE_SORTING_LINKS';
+export const CLICK_LINK = 'CLICK_LINK';
+export const RSS_UPDATES = 'RSS_UPDATES';
+export const RSS_UPDATES_DETAILS = 'RSS_UPDATES_DETAILS';
+export const RSS_SET_DETAILS_ID = 'RSS_SET_DETAILS_ID';
+export const RENAME_TAG_LINKLIST = 'RENAME_TAG_LINKLIST';
+export const REMOVE_TAG_FROM_LINKS = 'REMOVE_TAG_FROM_LINKS';
+
+// tagHierarchyData
+
+export const SET_TAG_HIERARCHY = 'SET_TAG_HIERARCHY';
+export const SELECT_NODE = 'SELECT_NODE';
+export const MANIPULATE_TAG = 'MANIPULATE_TAG';
+export const ADD_TAG_HIERARCHY = 'ADD_TAG_HIERARCHY';
+export const REMOVE_TAG_HIERARCHY = 'REMOVE_TAG_HIERARCHY';
+export const RENAME_TAG_HIERARCHY = 'RENAME_TAG_HIERARCHY';

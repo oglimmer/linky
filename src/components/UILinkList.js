@@ -5,7 +5,8 @@ import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 
-import { editLink, clickLink, toggleVisibilityMenuBar } from '../redux/actions';
+import { toggleVisibilityMenuBar } from '../redux/actions';
+import { editLink, clickLink } from '../redux/actions/links';
 
 import UILinkListElement from './UILinkListElement';
 import SortButton from './SortButton';

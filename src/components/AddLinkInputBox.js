@@ -5,7 +5,8 @@ import { Button, FormGroup } from 'react-bootstrap';
 import { Form } from 'react-redux-form';
 import { connect } from 'react-redux';
 
-import { persistLink, delLink, resetAddLinkFields, toggleVisibilityMenuBar } from '../redux/actions';
+import { toggleVisibilityMenuBar } from '../redux/actions';
+import { persistLink, delLink, resetAddLinkFields } from '../redux/actions/links';
 import UIInputElement from '../components/UIInputElement';
 
 const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, isAddEnabled }) => {

@@ -6,7 +6,7 @@ import { Button, ListGroupItem } from 'react-bootstrap';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import Immutable from 'immutable';
 
-import { fetchRssUpdatesDetails } from '../redux/actions';
+import { fetchRssUpdatesDetails } from '../redux/actions/links';
 
 const style = {
   borderBottom: '1px dotted #000',

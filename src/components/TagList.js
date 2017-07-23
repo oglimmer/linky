@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 // import ImmutablePropTypes from 'react-immutable-proptypes';
 import Immutable from 'immutable';
 
-import { changeTag } from '../redux/actions';
+import { changeTag } from '../redux/actions/links';
 import { getSiblings, getChildren, getParentName, getParentSiblings } from '../util/Hierarchy';
 
 const divStyle = { marginTop: 9, marginBottom: 9 };

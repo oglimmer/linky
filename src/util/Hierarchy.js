@@ -21,7 +21,7 @@ export const getChildren = (tagHierarchy, tagName) => {
 
 const filterExpressionVisible = (node, tagName, tagHierarchy) => {
   // show a node if it has links or it is the selected node
-  if (node.count > 0 || node.name === tagName) {
+  if (node.count > 0 || node.name === tagName || node.name === 'portal') {
     return true;
   }
   // also show it if it has at least 1 valid child

@@ -2,6 +2,7 @@
 import winston from 'winston';
 
 import tagDao from '../dao/tagDao';
+import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 import TagHierarchyLogic from '../logic/TagHierarchy';
@@ -33,10 +34,7 @@ class PersistTagHierarchyProcessor extends BaseProcessor {
 
   collectBodyParameters() {
     const { tree } = this.req.body;
-    console.log(JSON.stringify(tree));
-    this.data = {
-      tree,
-    };
+    this.data = { tree };
   }
 
   /* eslint-disable class-methods-use-this */
@@ -103,15 +101,65 @@ class PersistTagHierarchyProcessor extends BaseProcessor {
 
 }
 
+class RemoveTagProcessor extends BaseProcessor {
+
+  constructor(req, res, next) {
+    super(req, res, next, true);
+  }
+
+  collectBodyParameters() {
+    const { name } = this.req.params;
+    this.data = { name };
+  }
+
+  /* eslint-disable class-methods-use-this */
+  propertiesToValidate() {
+    return [{ name: 'name' }];
+  }
+  /* eslint-enable class-methods-use-this */
+
+  * process() {
+    try {
+      // valiate operation (prevent deletion of system tags)
+      const rec = yield tagDao.getHierarchyByUser(this.data.userid);
+      if (rec) {
+        const recToWrite = Object.assign({}, rec, {
+          tree: rec.tree.filter(e => e.name !== this.data.name),
+        });
+        tagDao.insert(recToWrite);
+      }
+      const rows = yield linkDao.listByUseridAndTag(this.data.userid, this.data.name);
+      const docsToWrite = rows.map((row) => {
+        const recLink = row.value;
+        recLink.tags = recLink.tags.filter(e => e !== this.data.name);
+        return recLink;
+      });
+      linkDao.bulk({ docs: docsToWrite });
+      this.res.send({ result: 'ok' });
+      winston.loggers.get('application').debug('Tag removed name=%s', this.data.name);
+    } catch (err) {
+      winston.loggers.get('application').error('Failed to remove Tag from TagHierarchy and LinkList. Error = %j', err);
+      ResponseUtil.sendErrorResponse500(err, this.res);
+    }
+    this.res.end();
+  }
+
+}
+
 export default {
 
-  getTagHierarchy: function getTagHierarchy(req, res, next) {
+  getTagHierarchy: (req, res, next) => {
     const glp = new GetTagHierarchyProcessor(req, res, next);
     glp.doProcess();
   },
 
-  persistTagHierarchy: function persistTagHierarchy(req, res, next) {
+  persistTagHierarchy: (req, res, next) => {
     const pthp = new PersistTagHierarchyProcessor(req, res, next);
+    pthp.doProcess();
+  },
+
+  removeTag: (req, res, next) => {
+    const pthp = new RemoveTagProcessor(req, res, next);
     pthp.doProcess();
   },
 

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
 
-import { startRssUpdates } from '../redux/actions';
+import { startRssUpdates } from '../redux/actions/links';
 
 import Routing from '../routes/Routing';
 
