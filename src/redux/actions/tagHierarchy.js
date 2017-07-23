@@ -90,7 +90,7 @@ export function addTagHierarchyNode() {
   };
 }
 
-export function saveChangedLinklist(oldTagName, newTagName) {
+function saveChangedLinklist(oldTagName, newTagName) {
   return (dispatch, getState) => fetch.patch('/rest/links/tags', { oldTagName, newTagName }, getState().auth.token)
     .then(response => response.json())
     .then(jsonResponse => dispatch(updateCountInHierarchy(newTagName, jsonResponse.count)))

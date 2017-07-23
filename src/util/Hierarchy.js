@@ -64,14 +64,14 @@ export const getParentSiblings = (tagHierarchy, parentName) =>
  *   parentToElementMap:
  *   ===================
  *   PARENT_OF_ROOT = [
- *     { name: root }
+ *     { name: root, count: .., index: ..., children: [] }
  *   ]
  *   root = [
- *     { name: a },
- *     { name: b }
+ *     { name: a, count: .., index: ..., children: [] },
+ *     { name: b, count: .., index: ..., children: [] }
  *   ]
  *   b = [
- *     { name: c },
+ *     { name: c, count: .., index: ..., children: [] },
  *   ]
  */
 const flatToMap = (flatTagHierarchy) => {
@@ -102,14 +102,14 @@ const flatToMap = (flatTagHierarchy) => {
  * OUTPUT:
  * ======
  *   PARENT_OF_ROOT = [
- *     { name: root , children: [a,b] }
+ *     { name: root , children: [a,b], count: .., index: ... }
  *   ]
  *   root = [
- *     { name: a, children: [] },
- *     { name: b, children: [c] }
+ *     { name: a, children: [], count: .., index: ... },
+ *     { name: b, children: [c], count: .., index: ... }
  *   ]
  *   b = [
- *     { name: c, children: [] },
+ *     { name: c, children: [], count: .., index: ... },
  *   ]
  */
 const addChildrenToMap = ({ parentToElementMap, elementNameToParentMap }) => {
@@ -162,10 +162,10 @@ const mapToHierarchy = (parentToElementMap) => {
       hierarchyLevelName: element.name,
       count: element.count,
       collapsed: false,
-      children: element.children.map((childName) => {
-        const childrenData = parentToElementMap[element.name];
-        return conv(childrenData.find(e => e.name === childName));
-      }).sort((a, b) => (a.index < b.index ? -1 : (a.index === b.index ? 0 : 1))),
+      children: element.children
+        .map(childName => parentToElementMap[element.name].find(e => e.name === childName))
+        .sort((a, b) => (a.index < b.index ? -1 : (a.index === b.index ? 0 : 1)))
+        .map(ele => conv(ele)),
     };
     /* eslint-enable no-nested-ternary */
     return newElement;
