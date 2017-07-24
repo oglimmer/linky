@@ -17,7 +17,11 @@ const rndName = () => {
   return text;
 };
 
-const equalIgnoringLastSlash = (strA, strB) => {
+const equalRelevant = (strA, strB) => {
+  const noTrailingSlash = str => (str.endsWith('/') ? str.substr(0, str.length - 1) : str);
+  const noHttpProtocol = str => (str.startsWith('http://') ? str.substr('http://'.length) : str);
+  const noHttpsProtocol = str => (str.startsWith('https://') ? str.substr('https://'.length) : str);
+  const noProtocol = str => noHttpsProtocol(noHttpProtocol(str));
   if (!strA && !strB) {
     return true;
   }
@@ -27,13 +31,7 @@ const equalIgnoringLastSlash = (strA, strB) => {
   if (strA === strB) {
     return true;
   }
-  if (strA.endsWith('/')) {
-    return strA.substr(0, strA.length - 1) === strB;
-  }
-  if (strB.endsWith('/')) {
-    return strB.substr(0, strB.length - 1) === strA;
-  }
-  return false;
+  return noProtocol(noTrailingSlash(strA)) === noProtocol(noTrailingSlash(strB));
 };
 
 const getCategories = ($a) => {
@@ -89,7 +87,7 @@ class ImportProcessor extends BaseProcessor {
         .then((rec) => {
           rec.tags.forEach(c => allTags.add(c));
           const updateObj = { userid: this.data.userid };
-          if (!equalIgnoringLastSlash(rec.linkUrl, url)) {
+          if (!equalRelevant(rec.linkUrl, url)) {
             updateObj.notes = `Original url was ${url}`;
           }
           return Object.assign({}, rec, updateObj);
