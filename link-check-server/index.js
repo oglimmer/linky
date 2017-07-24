@@ -2,6 +2,7 @@
 // node -r babel-register -r babel-polyfill link-check-server
 
 import request from 'request';
+import BlueBirdPromise from 'bluebird';
 
 import favicon from '../server/util/favicon';
 import linkDao, { LinkDao } from '../server/dao/linkDao';
@@ -14,7 +15,7 @@ const hasTag = (arr, tagName) => arr.find(e => e === tagName);
 const process200 = (response, httpGetCall, url, rec) => {
   httpGetCall.abort();
   const linkUrl = removeTrailingSlash(response.request.href);
-  favicon(linkUrl).then((faviconUrl) => {
+  return favicon(linkUrl).then((faviconUrl) => {
     let changed = false;
     if (linkUrl !== url) {
       console.log(`${new Date()}: link ${url} changed to ${linkUrl}`);
@@ -30,8 +31,9 @@ const process200 = (response, httpGetCall, url, rec) => {
       changed = true;
     }
     if (changed) {
-      linkDao.insert(rec);
+      return linkDao.insert(rec);
     }
+    return Promise.resolve();
   });
 };
 
@@ -39,10 +41,10 @@ const processError = (httpGetCall, url, rec) => {
   httpGetCall.abort();
   console.log(`${new Date()}: found broken link ${url}`);
   rec.tags.push('broken');
-  linkDao.insert(rec);
+  return linkDao.insert(rec);
 };
 
-const processRow = (rec) => {
+const processRow = rec => new Promise((resolve) => {
   if (!hasTag(rec.tags, 'broken') && !hasTag(rec.tags, 'locked')) {
     const url = rec.linkUrl;
     const httpGetCall = request.get({
@@ -50,13 +52,24 @@ const processRow = (rec) => {
       followAllRedirects: true,
       // timeout: 500,
     });
-    httpGetCall.on('response', response => process200(response, httpGetCall, url, rec));
-    httpGetCall.on('error', () => processError(httpGetCall, url, rec));
+    const timeout = setTimeout(() => {
+      console.log(`${new Date()}: call to ${rec.linkUrl} timed out`);
+      processError(httpGetCall, url, rec).then(() => resolve());
+    }, 5000);
+    httpGetCall.on('response', (response) => {
+      clearTimeout(timeout);
+      process200(response, httpGetCall, url, rec).then(() => resolve());
+    });
+    httpGetCall.on('error', () => {
+      clearTimeout(timeout);
+      processError(httpGetCall, url, rec).then(() => resolve());
+    });
   }
-};
+});
+
 
 const processRows = (recs) => {
-  recs.forEach(processRow);
+  BlueBirdPromise.map(recs, processRow, { concurrency: 20 });
 };
 
 console.log(`${new Date()}: starting link-check-server`);

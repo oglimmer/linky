@@ -14,7 +14,7 @@ import tagDao from '../dao/tagDao';
 import TagHierarchyLogic from '../logic/TagHierarchy';
 
 // TAGS
-const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
+export const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
 
 const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
 
