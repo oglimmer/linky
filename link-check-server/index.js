@@ -24,7 +24,7 @@ const process200 = (response, httpGetCall, url, rec) => {
       }
       changed = true;
     }
-    if (faviconUrl !== rec.faviconUrl) {
+    if (faviconUrl && faviconUrl !== rec.faviconUrl) {
       console.log(`${new Date()}: favicon ${rec.faviconUrl} changed to ${faviconUrl}`);
       rec.faviconUrl = faviconUrl;
       changed = true;
