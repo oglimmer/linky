@@ -26,6 +26,13 @@ const deleteUserById = (id, rev) => {
       console.log(`delete link ${rowL.linkUrl}`);
       destroy(rowL._id, rowL._rev);
     }));
+  view('hierarchy', 'byUserId', { key: id })
+    .then(resultH => resultH.rows)
+    .then(rowsH => rowsH.map(r => r.value))
+    .then(rowsH => rowsH.forEach((rowH) => {
+      console.log('delete hierarchy');
+      destroy(rowH._id, rowH._rev);
+    }));
   destroy(id, rev);
 };
 
