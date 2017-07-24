@@ -6,7 +6,7 @@ import BlueBirdPromise from 'bluebird';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 import linkDao from '../dao/linkDao';
-import { createRecord, updateTagHierarchy } from '../logic/Link';
+import { createRecord, updateTagHierarchy, simpleWordRegex } from '../logic/Link';
 
 const rndName = () => {
   let text = '';
@@ -60,9 +60,19 @@ class ImportProcessor extends BaseProcessor {
   }
   /* eslint-enable class-methods-use-this */
 
+  validate() {
+    if (simpleWordRegex.test(this.data.tagPrefix)) {
+      throw new Error(`Illegal tagPrefix ${this.data.tagPrefix}`);
+    }
+    if (simpleWordRegex.test(this.data.importNode)) {
+      throw new Error(`Illegal importNode ${this.data.importNode}`);
+    }
+  }
+
   /* eslint-disable require-yield */
   * process() {
     try {
+      this.validate();
       const $ = cheerio.load(this.data.bookmarks);
       const allTags = new Set();
       BlueBirdPromise.map($('a').toArray(), (a) => {
@@ -71,7 +81,7 @@ class ImportProcessor extends BaseProcessor {
         const url = $a.attr('href');
         winston.loggers.get('application').debug(`start to process ${url}...`);
         const categories = getCategories($a).map((c) => {
-          let cat = c.replace(/[^a-zA-Z\d]*/g, '').toLowerCase();
+          let cat = c.replace(/[^a-zA-Z-\d]*/g, '').toLowerCase();
           if (!cat) {
             cat = rndName();
           }
