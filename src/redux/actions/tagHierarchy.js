@@ -76,9 +76,9 @@ export function removeTagHierarchyNode() {
 
 export function addTagHierarchyNode() {
   /* eslint-disable no-alert */
-  const name = prompt('Enter the node`s name ([a-z0-9])');
+  const name = prompt('Enter the node`s name ([a-z0-9-])');
   /* eslint-enable no-alert */
-  const simpleWordRegex = new RegExp('^[a-z0-9]*$');
+  const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
   const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
   if (split[0]) {
     return (dispatch, getState) =>
@@ -100,9 +100,9 @@ function saveChangedLinklist(oldTagName, newTagName) {
 // rename or merge
 export function renameTagHierarchyNode(nodeName) {
   /* eslint-disable no-alert */
-  const name = prompt('Enter the new/existing node`s name ([a-z0-9])', nodeName);
+  const name = prompt('Enter the new/existing node`s name ([a-z0-9-])', nodeName);
   /* eslint-enable no-alert */
-  const simpleWordRegex = new RegExp('^[a-z0-9]*$');
+  const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
   const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
   const newTagName = split[0];
   if (newTagName) {

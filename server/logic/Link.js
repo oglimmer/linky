@@ -2,7 +2,6 @@
 import requestRaw from 'request';
 import { AllHtmlEntities } from 'html-entities';
 import assert from 'assert';
-import util from 'util';
 
 import favicon from '../util/favicon';
 import linkDao from '../dao/linkDao';
@@ -15,7 +14,7 @@ import tagDao from '../dao/tagDao';
 import TagHierarchyLogic from '../logic/TagHierarchy';
 
 // TAGS
-const simpleWordRegex = new RegExp('^[a-z0-9]*$');
+const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
 
 const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
 
@@ -164,8 +163,22 @@ export const createRecord = (rec) => {
   const tags = ensureRssTag(ensureAllTag(fixedTags), fixedRssUrl);
   return resolveUrl(fixedUrl, pageTitle)
     .then(({ linkUrl, title }) => favicon(linkUrl)
-      .then(faviconUrl => createObject({ tags, linkUrl, faviconUrl, rssUrl: fixedRssUrl, pageTitle: title, notes })))
-    .catch(() => createObject({ tags, linkUrl: fixedUrl, rssUrl: fixedRssUrl, pageTitle: fixedUrl, notes }));
+      .then(faviconUrl => createObject({
+        tags,
+        linkUrl,
+        faviconUrl,
+        rssUrl: fixedRssUrl,
+        pageTitle: title,
+        notes,
+      })),
+    )
+    .catch(() => createObject({
+      tags,
+      linkUrl: fixedUrl,
+      rssUrl: fixedRssUrl,
+      pageTitle: fixedUrl,
+      notes,
+    }));
 };
 
 export const presistRecord = rec => linkDao.insert(rec);

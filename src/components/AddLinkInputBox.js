@@ -30,7 +30,7 @@ const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, isAddEnabled }) 
         <UIInputElement
           label="Tags"
           model="tags"
-          placeholder="a tag is one word [a-z0-9]"
+          placeholder="a tag is one word [a-z0-9-]"
           autoComplete="off"
         />
       </FormGroup>
