@@ -2,6 +2,7 @@
 import requestRaw from 'request';
 import { AllHtmlEntities } from 'html-entities';
 import assert from 'assert';
+import util from 'util';
 
 import favicon from '../util/favicon';
 import linkDao from '../dao/linkDao';
@@ -62,12 +63,21 @@ const isHtml = (response) => {
 
 export const fixUrl = url => (url && !url.startsWith('http') ? `http://${url}` : url);
 
-const resolveUrl = (url, pageTitle) => new Promise((resolve) => {
+const resolveUrl = (url, pageTitle) => new Promise((resolve, reject) => {
   const httpGetCall = requestRaw.get({
     url,
     followAllRedirects: true,
     timeout: 500,
   });
+  const timeout = setTimeout(() => {
+    httpGetCall.abort();
+    // we need to reject this, as the subsequent request to get the favicon/title would fail as well
+    reject('Processing failed as socket received');
+  }, 2500);
+  const doresolve = ({ linkUrl, title }) => {
+    clearTimeout(timeout);
+    resolve({ linkUrl, title });
+  };
   let buffer = '';
   let title = pageTitle || url;
   let linkUrl = url;
@@ -75,7 +85,7 @@ const resolveUrl = (url, pageTitle) => new Promise((resolve) => {
     linkUrl = removeTrailingSlash(response.request.href);
     if (pageTitle || !isHtml(response)) {
       httpGetCall.abort();
-      resolve({ linkUrl, title });
+      doresolve({ linkUrl, title });
     }
   });
   httpGetCall.on('data', (data) => {
@@ -87,15 +97,15 @@ const resolveUrl = (url, pageTitle) => new Promise((resolve) => {
       const entities = new AllHtmlEntities();
       title = entities.decode(match[1]);
       httpGetCall.abort();
-      resolve({ linkUrl, title });
+      doresolve({ linkUrl, title });
     }
   });
   httpGetCall.on('complete', () => {
-    resolve({ linkUrl, title });
+    doresolve({ linkUrl, title });
   });
   httpGetCall.on('error', () => {
     httpGetCall.abort();
-    resolve({ linkUrl, title });
+    doresolve({ linkUrl, title });
   });
 });
 
@@ -135,6 +145,17 @@ export function updateTagHierarchy(userid, tags, parent = 'root') {
   });
 }
 
+const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, notes }) =>
+  Object.assign({}, DEFAULT_LINK, {
+    type: 'link',
+    tags,
+    linkUrl,
+    faviconUrl,
+    rssUrl,
+    pageTitle,
+    notes,
+  });
+
 export const createRecord = (rec) => {
   const { url, rssUrl, tagsAsString, tagsAsArray, pageTitle, notes } = rec;
   const fixedUrl = fixUrl(url);
@@ -143,16 +164,8 @@ export const createRecord = (rec) => {
   const tags = ensureRssTag(ensureAllTag(fixedTags), fixedRssUrl);
   return resolveUrl(fixedUrl, pageTitle)
     .then(({ linkUrl, title }) => favicon(linkUrl)
-    .then(faviconUrl => Object.assign({}, DEFAULT_LINK, {
-      type: 'link',
-      tags,
-      linkUrl,
-      faviconUrl,
-      rssUrl: fixedRssUrl,
-      pageTitle: title,
-      notes,
-    }),
-  ));
+      .then(faviconUrl => createObject({ tags, linkUrl, faviconUrl, rssUrl: fixedRssUrl, pageTitle: title, notes })))
+    .catch(() => createObject({ tags, linkUrl: fixedUrl, rssUrl: fixedRssUrl, pageTitle: fixedUrl, notes }));
 };
 
 export const presistRecord = rec => linkDao.insert(rec);
