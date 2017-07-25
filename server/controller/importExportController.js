@@ -61,10 +61,10 @@ class ImportProcessor extends BaseProcessor {
   /* eslint-enable class-methods-use-this */
 
   validate() {
-    if (simpleWordRegex.test(this.data.tagPrefix)) {
+    if (!simpleWordRegex.test(this.data.tagPrefix)) {
       throw new Error(`Illegal tagPrefix ${this.data.tagPrefix}`);
     }
-    if (simpleWordRegex.test(this.data.importNode)) {
+    if (!simpleWordRegex.test(this.data.importNode)) {
       throw new Error(`Illegal importNode ${this.data.importNode}`);
     }
   }
