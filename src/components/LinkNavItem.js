@@ -6,7 +6,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
-const NavItem = (properties) => {
+const LinkNavItem = (properties) => {
   const { active, disabled, className, style, ...props } = properties;
 
   // These are injected down by `<Nav>` for building `<SubNav>`s.
@@ -35,15 +35,15 @@ const NavItem = (properties) => {
   );
 };
 
-NavItem.propTypes = {
+LinkNavItem.propTypes = {
   active: PropTypes.bool,
   disabled: PropTypes.bool,
   role: PropTypes.string,
   href: PropTypes.string,
 };
-NavItem.defaultProps = {
+LinkNavItem.defaultProps = {
   active: false,
   disabled: false,
 };
 
-export default NavItem;
+export default LinkNavItem;

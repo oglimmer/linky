@@ -5,7 +5,7 @@ import { Navbar, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import NavItem from './NavItem';
+import LinkNavItem from './LinkNavItem';
 import LogoutButton from './LogoutButton';
 
 
@@ -19,8 +19,8 @@ const Header = ({ authToken }) => (
     </Navbar.Header>
     <Navbar.Collapse>
       <Nav>
-        { authToken ? <NavItem to="/tags">Tags</NavItem> : '' }
-        { authToken ? <NavItem to="/importExport">Import/Export</NavItem> : '' }
+        { authToken ? <LinkNavItem to="/tags">Tags</LinkNavItem> : '' }
+        { authToken ? <LinkNavItem to="/importExport">Import/Export</LinkNavItem> : '' }
       </Nav>
       <Nav pullRight>
         <LogoutButton />
