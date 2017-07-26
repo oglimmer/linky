@@ -8,9 +8,10 @@ import { diff } from '../../util/ArrayUtil';
 
 import { CLICK_LINK, CHANGE_SORTING_LINKS, SELECT_TAG, ADD_LINK, UPDATE_LINK,
   DEL_LINK, RSS_UPDATES, RSS_UPDATES_DETAILS, RSS_SET_DETAILS_ID, SET_LINKS,
-  RENAME_TAG_LINKLIST, SET_ERROR_MESSAGE, REMOVE_TAG_FROM_LINKS } from '../actionTypes';
+  RENAME_TAG_LINKLIST, REMOVE_TAG_FROM_LINKS } from '../actionTypes';
 
 import { fetchTagHierarchy, manipulateTagCounter } from './tagHierarchy';
+import { setErrorMessage, setTempMessage, setInfoMessage } from './feedback';
 
 const RSS_UPDATE_FREQUENCY = 1000 * 60 * 5;
 
@@ -57,14 +58,6 @@ function setLinks(linkList) {
 
 export function removeTagFromLinks(tagName) {
   return { type: REMOVE_TAG_FROM_LINKS, tagName };
-}
-
-export function setErrorMessage(errorMessage) {
-  const action = { type: SET_ERROR_MESSAGE, errorMessage };
-  if (typeof errorMessage !== 'string') {
-    action.errorMessage = JSON.stringify(errorMessage);
-  }
-  return action;
 }
 
 export function renameTagInLinks(oldTagName, newTagName) {
@@ -189,15 +182,21 @@ function handlingTagListChange(newLink, oldTags) {
 
 export function persistLink(linkId, url, tags, rssUrl, pageTitle, notes) {
   return (dispatch, getState) => {
+    dispatch(setTempMessage('sending data to server ...'));
     const { linkList, selectedTag } = getState().mainData;
     return (linkId ?
       fetch.put(`/rest/links/${linkId}`, { url, tags, rssUrl, pageTitle, notes }, getState().auth.token) :
       fetch.post('/rest/links', { url, tags, rssUrl, pageTitle, notes }, getState().auth.token))
       .then(response => response.json())
       .then((newLink) => {
-        dispatch(handlingLinkListChange(linkId, newLink, selectedTag, dispatch));
-        const oldElement = linkList.find(e => e.id === linkId);
-        dispatch(handlingTagListChange(newLink, oldElement ? oldElement.tags : []));
+        if (newLink.message) {
+          dispatch(setErrorMessage(newLink.message));
+        } else {
+          dispatch(setInfoMessage(`${newLink.linkUrl} with tags = ${newLink.tags} successfully saved.`));
+          dispatch(handlingLinkListChange(linkId, newLink, selectedTag, dispatch));
+          const oldElement = linkList.find(e => e.id === linkId);
+          dispatch(handlingTagListChange(newLink, oldElement ? oldElement.tags : []));
+        }
       })
       .catch(error => console.log(error));
   };

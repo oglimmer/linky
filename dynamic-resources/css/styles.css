@@ -264,3 +264,31 @@ input {
   color: #fff;
   background-color: #ff733f;
 }
+
+/* error/info/warning messages */
+
+.alert-success {
+  -webkit-animation: seconds 5.0s forwards;
+  -webkit-animation-iteration-count: 1;
+  -webkit-animation-delay: 1s;
+  animation: seconds 5.0s forwards;
+  animation-iteration-count: 1;
+  animation-delay: 1s;
+  margin-top: 5px;
+}
+@-webkit-keyframes seconds {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes seconds {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

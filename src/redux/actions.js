@@ -3,7 +3,8 @@ import fetch from '../util/fetch';
 
 import { RESET, SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, TOGGLE_VISIBILITY } from './actionTypes';
 
-import { initialLoadLinks, setErrorMessage } from './actions/links';
+import { initialLoadLinks } from './actions/links';
+import { setErrorMessage } from './actions/feedback';
 
 export function reset() {
   return { type: RESET };

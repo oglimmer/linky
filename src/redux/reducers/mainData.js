@@ -2,7 +2,7 @@
 import Immutable from 'immutable';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS, UPDATE_LINK, RSS_SET_DETAILS_ID,
-  SET_ERROR_MESSAGE, RSS_UPDATES, RSS_UPDATES_DETAILS, REMOVE_TAG_FROM_LINKS,
+  RSS_UPDATES, RSS_UPDATES_DETAILS, REMOVE_TAG_FROM_LINKS,
   CHANGE_SORTING_LINKS, CLICK_LINK, SELECT_TAG, RESET, RENAME_TAG_LINKLIST } from './../actionTypes';
 
 import { initialStateMainData, DEFAULT_LINK } from './../DataModels';
@@ -89,10 +89,6 @@ export default function mainData(state = initialStateMainData, action) {
     case SELECT_TAG:
       return Object.assign({}, state, {
         selectedTag: action.tag,
-      });
-    case SET_ERROR_MESSAGE:
-      return Object.assign({}, state, {
-        errorMessage: action.errorMessage,
       });
     case CHANGE_SORTING_LINKS:
       return Object.assign({}, state, {

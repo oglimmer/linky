@@ -22,12 +22,17 @@ export const importExportForm = {
   importNode: 'import',
 };
 
+export const initialFeedbackData = {
+  errorMessage: '',
+  infoMessage: '',
+  tempMessage: '',
+};
+
 export const initialStateMainData = {
   linkList: Immutable.List(),
   feedUpdatesList: Immutable.List(),
   feedUpdatesDetails: Immutable.List(),
   selectedLinkForDetails: null,
-  errorMessage: '',
   sortingByColumn: 'mostUsed',
   selectedTag: null,
 };

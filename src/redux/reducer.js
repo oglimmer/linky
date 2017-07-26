@@ -10,6 +10,7 @@ import { initialStateAuth, loginForm, addUrlForm, initialMenuBar, importExportFo
 
 import mainData from './reducers/mainData';
 import tagHierarchyData from './reducers/tagHierarchyData';
+import feedbackData from './reducers/feedbackData';
 
 function auth(state = initialStateAuth, action) {
   switch (action.type) {
@@ -42,6 +43,7 @@ function menuBar(state = initialMenuBar, action) {
 export default combineReducers({
   mainData,
   tagHierarchyData,
+  feedbackData,
   auth,
   menuBar,
   login: combineForms(loginForm, 'login'),
