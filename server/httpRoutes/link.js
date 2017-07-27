@@ -12,4 +12,5 @@ export default (app) => {
   app.get('/rest/links/:linkid/favicon', authorizationController.checkAuthorization, imageController.getFavicon);
   app.patch('/rest/links/tags', authorizationController.checkAuthorization, linkController.batchModifyLinksForTag);
   app.patch('/rest/links/import', authorizationController.checkAuthorization, importExportController.import);
+  app.get('/rest/export/links', authorizationController.checkAuthorization, importExportController.export);
 };

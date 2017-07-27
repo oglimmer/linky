@@ -6,9 +6,9 @@ import { Form } from 'react-redux-form';
 import PropTypes from 'prop-types';
 
 import UIInputElement from '../components/UIInputElement';
-import { importBookmarks } from '../redux/actions';
+import { importBookmarks, exportBookmarks } from '../redux/actions';
 
-const ImportExportPage = ({ onSubmit }) => (
+const ImportExportPage = ({ onSubmit, onExport }) => (
   <div>
     <Form className="form-horizontal" model="importExport" onSubmit={onSubmit}>
       <FormGroup controlId="row1controls">
@@ -42,18 +42,20 @@ const ImportExportPage = ({ onSubmit }) => (
       </FormGroup>
       <div>
         <Button type="submit">Import</Button>{' '}
-        <Button>Export</Button>
+        <Button onClick={onExport}>Export</Button>
       </div>
     </Form>
   </div>
 );
 ImportExportPage.propTypes = {
   onSubmit: PropTypes.func.isRequired,
+  onExport: PropTypes.func.isRequired,
 };
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: formData =>
     dispatch(importBookmarks(formData.bookmarks, formData.tagPrefix, formData.importNode)),
+  onExport: () => dispatch(exportBookmarks()),
 });
 
 export default connect(null, mapDispatchToProps)(ImportExportPage);

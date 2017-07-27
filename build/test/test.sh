@@ -53,6 +53,11 @@ if [ "$1" == "hierarchy" ]; then
   curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/tags/hierarchy
 fi
 
+if [ "$1" == "export" ]; then
+  [ -z "$AUTH_TOKEN" ] && echo "AUTH_TOKEN not set" && exit 1
+  curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/export/links
+fi
+
 if [ -z "$1" ]; then
   AUTH_AVAIL=$(if [ -z ${AUTH_TOKEN} ]; then echo "empty"; else echo "set"; fi)
   echo "AVAILABLE COMMANDS: (USING BASE_URL=$BASE_URL | AUTH_TOKEN is $AUTH_AVAIL)"

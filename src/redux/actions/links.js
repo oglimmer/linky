@@ -198,20 +198,22 @@ export function persistLink(linkId, url, tags, rssUrl, pageTitle, notes) {
           dispatch(handlingTagListChange(newLink, oldElement ? oldElement.tags : []));
         }
       })
-      .catch(error => console.log(error));
+      .catch(error => dispatch(setErrorMessage(error)));
   };
 }
 
 export function delLink(id) {
   return (dispatch, getState) => {
+    dispatch(setTempMessage('sending data to server ...'));
     const linkToDelete = getState().mainData.linkList.find(e => e.id === id);
     assert(linkToDelete && linkToDelete.id && linkToDelete.tags);
     return fetch.delete(`/rest/links/${id}`, getState().auth.token)
-    .then(() => {
-      dispatch(delLinkPost(id));
-      linkToDelete.tags.forEach(tagName => dispatch(manipulateTagCounter(tagName, -1)));
-    })
-    .catch(error => console.log(error));
+      .then(() => {
+        dispatch(delLinkPost(id));
+        linkToDelete.tags.forEach(tagName => dispatch(manipulateTagCounter(tagName, -1)));
+        dispatch(setInfoMessage(`${linkToDelete.linkUrl} successfully deleted.`));
+      })
+      .catch(error => dispatch(setErrorMessage(error)));
   };
 }
 

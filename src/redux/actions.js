@@ -1,4 +1,6 @@
 
+import { actions } from 'react-redux-form';
+
 import fetch from '../util/fetch';
 
 import { RESET, SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, TOGGLE_VISIBILITY } from './actionTypes';
@@ -50,5 +52,12 @@ export function checkAuth(email, password) {
 
 export function importBookmarks(bookmarks, tagPrefix, importNode) {
   return (dispatch, getState) => fetch.patch('/rest/links/import', { bookmarks, tagPrefix, importNode }, getState().auth.token)
-    .catch(error => console.log(error));
+    .catch(error => dispatch(setErrorMessage(error)));
+}
+
+export function exportBookmarks() {
+  return (dispatch, getState) => fetch.get('/rest/export/links', getState().auth.token)
+    .then(response => response.json())
+    .then(json => dispatch(actions.change('importExport.bookmarks', json.content)))
+    .catch(error => dispatch(setErrorMessage(error)));
 }

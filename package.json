@@ -39,6 +39,7 @@
     "jsonwebtoken": "^7.4.0",
     "morgan": "^1.8.2",
     "nano": "^6.2.0",
+    "netscape-bookmarks": "^0.1.0",
     "node-jose": "^0.9.4",
     "oauth-1.0a": "^2.1.0",
     "p-all": "^1.0.0",

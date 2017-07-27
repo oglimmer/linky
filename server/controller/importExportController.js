@@ -2,6 +2,7 @@
 import winston from 'winston';
 import cheerio from 'cheerio';
 import BlueBirdPromise from 'bluebird';
+import netscape from 'netscape-bookmarks';
 
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
@@ -117,6 +118,36 @@ class ImportProcessor extends BaseProcessor {
 
 }
 
+class ExportProcessor extends BaseProcessor {
+
+  constructor(req, res, next) {
+    super(req, res, next, true);
+  }
+
+  collectBodyParameters() {
+    this.data = {};
+  }
+
+  * process() {
+    try {
+      const rows = yield linkDao.listByUserid(this.data.userid);
+      console.log(JSON.stringify(rows));
+      const data = {};
+      rows.forEach((row) => {
+        const rec = row.value;
+        data[rec.pageTitle] = rec.linkUrl;
+      });
+      const html = netscape(data);
+      this.res.send({ content: html });
+    } catch (err) {
+      winston.loggers.get('application').error(err);
+      ResponseUtil.sendErrorResponse500(err, this.res);
+    }
+    this.res.end();
+  }
+
+}
+
 export default {
 
   import: (req, res, next) => {
@@ -124,5 +155,9 @@ export default {
     glp.doProcess();
   },
 
+  export: (req, res, next) => {
+    const glp = new ExportProcessor(req, res, next);
+    glp.doProcess();
+  },
 
 };

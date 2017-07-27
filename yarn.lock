@@ -4232,6 +4232,10 @@ nested-error-stacks@^1.0.0:
   dependencies:
     inherits "~2.0.1"
 
+netscape-bookmarks@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/netscape-bookmarks/-/netscape-bookmarks-0.1.0.tgz#5457290856edaa2a075291b6ec769e727bccfd99"
+
 no-case@^2.2.0:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-2.3.1.tgz#7aeba1c73a52184265554b7dc03baf720df80081"
