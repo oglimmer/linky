@@ -9,7 +9,6 @@ const AlertAdapter = ({ errorMessage, infoMessage, tempMessage, close }) => {
   const CloseButton = () => (
     <span role="button" tabIndex={0} onClick={close}>[close]</span>
   );
-  console.log(JSON.stringify(infoMessage));
   if (!errorMessage && !infoMessage && !tempMessage) {
     return null;
   }

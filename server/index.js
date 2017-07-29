@@ -40,6 +40,7 @@ import serverPropsLoader from './util/serverPropsLoader';
 import BuildInfo from '../src/util/BuildInfo';
 
 import properties from './util/linkyproperties';
+import AlertAdapter from '../src/components/AlertAdapter';
 
 serverPropsLoader(BuildInfo);
 
@@ -163,7 +164,10 @@ if (!debugMode || debugMode !== 'rest') {
       const reactHtml = ReactDOMServer.renderToString(
         <StaticRouter location={req.url} context={context}>
           <Provider store={store}>
-            <Routing store={store} />
+            <div>
+              <AlertAdapter />
+              <Routing store={store} />
+            </div>s
           </Provider>
         </StaticRouter>,
       );
