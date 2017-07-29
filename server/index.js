@@ -167,7 +167,7 @@ if (!debugMode || debugMode !== 'rest') {
             <div>
               <AlertAdapter />
               <Routing store={store} />
-            </div>s
+            </div>
           </Provider>
         </StaticRouter>,
       );
