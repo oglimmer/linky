@@ -79,7 +79,6 @@ const flatToMap = (flatTagHierarchy) => {
   const elementNameToParentMap = {};
   flatTagHierarchy.forEach((e) => {
     assert(e.name, `element in input array doesn't have name: ${JSON.stringify(e)}`);
-    assert(!(e.count == null), `element in input array doesn't have count: ${JSON.stringify(e)}`);
     const parentName = e.parent ? e.parent : '$$PARENT_OF_ROOT$$';
     elementNameToParentMap[e.name] = parentName;
     let valueArray = parentToElementMap[parentName];
@@ -176,8 +175,75 @@ const mapToHierarchy = (parentToElementMap) => {
   return {};
 };
 
+/*
+ * INPUT: addChildrenToMap
+ * OUTPUT:
+ * ======
+ * {
+ *   a: {
+ *    contents: {
+ *      titleLinkA1: "url-link-a1",
+ *      titleLinkA2: "url-link-a2",
+ *    }
+ *   },
+ *   b: {
+ *    contents: {
+ *      c: {
+ *        contents: {
+ *          titleLinkC1: "url-link-c1",
+ *          titleLinkC2: "url-link-c2",
+ *        }
+ *      },
+ *      titleLinkB1: "url-link-b1",
+ *      titleLinkB2: "url-link-b2",
+ *      titleLinkB3: "url-link-b3",
+ *    }
+ *   }
+ * }
+ */
+const mapToNetscapeTree = (parentToElementMap, linklist) => {
+  if (!parentToElementMap.$$PARENT_OF_ROOT$$) {
+    return {};
+  }
+  const addChildren = (targetParent, sourceParent) => {
+    sourceParent.children
+      // childName is the name of child of root
+      .map(childName => parentToElementMap[sourceParent.name].find(e => e.name === childName))
+      // we now have data objects, not just the names
+      // .sort((a, b) => (a.index < b.index ? -1 : (a.index === b.index ? 0 : 1)))
+      // don't sort as target is no array anyways
+      .forEach((sourceElement) => {
+        const tagName = sourceElement.name;
+        // each tag is new object
+        const newTargetObj = {
+          contents: {},
+        };
+        // copy all child tags into the contents object
+        addChildren(newTargetObj.contents, sourceElement);
+        let counter = 0;
+        linklist.filter(e => e.tags.findIndex(t => t === tagName) !== -1).forEach((link) => {
+          let key = link.pageTitle;
+          while (newTargetObj.contents[key]) {
+            key = `${link.pageTitle}-${counter}`;
+            counter += 1;
+          }
+          newTargetObj.contents[key] = link.linkUrl;
+        });
+        // assign this new object to parent under tag's name
+        const targetParentToAssign = targetParent;
+        targetParentToAssign[tagName] = newTargetObj;
+      });
+  };
+  const root = {};
+  addChildren(root, parentToElementMap.$$PARENT_OF_ROOT$$[0]);
+  return root;
+};
+
 export const toHierarchy =
   tagHierarchy => mapToHierarchy(addChildrenToMap(flatToMap(tagHierarchy)));
+
+export const toNetscape = (tagHierarchy, linklist) =>
+  mapToNetscapeTree(addChildrenToMap(flatToMap(tagHierarchy)), linklist);
 
 const flattenObj = (obj, parent, index, resultList) => {
   resultList.push({

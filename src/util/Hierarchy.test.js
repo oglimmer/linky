@@ -1,6 +1,6 @@
 import Immutable from 'immutable';
 
-import { getChildren, getSiblings, toHierarchy, flatten } from './Hierarchy';
+import {getChildren, getSiblings, toHierarchy, flatten, toNetscape} from './Hierarchy';
 
 it('getSiblings: a', () => {
   const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }];
@@ -142,5 +142,117 @@ it('flatten: simple', () => {
     },
   ]);
   const result = flatten(a);
+  expect(result).toEqual(expected);
+});
+
+it('to netscape', () => {
+  const tags = [
+    {
+      parent: null,
+      name: 'root',
+      count: 0,
+    },
+    {
+      parent: 'root',
+      name: 'a',
+      count: 1,
+    },
+    {
+      parent: 'root',
+      name: 'b',
+      count: 2,
+    },
+    {
+      parent: 'b',
+      name: 'c',
+      count: 1,
+    },
+  ];
+  const links = [
+    {
+      linkUrl: 'link-a',
+      pageTitle: 'la',
+      tags: ['a'],
+    },
+    {
+      linkUrl: 'link-b1',
+      pageTitle: 'lb1',
+      tags: ['b'],
+    },
+    {
+      linkUrl: 'link-b2',
+      pageTitle: 'lb2',
+      tags: ['b'],
+    },
+    {
+      linkUrl: 'link-c',
+      pageTitle: 'lc',
+      tags: ['c'],
+    },
+  ];
+  const expected = {
+    a: {
+      contents: {
+        la: 'link-a',
+      },
+    },
+    b: {
+      contents: {
+        c: {
+          contents: {
+            lc: 'link-c',
+          },
+        },
+        lb1: 'link-b1',
+        lb2: 'link-b2',
+      },
+    },
+  };
+  const result = toNetscape(tags, links);
+  expect(result).toEqual(expected);
+});
+
+it('to netscape (duplicate titles)', () => {
+  const tags = [
+    {
+      parent: null,
+      name: 'root',
+      count: 0,
+    },
+    {
+      parent: 'root',
+      name: 'a',
+      count: 1,
+    },
+    {
+      parent: 'a',
+      name: 'b',
+      count: 2,
+    },
+  ];
+  const links = [
+    {
+      linkUrl: 'b',
+      pageTitle: 'b',
+      tags: ['a'],
+    },
+    {
+      linkUrl: 'b',
+      pageTitle: 'b',
+      tags: ['a'],
+    },
+  ];
+  const expected = {
+    a: {
+      contents: {
+        b: {
+          contents: {},
+        },
+        'b-0': 'b',
+        'b-1': 'b',
+      },
+    },
+  };
+  const result = toNetscape(tags, links);
   expect(result).toEqual(expected);
 });

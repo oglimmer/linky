@@ -7,8 +7,10 @@ import netscape from 'netscape-bookmarks';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 import linkDao from '../dao/linkDao';
+import tagLogic from '../logic/TagHierarchy';
 import asyncWaitDao from '../dao/asyncWaitDao';
 import { createRecord, updateTagHierarchy, simpleWordRegex } from '../logic/Link';
+import { toNetscape } from '../../src/util/Hierarchy';
 
 const rndName = () => {
   let text = '';
@@ -148,11 +150,8 @@ class ExportProcessor extends BaseProcessor {
   * process() {
     try {
       const rows = yield linkDao.listByUserid(this.data.userid);
-      const data = {};
-      rows.forEach((row) => {
-        const rec = row.value;
-        data[rec.pageTitle] = rec.linkUrl;
-      });
+      const tagHierarchy = yield tagLogic.load(this.data.userid);
+      const data = toNetscape(tagHierarchy.tree, rows.map(l => l.value));
       const html = netscape(data);
       this.res.send({ content: html });
     } catch (err) {
