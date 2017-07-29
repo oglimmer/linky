@@ -68,5 +68,6 @@ if [ -z "$1" ]; then
   echo "deletelink id"
   echo "html [url]"
   echo "hierarchy"
+  echo "export"
 fi
 
