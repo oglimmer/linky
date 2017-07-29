@@ -1,6 +1,6 @@
 import Immutable from 'immutable';
 
-import {getChildren, getSiblings, toHierarchy, flatten, toNetscape} from './Hierarchy';
+import { getChildren, getSiblings, toHierarchy, flatten, toNetscape } from './Hierarchy';
 
 it('getSiblings: a', () => {
   const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }];
