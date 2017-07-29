@@ -2,7 +2,7 @@
 import winston from 'winston';
 import { matchPath } from 'react-router-dom';
 
-import { setAuthToken } from '../../src/redux/actions';
+import { setAuthToken, initAsyncWaits } from '../../src/redux/actions';
 import visitorDao from '../dao/visitorDao';
 import jwt from './JwtUtil';
 import routes from '../../src/routes/routes';
@@ -24,6 +24,7 @@ export default (dispatch, req, res) => {
     return jwt.verify(authToken)
       .then(() => dispatch(setAuthToken(authToken)))
       .then(() => (dataLoadFnt ? dataLoadFnt() : Promise.resolve()))
+      .then(() => dispatch(initAsyncWaits()))
       .catch((e) => {
         if (e.name !== 'TokenExpiredError' && e.name !== 'JsonWebTokenError') {
           winston.loggers.get('application').error(e);

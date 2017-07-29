@@ -34,14 +34,19 @@ class BaseDataAccessObject {
   }
 
   listByViewMultiParams(ddoc, viewName, start, end, params) {
-    const allParams = Object.assign({}, params);
-    allParams.startkey = start;
-    allParams.endkey = end;
+    const allParams = Object.assign({
+      startkey: start,
+      endkey: end,
+    }, params);
     return view(ddoc, viewName, allParams).then(body => body.rows);
   }
 
   listByView(ddoc, viewName, key) {
-    return view(ddoc, viewName, { keys: [key] }).then(body => body.rows);
+    const allParams = { };
+    if (key) {
+      allParams.keys = [key];
+    }
+    return view(ddoc, viewName, allParams).then(body => body.rows);
   }
 
   getById(id) {

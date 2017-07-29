@@ -42,6 +42,8 @@ import BuildInfo from '../src/util/BuildInfo';
 import properties from './util/linkyproperties';
 import AlertAdapter from '../src/components/AlertAdapter';
 
+import postStartupClean from './util/postStartupClean';
+
 serverPropsLoader(BuildInfo);
 
 const app = express();
@@ -227,3 +229,5 @@ app.listen(port, bind, (err) => {
     winston.loggers.get('application').info(`Server started at ${bind}:${port}....`);
   }
 });
+
+postStartupClean();

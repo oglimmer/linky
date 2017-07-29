@@ -13,4 +13,5 @@ export default (app) => {
   app.patch('/rest/links/tags', authorizationController.checkAuthorization, linkController.batchModifyLinksForTag);
   app.patch('/rest/links/import', authorizationController.checkAuthorization, importExportController.import);
   app.get('/rest/export/links', authorizationController.checkAuthorization, importExportController.export);
+  app.get('/rest/import/ready', authorizationController.checkAuthorization, importExportController.importReady);
 };

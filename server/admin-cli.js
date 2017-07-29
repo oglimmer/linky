@@ -33,6 +33,13 @@ const deleteUserById = (id, rev) => {
       console.log('delete hierarchy');
       destroy(rowH._id, rowH._rev);
     }));
+  view('asyncWait', 'byUserId', { key: id })
+    .then(resultA => resultA.rows)
+    .then(rowsA => rowsA.map(r => r.value))
+    .then(rowsA => rowsA.forEach((rowA) => {
+      console.log('delete asyncWait');
+      destroy(rowA._id, rowA._rev);
+    }));
   destroy(id, rev);
 };
 

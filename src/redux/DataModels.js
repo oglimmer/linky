@@ -20,6 +20,7 @@ export const importExportForm = {
   bookmarks: '',
   tagPrefix: '',
   importNode: 'import',
+  buttonsDisable: false,
 };
 
 export const initialFeedbackData = {

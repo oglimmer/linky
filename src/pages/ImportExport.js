@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import UIInputElement from '../components/UIInputElement';
 import { importBookmarks, exportBookmarks } from '../redux/actions';
 
-const ImportExportPage = ({ onSubmit, onExport }) => (
+const ImportExportPage = ({ onSubmit, onExport, buttonsDisable }) => (
   <div>
     <Form className="form-horizontal" model="importExport" onSubmit={onSubmit}>
       <FormGroup controlId="row1controls">
@@ -41,8 +41,8 @@ const ImportExportPage = ({ onSubmit, onExport }) => (
         />
       </FormGroup>
       <div>
-        <Button type="submit">Import</Button>{' '}
-        <Button onClick={onExport}>Export</Button>
+        <Button disabled={buttonsDisable} type="submit">Import</Button>{' '}
+        <Button disabled={buttonsDisable} onClick={onExport}>Export</Button>
       </div>
     </Form>
   </div>
@@ -50,7 +50,12 @@ const ImportExportPage = ({ onSubmit, onExport }) => (
 ImportExportPage.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onExport: PropTypes.func.isRequired,
+  buttonsDisable: PropTypes.bool.isRequired,
 };
+
+const mapStateToProps = state => ({
+  buttonsDisable: state.importExport.buttonsDisable,
+});
 
 const mapDispatchToProps = dispatch => ({
   onSubmit: formData =>
@@ -58,4 +63,4 @@ const mapDispatchToProps = dispatch => ({
   onExport: () => dispatch(exportBookmarks()),
 });
 
-export default connect(null, mapDispatchToProps)(ImportExportPage);
+export default connect(mapStateToProps, mapDispatchToProps)(ImportExportPage);

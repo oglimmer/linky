@@ -7,6 +7,7 @@ import netscape from 'netscape-bookmarks';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 import linkDao from '../dao/linkDao';
+import asyncWaitDao from '../dao/asyncWaitDao';
 import { createRecord, updateTagHierarchy, simpleWordRegex } from '../logic/Link';
 
 const rndName = () => {
@@ -70,8 +71,25 @@ class ImportProcessor extends BaseProcessor {
     }
   }
 
-  /* eslint-disable require-yield */
+  * loadAsyncWaitId() {
+    const asyncWaitRec = yield asyncWaitDao.getAsyncWaitByByUserAndObject(this.data.userid, 'import');
+    if (asyncWaitRec) {
+      /* eslint-disable no-underscore-dangle */
+      return {
+        id: asyncWaitRec._id,
+        rev: asyncWaitRec._rev,
+      };
+      /* eslint-enable no-underscore-dangle */
+    }
+    return yield asyncWaitDao.insert({
+      type: 'asyncwait',
+      userid: this.data.userid,
+      object: 'import',
+    });
+  }
+
   * process() {
+    const asyncWaitId = yield BlueBirdPromise.coroutine(this.loadAsyncWaitId).bind(this)();
     try {
       this.validate();
       const $ = cheerio.load(this.data.bookmarks);
@@ -106,15 +124,18 @@ class ImportProcessor extends BaseProcessor {
       }, { concurrency: 5 })
         .then(docs => linkDao.bulk({ docs }))
         .then(() => updateTagHierarchy(this.data.userid, allTags, this.data.importNode))
-        .then(() => winston.loggers.get('application').debug('import done.'));
+        .then(() => {
+          winston.loggers.get('application').debug('import done.');
+          asyncWaitDao.delete(asyncWaitId.id, asyncWaitId.rev);
+        });
       this.res.send('ok');
     } catch (err) {
       winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
+      asyncWaitDao.delete(asyncWaitId.id, asyncWaitId.rev);
     }
     this.res.end();
   }
-  /* eslint-enable require-yield */
 
 }
 
@@ -124,14 +145,9 @@ class ExportProcessor extends BaseProcessor {
     super(req, res, next, true);
   }
 
-  collectBodyParameters() {
-    this.data = {};
-  }
-
   * process() {
     try {
       const rows = yield linkDao.listByUserid(this.data.userid);
-      console.log(JSON.stringify(rows));
       const data = {};
       rows.forEach((row) => {
         const rec = row.value;
@@ -139,6 +155,26 @@ class ExportProcessor extends BaseProcessor {
       });
       const html = netscape(data);
       this.res.send({ content: html });
+    } catch (err) {
+      winston.loggers.get('application').error(err);
+      ResponseUtil.sendErrorResponse500(err, this.res);
+    }
+    this.res.end();
+  }
+
+}
+
+class ImportReadyProcessor extends BaseProcessor {
+
+  constructor(req, res, next) {
+    super(req, res, next, true);
+  }
+
+  * process() {
+    try {
+      const rec = yield asyncWaitDao.getAsyncWaitByByUserAndObject(this.data.userid, 'import');
+      const ready = !rec;
+      this.res.send({ importDone: ready });
     } catch (err) {
       winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
@@ -157,6 +193,11 @@ export default {
 
   export: (req, res, next) => {
     const glp = new ExportProcessor(req, res, next);
+    glp.doProcess();
+  },
+
+  importReady: (req, res, next) => {
+    const glp = new ImportReadyProcessor(req, res, next);
     glp.doProcess();
   },
 
