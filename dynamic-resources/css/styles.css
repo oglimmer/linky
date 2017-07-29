@@ -267,28 +267,45 @@ input {
 
 /* error/info/warning messages */
 
-.alert-success {
-  -webkit-animation: seconds 5.0s forwards;
-  -webkit-animation-iteration-count: 1;
-  -webkit-animation-delay: 1s;
-  animation: seconds 5.0s forwards;
-  animation-iteration-count: 1;
-  animation-delay: 1s;
+.alert {
+  position: absolute;
+  left: 0px;
+  top: -5px;
   margin-top: 5px;
+  width: 100%;
+  z-index: 16777271;
+}
+
+.alert-success {
+  -webkit-animation: seconds 15.0s forwards;
+  animation: seconds 15.0s forwards;
+  position: absolute;
 }
 @-webkit-keyframes seconds {
-  0% {
-    opacity: 1;
+  from {
+    top: -65px;
   }
-  100% {
-    opacity: 0;
+  20% {
+    top: -5px;
+  }
+  80% {
+    top: -5px;
+  }
+  to {
+    top: -65px;
   }
 }
 @keyframes seconds {
-  0% {
-    opacity: 1;
+  from {
+    top: -65px;
   }
-  100% {
-    opacity: 0;
+  20% {
+    top: -5px;
+  }
+  80% {
+    top: -5px;
+  }
+  to {
+    top: -65px;
   }
 }

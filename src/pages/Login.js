@@ -11,7 +11,6 @@ import { connect } from 'react-redux';
 
 import { checkAuth } from '../redux/actions';
 
-import AlertAdapter from '../components/AlertAdapter';
 import FormControlAdapter from '../components/FormControlAdapter';
 
 const click = (target) => {
@@ -59,7 +58,6 @@ const Login = ({ dispatch, history }) => (
     </div>
     { showUserPasswordLogin ? (<div className="center-form panel">
       <div className="panel-body">
-        <AlertAdapter />
         <Form
           model="login"
           onSubmit={(formData) => {

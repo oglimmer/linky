@@ -8,7 +8,6 @@ import { connect } from 'react-redux';
 import AddLinkInputBox from '../components/AddLinkInputBox';
 import UILinkList from '../components/UILinkList';
 import TagList from '../components/TagList';
-import AlertAdapter from '../components/AlertAdapter';
 import ToggleAddLinkMenuButton from '../components/ToggleAddLinkMenuButton';
 import { completeChangeTag } from '../redux/actions/links';
 
@@ -23,7 +22,6 @@ class PortalPage extends React.Component {
       <div>
         <ToggleAddLinkMenuButton />
         <AddLinkInputBox />
-        <AlertAdapter />
         <TagList />
         <UILinkList />
       </div>

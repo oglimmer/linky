@@ -12,7 +12,6 @@ import { initialLoadTags, selectNodeInTagHierarchy, addTagHierarchyNode, removeT
 import { toHierarchy, flatten, getChildren } from '../util/Hierarchy';
 
 import { TAGS, READONLY_TAGS } from '../util/TagRegistry';
-import AlertAdapter from '../components/AlertAdapter';
 
 class TagPage extends React.Component {
   constructor(props) {
@@ -55,7 +54,6 @@ class TagPage extends React.Component {
         { this.props.onAdd ? (<button onClick={this.props.onAdd}>Add hierarchy level</button>) : ''}
         { isRemoveAvail ? (<button onClick={this.props.onRemove}>Remove selected level</button>) : ''}
         { isRenameAvail ? (<button onClick={() => this.props.onRename(this.props.selectedNode.hierarchyLevelName)}>Rename selected level</button>) : ''}
-        <AlertAdapter />
         <Tree
           paddingLeft={20}
           tree={tree}

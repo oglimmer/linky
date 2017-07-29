@@ -5,27 +5,27 @@ import { Alert } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { setInfoMessage } from '../redux/actions/feedback';
 
-const AlertAdapter = ({ errorMessage, infoMessage, tempMessage, hide }) => {
+const AlertAdapter = ({ errorMessage, infoMessage, tempMessage, close }) => {
+  const CloseButton = () => (
+    <span role="button" tabIndex={0} onClick={close}>[close]</span>
+  );
+  console.log(JSON.stringify(infoMessage));
   if (!errorMessage && !infoMessage && !tempMessage) {
     return null;
   }
   if (errorMessage) {
-    return (<Alert bsStyle="danger">{errorMessage}</Alert>);
+    return (<Alert bsStyle="danger">{errorMessage} <CloseButton /></Alert>);
   }
   if (tempMessage) {
-    return (<Alert bsStyle="info">{tempMessage}</Alert>);
+    return (<Alert bsStyle="info">{tempMessage} <CloseButton /></Alert>);
   }
-  setTimeout(() => {
-    hide();
-  }, 3800);
-  return (<Alert bsStyle="success">{infoMessage}</Alert>);
+  return (<Alert bsStyle="success">{infoMessage} <CloseButton /></Alert>);
 };
-
 AlertAdapter.propTypes = {
   errorMessage: PropTypes.string,
   infoMessage: PropTypes.string,
   tempMessage: PropTypes.string,
-  hide: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired,
 };
 AlertAdapter.defaultProps = {
   errorMessage: '',
@@ -40,9 +40,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  hide: () => {
-    dispatch(setInfoMessage(''));
-  },
+  close: () => dispatch(setInfoMessage('')),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AlertAdapter);

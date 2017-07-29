@@ -6,6 +6,7 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
 
 import { startRssUpdates } from '../redux/actions/links';
+import AlertAdapter from '../components/AlertAdapter';
 
 import Routing from '../routes/Routing';
 
@@ -25,9 +26,12 @@ class Root extends React.Component {
   render() {
     return (
       <Provider store={this.store}>
-        <ConnectedRouter history={history.history}>
-          <Routing store={this.store} />
-        </ConnectedRouter>
+        <div>
+          <AlertAdapter />
+          <ConnectedRouter history={history.history}>
+            <Routing store={this.store} />
+          </ConnectedRouter>
+        </div>
       </Provider>
     );
   }
