@@ -292,7 +292,7 @@ input {
     top: -5px;
   }
   to {
-    top: -65px;
+    top: -100px;
   }
 }
 @keyframes seconds {
@@ -306,6 +306,6 @@ input {
     top: -5px;
   }
   to {
-    top: -65px;
+    top: -100px;
   }
 }
