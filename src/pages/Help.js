@@ -86,9 +86,12 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
           </div>
           <div>
             As this page is build with reactjs, all communication to/from the server is via a
-            REST api anyway. You can play around with it by grabbing this
-            <a href="https://github.com/oglimmer/linky/blob/master/build/test/test.sh"> shell
-              script </a>. Set the shell variable AUTH_TOKEN to your token and try:
+            REST api anyway, so you can play around with it by grabbing this
+            <a href="https://github.com/oglimmer/linky/blob/master/build/test/test.sh">
+              shell script
+            </a>.
+            Set the shell variable AUTH_TOKEN to your token,
+            set BASE_URL to https://linky.oglimmer.de and try:
             &#39;./test.sh getlinks&#39;
           </div>
         </div>
