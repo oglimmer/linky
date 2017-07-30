@@ -8,13 +8,14 @@ import linkDao from '../dao/linkDao';
 
 import { DEFAULT_LINK } from '../../src/redux/DataModels';
 import { removeTrailingSlash } from '../util/StringUtil';
-import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS, LOCKED } from '../../src/util/TagRegistry';
+import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS, LOCKED, DUEDATE } from '../../src/util/TagRegistry';
 
 import tagDao from '../dao/tagDao';
 import TagHierarchyLogic from '../logic/TagHierarchy';
 
 // TAGS
 export const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
+export const dateRegex = new RegExp('^[\\d]{4}-[\\d]{2}-[\\d]{2}$');
 
 const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
 
@@ -27,20 +28,31 @@ const getTagsFromArray = (tagsArray) => {
   return tagsArray.filter(e => simpleWordRegex.test(e));
 };
 
-export const ensureAllTag = (tagsArr) => {
-  if (tagsArr && !tagsArr.find(e => e.toLowerCase() === ALL)) {
-    tagsArr.push('all');
+const toLowerCase = arr => arr.map(t => t.toLowerCase());
+
+const ensureAllTag = (tagsArr) => {
+  if (tagsArr && !tagsArr.find(e => e === ALL)) {
+    tagsArr.push(ALL);
   }
   return tagsArr;
 };
 
-export const ensureRssTag = (tagsArr, rssUrl) => {
-  const findFctn = e => e.toLowerCase() === RSS;
+const ensureRssTag = (tagsArr, rssUrl) => {
+  const findFctn = e => e === RSS;
   if (rssUrl && tagsArr && !tagsArr.find(findFctn)) {
-    tagsArr.push('rss');
+    tagsArr.push(RSS);
   }
   if (!rssUrl && tagsArr && tagsArr.find(findFctn)) {
     tagsArr.splice(tagsArr.findIndex(findFctn), 1);
+  }
+  return tagsArr;
+};
+
+const ensureWithduedateTag = (tagsArr) => {
+  if (tagsArr.find(e => dateRegex.test(e)) && !tagsArr.find(e => e === DUEDATE)) {
+    tagsArr.push(DUEDATE);
+  } else if (!tagsArr.find(e => dateRegex.test(e)) && tagsArr.find(e => e === DUEDATE)) {
+    tagsArr.splice(tagsArr.findIndex(e => e === DUEDATE), 1);
   }
   return tagsArr;
 };
@@ -55,6 +67,24 @@ export const rewriteFavicon = (rec) => {
 };
 
 // URL
+
+export const equalRelevant = (strA, strB) => {
+  const noTrailingSlash = str => (str.endsWith('/') ? str.substr(0, str.length - 1) : str);
+  const noHttpProtocol = str => (str.startsWith('http://') ? str.substr('http://'.length) : str);
+  const noHttpsProtocol = str => (str.startsWith('https://') ? str.substr('https://'.length) : str);
+  const noProtocol = str => noHttpsProtocol(noHttpProtocol(str));
+  if (!strA && !strB) {
+    return true;
+  }
+  if ((!strA && !!strB) || (!!strA && !strB)) {
+    return false;
+  }
+  if (strA === strB) {
+    return true;
+  }
+  return noProtocol(noTrailingSlash(strA)) === noProtocol(noTrailingSlash(strB));
+};
+
 const isHtml = (response) => {
   const contentTypeHeader = response.headers['content-type'];
   if (!contentTypeHeader) {
@@ -116,7 +146,7 @@ const resolveUrl = (url, pageTitle, locked) => new Promise((resolve, reject) => 
 });
 
 /* eslint-disable no-nested-ternary */
-const getNextIndex = (tagHierarchy, parent = 'root') => {
+export const getNextIndex = (tagHierarchy, parent = 'root') => {
   const sortedRootElements = tagHierarchy
     .filter(e => e.parent === parent)
     .sort((a, b) => (a.index < b.index ? 1 : (a.index === b.index ? 0 : -1)));
@@ -162,12 +192,23 @@ const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, notes }) =
     notes,
   });
 
+export const validateAndEnhanceTags = (tags, rssUrl) =>
+  ensureWithduedateTag( // add duedate if date given
+    ensureRssTag( // add rss if rss-url given
+      ensureAllTag( // ensure all
+        removeForbiddenTags( // remove user added forbidden tags
+          toLowerCase(tags), // all to lower case
+        ),
+      ), rssUrl,
+    ),
+  );
+
 export const createRecord = (rec) => {
   const { url, rssUrl, tagsAsString, tagsAsArray, pageTitle, notes } = rec;
   const fixedUrl = fixUrl(url);
   const fixedRssUrl = fixUrl(rssUrl);
   const fixedTags = Object.prototype.hasOwnProperty.call(rec, 'tagsAsString') ? getTags(tagsAsString) : getTagsFromArray(tagsAsArray);
-  const tags = removeForbiddenTags(ensureRssTag(ensureAllTag(fixedTags), fixedRssUrl));
+  const tags = validateAndEnhanceTags(fixedTags, fixedRssUrl);
   const locked = !!tags.find(t => t === LOCKED);
   return resolveUrl(fixedUrl, pageTitle, locked)
     .then(({ linkUrl, title }) => favicon(linkUrl)

@@ -9,7 +9,7 @@ import BaseProcessor from './BaseProcessor';
 import linkDao from '../dao/linkDao';
 import tagLogic from '../logic/TagHierarchy';
 import asyncWaitDao from '../dao/asyncWaitDao';
-import { createRecord, updateTagHierarchy, simpleWordRegex } from '../logic/Link';
+import { createRecord, updateTagHierarchy, simpleWordRegex, equalRelevant } from '../logic/Link';
 import { toNetscape } from '../../src/util/Hierarchy';
 
 const rndName = () => {
@@ -19,23 +19,6 @@ const rndName = () => {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
-};
-
-const equalRelevant = (strA, strB) => {
-  const noTrailingSlash = str => (str.endsWith('/') ? str.substr(0, str.length - 1) : str);
-  const noHttpProtocol = str => (str.startsWith('http://') ? str.substr('http://'.length) : str);
-  const noHttpsProtocol = str => (str.startsWith('https://') ? str.substr('https://'.length) : str);
-  const noProtocol = str => noHttpsProtocol(noHttpProtocol(str));
-  if (!strA && !strB) {
-    return true;
-  }
-  if ((!strA && !!strB) || (!!strA && !strB)) {
-    return false;
-  }
-  if (strA === strB) {
-    return true;
-  }
-  return noProtocol(noTrailingSlash(strA)) === noProtocol(noTrailingSlash(strB));
 };
 
 const getCategories = ($a) => {

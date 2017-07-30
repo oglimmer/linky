@@ -26,7 +26,7 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
     <div>
       System tags are:
       <ul>
-        { TAGS.map(tag => (<li key={Math.random()}>{tag}</li>)) }
+        { TAGS.sort().map(tag => (<li key={Math.random()}>{tag}</li>)) }
       </ul>
     </div>
     <p>
@@ -34,6 +34,25 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
     </p>
     <p>
       <b>broken</b>: shows all links failing a nightly http get validation.
+    </p>
+    <p>
+      <b>due</b>: shows all due links. When a link has a tag in the format yyyy-mm-dd it will get
+      the duedate tag and starting this date, the system will add due.
+    </p>
+    <p>
+      <b>duedate</b>: shows all links having a tag in going by the format yyyy-mm-dd.
+    </p>
+    <p>
+      <b>locked</b>: use this tag to remove a link from the nightly validation. All links on non
+      public urls should have, otherwise linky constantly marks your link as broken or changes it
+      to something like the intranet login page.
+    </p>
+    <p>
+      <b>portal</b>: tag initially selected, so all tags with this tag are on your portal.
+    </p>
+    <p>
+      <b>root</b>: system internal tag. Defines the root node of the tag hierarchy. You must not
+      use this.
     </p>
     <p>
       <b>rss</b>: shows all links having an associated RSS url
@@ -47,18 +66,6 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
       <b>urlupdated</b>: shows all links which were updated during the nightly http get validation,
       as the response resulted in a 3** http result code and therefore linky stored the new final
       url.
-    </p>
-    <p>
-      <b>portal</b>: tag initially selected, so all tags with this tag are on your portal.
-    </p>
-    <p>
-      <b>locked</b>: use this tag to remove a link from the nightly validation. All links on non
-      public urls should have, otherwise linky constantly marks your link as broken or changes it
-      to something like the intranet login page.
-    </p>
-    <p>
-      <b>root</b>: system internal tag. Defines the root node of the tag hierarchy. You must not
-      use this.
     </p>
     <h3>What are those 2 cookies you store?</h3>
     <p>
@@ -108,7 +115,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
   onMeUserInformation: () => {
     dispatch(getMeUserInformation());
+    /* eslint-disable no-alert */
     alert('Scroll to the top ;)');
+    /* eslint-enable no-alert */
   },
 });
 

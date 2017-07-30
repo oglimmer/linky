@@ -9,7 +9,7 @@ const getCountForNode = (allTags, nodeName) => {
   return 0;
 };
 
-const init = (allTags, parent = 'root') => {
+export const init = (allTags, parent = 'root') => {
   if (!allTags.find(e => e[0].toLowerCase() === 'portal')) {
     allTags.push(['portal', 0]);
   }

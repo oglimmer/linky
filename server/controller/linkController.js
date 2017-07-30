@@ -5,7 +5,7 @@ import linkDao from '../dao/linkDao';
 import tagDao from '../dao/tagDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
-import { fixUrl, ensureRssTag, ensureAllTag, getTags, rewriteFavicon,
+import { fixUrl, validateAndEnhanceTags, getTags, rewriteFavicon,
   createRecord, presistRecord, updateTagHierarchy } from '../logic/Link';
 
 import { READONLY_TAGS } from '../../src/util/TagRegistry';
@@ -56,7 +56,7 @@ class UpdateLinkProcessor extends BaseProcessor {
     const { linkid } = this.req.params;
     const linkUrl = fixUrl(this.req.body.url);
     const rssUrl = fixUrl(this.req.body.rssUrl);
-    const tags = ensureRssTag(ensureAllTag(getTags(this.req.body.tags)), rssUrl);
+    const tags = validateAndEnhanceTags(getTags(this.req.body.tags), rssUrl);
     const { pageTitle, notes } = this.req.body;
     this.data = {
       linkid,
