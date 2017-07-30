@@ -8,7 +8,7 @@ import linkDao from '../dao/linkDao';
 
 import { DEFAULT_LINK } from '../../src/redux/DataModels';
 import { removeTrailingSlash } from '../util/StringUtil';
-import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS } from '../../src/util/TagRegistry';
+import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS, LOCKED } from '../../src/util/TagRegistry';
 
 import tagDao from '../dao/tagDao';
 import TagHierarchyLogic from '../logic/TagHierarchy';
@@ -65,7 +65,7 @@ const isHtml = (response) => {
 
 export const fixUrl = url => (url && !url.startsWith('http') ? `http://${url}` : url);
 
-const resolveUrl = (url, pageTitle) => new Promise((resolve, reject) => {
+const resolveUrl = (url, pageTitle, locked) => new Promise((resolve, reject) => {
   const httpGetCall = requestRaw.get({
     url,
     followAllRedirects: true,
@@ -78,7 +78,11 @@ const resolveUrl = (url, pageTitle) => new Promise((resolve, reject) => {
   }, 2500);
   const doresolve = ({ linkUrl, title }) => {
     clearTimeout(timeout);
-    resolve({ linkUrl, title });
+    if (locked) {
+      resolve({ linkUrl: url, title: pageTitle || url });
+    } else {
+      resolve({ linkUrl, title });
+    }
   };
   let buffer = '';
   let title = pageTitle || url;
@@ -164,7 +168,8 @@ export const createRecord = (rec) => {
   const fixedRssUrl = fixUrl(rssUrl);
   const fixedTags = Object.prototype.hasOwnProperty.call(rec, 'tagsAsString') ? getTags(tagsAsString) : getTagsFromArray(tagsAsArray);
   const tags = removeForbiddenTags(ensureRssTag(ensureAllTag(fixedTags), fixedRssUrl));
-  return resolveUrl(fixedUrl, pageTitle)
+  const locked = !!tags.find(t => t === LOCKED);
+  return resolveUrl(fixedUrl, pageTitle, locked)
     .then(({ linkUrl, title }) => favicon(linkUrl)
       .then(faviconUrl => createObject({
         tags,
