@@ -103,3 +103,12 @@ export function exportBookmarks() {
       .catch(error => dispatch(setErrorMessage(error)));
   };
 }
+
+export function getMeUserInformation() {
+  return (dispatch, getState) => fetch.get('/rest/users/me', getState().auth.token)
+    .then(response => response.json())
+    .then((json) => {
+      dispatch(setErrorMessage(`This is what we have stored about you: ${JSON.stringify(json)}`));
+    })
+    .catch(error => dispatch(setErrorMessage(error)));
+}

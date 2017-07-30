@@ -23,6 +23,7 @@ const Header = ({ authToken }) => (
         { authToken ? <LinkNavItem to="/importExport">Import/Export</LinkNavItem> : '' }
       </Nav>
       <Nav pullRight>
+        <LinkNavItem to="/help">Help</LinkNavItem>
         <LogoutButton />
       </Nav>
     </Navbar.Collapse>

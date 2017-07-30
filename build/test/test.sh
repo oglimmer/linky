@@ -58,6 +58,12 @@ if [ "$1" == "export" ]; then
   curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/export/links
 fi
 
+if [ "$1" == "me" ]; then
+  [ -z "$AUTH_TOKEN" ] && echo "AUTH_TOKEN not set" && exit 1
+  echo curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/users/me
+  curl -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/users/me
+fi
+
 if [ -z "$1" ]; then
   AUTH_AVAIL=$(if [ -z ${AUTH_TOKEN} ]; then echo "empty"; else echo "set"; fi)
   echo "AVAILABLE COMMANDS: (USING BASE_URL=$BASE_URL | AUTH_TOKEN is $AUTH_AVAIL)"
@@ -69,5 +75,6 @@ if [ -z "$1" ]; then
   echo "html [url]"
   echo "hierarchy"
   echo "export"
+  echo "me"
 fi
 

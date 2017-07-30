@@ -102,19 +102,44 @@ class AuthenticateProcessor extends BaseProcessor {
 
 }
 
+class GetUserProcessor extends BaseProcessor {
+
+  constructor(req, res, next) {
+    super(req, res, next, true);
+  }
+
+  * process() {
+    try {
+      const user = yield userDao.getById(this.data.userid);
+      if (!user) {
+        ResponseUtil.sendErrorResponse500('Unknown id', this.res);
+      } else {
+        winston.loggers.get('application').debug('User info for id=%s', this.data.userid);
+        const { _id, _rev, ...respUser } = user;
+        this.res.send(respUser);
+      }
+    } catch (err) {
+      winston.loggers.get('application').error(err);
+      ResponseUtil.sendErrorResponse500(err, this.res);
+    }
+    this.res.end();
+  }
+
+}
+
 export default {
 
-  authenticate: function authenticate(req, res, next) {
+  authenticate: (req, res, next) => {
     const ap = new AuthenticateProcessor(req, res, next);
     ap.doProcess();
   },
 
-  createUser: function createUser(req, res, next) {
+  createUser: (req, res, next) => {
     const cup = new CreateUserProcessor(req, res, next);
     cup.doProcess();
   },
 
-  logout: function logout(req, res) {
+  logout: (req, res) => {
     const { vistorToken } = req.cookies;
     visitorDao.getByVisitorId(vistorToken)
       .then((vistorRec) => {
@@ -128,6 +153,11 @@ export default {
     res.clearCookie('authToken');
     res.send('ok');
     res.end();
+  },
+
+  getUser: (req, res, next) => {
+    const cup = new GetUserProcessor(req, res, next);
+    cup.doProcess();
   },
 
 };

@@ -8,7 +8,7 @@ import linkDao from '../dao/linkDao';
 
 import { DEFAULT_LINK } from '../../src/redux/DataModels';
 import { removeTrailingSlash } from '../util/StringUtil';
-import { UNTAGGED, ALL, RSS } from '../../src/util/TagRegistry';
+import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS } from '../../src/util/TagRegistry';
 
 import tagDao from '../dao/tagDao';
 import TagHierarchyLogic from '../logic/TagHierarchy';
@@ -44,6 +44,9 @@ export const ensureRssTag = (tagsArr, rssUrl) => {
   }
   return tagsArr;
 };
+
+const removeForbiddenTags = tagsArray =>
+  tagsArray.filter(e => !FORBIDDEN_TAGS.find(t => t === e));
 
 // FAVICON
 export const rewriteFavicon = (rec) => {
@@ -160,7 +163,7 @@ export const createRecord = (rec) => {
   const fixedUrl = fixUrl(url);
   const fixedRssUrl = fixUrl(rssUrl);
   const fixedTags = Object.prototype.hasOwnProperty.call(rec, 'tagsAsString') ? getTags(tagsAsString) : getTagsFromArray(tagsAsArray);
-  const tags = ensureRssTag(ensureAllTag(fixedTags), fixedRssUrl);
+  const tags = removeForbiddenTags(ensureRssTag(ensureAllTag(fixedTags), fixedRssUrl));
   return resolveUrl(fixedUrl, pageTitle)
     .then(({ linkUrl, title }) => favicon(linkUrl)
       .then(faviconUrl => createObject({

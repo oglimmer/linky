@@ -9,6 +9,7 @@ import PortalPage from '../pages/PortalPage';
 import TagPage from '../pages/TagPage';
 import Impressum from '../pages/Impressum';
 import ImportExport from '../pages/ImportExport';
+import Help from '../pages/Help';
 
 import { initialLoadLinks } from '../../src/redux/actions/links';
 import { initialLoadTags } from '../../src/redux/actions/tagHierarchy';
@@ -85,6 +86,13 @@ const routes = auth => [
     exact: true,
     path: '/impressum',
     component: Impressum,
+    loadData: null,
+  },
+  {
+    tagName: Route,
+    exact: true,
+    path: '/help',
+    component: Help,
     loadData: null,
   },
   {
