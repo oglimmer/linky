@@ -5217,6 +5217,10 @@ react-router@^4.1.1:
     prop-types "^15.5.4"
     warning "^3.0.0"
 
+react-tag-autocomplete@^5.4.1:
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/react-tag-autocomplete/-/react-tag-autocomplete-5.4.1.tgz#941266c73f26e32f151ed94fc9285258fdff0eff"
+
 react-ui-tree@^2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/react-ui-tree/-/react-ui-tree-2.6.0.tgz#cd110a5eee925c49694927c0c81416cf44fdca9c"

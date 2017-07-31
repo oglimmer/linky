@@ -8,8 +8,10 @@ import { connect } from 'react-redux';
 import { toggleVisibilityMenuBar } from '../redux/actions';
 import { persistLink, delLink, resetAddLinkFields } from '../redux/actions/links';
 import UIInputElement from '../components/UIInputElement';
+import UIInputAutocompleteElement from '../components/UIInputAutocompleteElement';
 
-const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, isAddEnabled }) => {
+const AddLinkInputBox = (
+  { onSubmit, linkId, onClose, onDelete, isAddEnabled }) => {
   if (!isAddEnabled) {
     return null;
   }
@@ -27,12 +29,7 @@ const AddLinkInputBox = ({ onSubmit, linkId, onClose, onDelete, isAddEnabled }) 
           autoFocus="true"
           autoComplete="off"
         />
-        <UIInputElement
-          label="Tags"
-          model="tags"
-          placeholder="a tag is one word [a-z0-9-]"
-          autoComplete="off"
-        />
+        <UIInputAutocompleteElement />
       </FormGroup>
       <FormGroup controlId="row2controls">
         <UIInputElement
@@ -94,6 +91,8 @@ AddLinkInputBox.defaultProps = {
 const mapStateToPropsAddLinkInputBox = state => ({
   linkId: state.addUrl.id,
   isAddEnabled: state.menuBar.addEnabled,
+  tags: state.addUrl.tags.split(' ').map(e => ({ id: e, name: e })),
+  suggestions: state.tagHierarchyData.tagHierarchy.map(e => ({ id: e.name, name: e.name })),
 });
 
 
