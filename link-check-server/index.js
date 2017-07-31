@@ -42,15 +42,18 @@ const updateUrl = rec => new Promise((resolve, reject) => {
   const timeout = setTimeout(() => {
     httpGetCall.abort();
     console.log(`${new Date()}: call to ${rec.linkUrl} timed out`);
-    reject(rec);
-  }, 5000);
+    reject(Object.assign({}, rec, {
+      tags: cloneAndPush(rec.tags, BROKEN),
+      $$DIRTY$$: true,
+    }));
+  }, 30000);
   httpGetCall.on('response', (response) => {
     clearTimeout(timeout);
     httpGetCall.abort();
     const newUrl = removeTrailingSlash(response.request.href);
     const updateObj = {};
-    if (!(equalRelevant(newUrl, rec.linkUrl))) {
-      console.log(`${new Date()}: link ${rec.linkUrl} changed to ${newUrl}`);
+    if (!(equalRelevant(newUrl, url))) {
+      console.log(`${new Date()}: link ${url} changed to ${newUrl}`);
       updateObj.$$DIRTY$$ = true;
       updateObj.linkUrl = newUrl;
       updateObj.notes = `${rec.notes}. Updated url to ${newUrl}`;
@@ -61,9 +64,9 @@ const updateUrl = rec => new Promise((resolve, reject) => {
     resolve(Object.assign({}, rec, updateObj));
   });
   httpGetCall.on('error', () => {
+    console.log(`${new Date()}: found broken link ${url}`);
     httpGetCall.abort();
     clearTimeout(timeout);
-    console.log(`${new Date()}: found broken link ${url}`);
     reject(Object.assign({}, rec, {
       tags: cloneAndPush(rec.tags, BROKEN),
       $$DIRTY$$: true,
@@ -78,17 +81,18 @@ const persist = (rec) => {
     /* eslint-disable no-param-reassign */
     delete rec.$$DIRTY$$;
     /* eslint-enable no-param-reassign */
-    linkDao.insert(rec);
     console.log(`${new Date()}: link ${rec.linkUrl} persisted`);
     changedUserId.add(rec.userid);
+    return linkDao.insert(rec);
   }
+  return Promise.resolve(rec);
 };
 
 const processUrlFavicon = (rec) => {
   if (!hasTag(rec.tags, BROKEN) && !hasTag(rec.tags, LOCKED)) {
     return updateUrl(rec).then(updateFavicon).catch(r => r);
   }
-  return Promise.resolve();
+  return Promise.resolve(rec);
 };
 
 const checkDue = (rec) => {

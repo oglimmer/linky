@@ -5,7 +5,7 @@ import request from 'request-promise';
 
 const promisedFavicon = Promise.promisify(favicon);
 
-export default url => promisedFavicon(url).then((faviconUrl) => {
+export default url => promisedFavicon(url, { timeout: 15000 }).then((faviconUrl) => {
   if (!faviconUrl) {
     return null;
   }
