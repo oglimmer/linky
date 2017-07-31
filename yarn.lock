@@ -5217,9 +5217,9 @@ react-router@^4.1.1:
     prop-types "^15.5.4"
     warning "^3.0.0"
 
-react-tag-autocomplete@^5.4.1:
-  version "5.4.1"
-  resolved "https://registry.yarnpkg.com/react-tag-autocomplete/-/react-tag-autocomplete-5.4.1.tgz#941266c73f26e32f151ed94fc9285258fdff0eff"
+"react-tag-autocomplete@https://github.com/oglimmer/react-tags":
+  version "5.5.0"
+  resolved "https://github.com/oglimmer/react-tags#52b6493be56ad071e7e4bea672bca77c32d3d5d3"
 
 react-ui-tree@^2.6.0:
   version "2.6.0"
