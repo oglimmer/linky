@@ -6,7 +6,7 @@ import winston from 'winston';
 import ResponseUtil from '../../src/util/ResponseUtil';
 
 
-/* abstract*/ class BaseProcessor {
+/* abstract */ class BaseProcessor {
 
   constructor(req, res, next, securePath) {
     this.req = req;
@@ -15,7 +15,7 @@ import ResponseUtil from '../../src/util/ResponseUtil';
     this.securePath = securePath;
   }
 
-  /* final*/ collectSecureParameter() {
+  /* final */ collectSecureParameter() {
     assert(this.req.user, 'No user object. This should be prevented by `AuthorizationController.checkAuthorization`');
     const { userid } = this.req.user;
     if (this.data.userid && this.data.userid !== userid) {
@@ -42,11 +42,11 @@ import ResponseUtil from '../../src/util/ResponseUtil';
   }
   /* eslint-enable class-methods-use-this */
 
-  /* final*/ collectRouteParameter() {
+  /* final */ collectRouteParameter() {
     Object.assign(this.data, this.req.params);
   }
 
-  /* final*/ isValid() {
+  /* final */ isValid() {
     const propertiesToValidate = this.propertiesToValidate();
     const keysToValidate = Object.keys(propertiesToValidate);
     for (let i = 0; i < keysToValidate.length; i += 1) {
@@ -66,7 +66,7 @@ import ResponseUtil from '../../src/util/ResponseUtil';
   /** must be overwritten */
   /* *process(); */
 
-  /* private*/ doProcessPart2() {
+  /* private */ doProcessPart2() {
     this.collectRouteParameter();
     if (this.securePath) {
       this.collectSecureParameter();
@@ -79,7 +79,7 @@ import ResponseUtil from '../../src/util/ResponseUtil';
     return null;
   }
 
-  /* public*/ doProcess() {
+  /* public */ doProcess() {
     const promise = this.collectBodyParameters();
     if (promise) {
       promise.then(() => this.doProcessPart2()).catch(err => this.res.status(500).send(err));
