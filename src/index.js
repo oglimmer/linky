@@ -14,6 +14,7 @@ if (window.$REDUX_STATE) {
   state.mainData.linkList = Immutable.List(state.mainData.linkList);
   state.mainData.feedUpdatesList = Immutable.List(state.mainData.feedUpdatesList);
   state.mainData.feedUpdatesDetails = Immutable.List(state.mainData.feedUpdatesDetails);
+  state.mainData.listColumns = Immutable.List(state.mainData.listColumns);
   state.tagHierarchyData.tagHierarchy = immutableConverter(state.tagHierarchyData.tagHierarchy);
 }
 

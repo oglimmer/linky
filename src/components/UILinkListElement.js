@@ -8,33 +8,68 @@ import Immutable from 'immutable';
 
 import { fetchRssUpdatesDetails } from '../redux/actions/links';
 
-const style = {
+const styleFeedUpdate = {
   borderBottom: '1px dotted #000',
 };
+const styleRow = {
+  paddingLeft: '20px',
+};
 
-const UILinkListElement = ({ id, pageTitle, onUpdateLink, onClickLink, faviconUrl,
-  feedUpdates, hasRssUrl, onShowRssDetails, rssDetails, selectedLinkForDetails }) => (
+const display = (columnName, text) => {
+  switch (columnName) {
+    case 'tags':
+      return text.map(tag => (
+        <span key={Math.random()}>
+          <span className="label label-default">{tag}</span>
+          {' '}
+        </span>
+      ));
+    case 'linkUrl':
+      return <span className="label label-success">{text}</span>;
+    case 'rssUrl':
+      return <span className="label label-danger">{text}</span>;
+    default:
+      return text;
+  }
+};
+
+const UILinkListElement = ({ id, onUpdateLink, onClickLink, faviconUrl, listColumns,
+  feedUpdates, hasRssUrl, onShowRssDetails, rssDetails, selectedLinkForDetails, link }) => (
     <span>
       <ListGroupItem onClick={() => onClickLink(id)} href={`/leave?target=${id}`} target="_blank">
-        <img width="16" src={faviconUrl || '/static/default.png'} alt="favicon" />
+        {listColumns.map((columnName, index) => {
+          const text = link[columnName];
+          if (index === 0) {
+            return (
+              <div key={Math.random()}>
+                <img width="16" src={faviconUrl || '/static/default.png'} alt="favicon" />
+                {' '}
+                {display(columnName, text)}
+                { feedUpdates ? (
+                  <span
+                    style={styleFeedUpdate}
+                    role="link"
+                    tabIndex="0"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onShowRssDetails(id);
+                    }}
+                  >
+                    {' '}(New: {feedUpdates.value})
+                  </span>
+                ) : '' }
+                { hasRssUrl && !feedUpdates ? '(New: ???)' : '' }
+                <Button
+                  className="pull-right btn-xs"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); onUpdateLink(); }}
+                >E</Button>
+              </div>
+            );
+          }
+          return (<div key={Math.random()} style={styleRow}>{display(columnName, text)}</div>);
+        })}
         {' '}
-        {pageTitle}
-        {' '}
-        { feedUpdates ? (
-          <span
-            style={style}
-            role="link"
-            tabIndex="0"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onShowRssDetails(id); }}
-          >
-            (New: {feedUpdates.value})
-          </span>
-        ) : '' }
-        { hasRssUrl && !feedUpdates ? '(New: ???)' : '' }
-        <Button
-          className="pull-right btn-xs"
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onUpdateLink(); }}
-        >E</Button>
       </ListGroupItem>
       { id === selectedLinkForDetails ? rssDetails.map(e => (
         <ListGroupItem key={Math.random()} href={e.link} target="_blank">
@@ -46,7 +81,6 @@ const UILinkListElement = ({ id, pageTitle, onUpdateLink, onClickLink, faviconUr
 );
 UILinkListElement.propTypes = {
   id: PropTypes.string.isRequired,
-  pageTitle: PropTypes.string.isRequired,
   onUpdateLink: PropTypes.func.isRequired,
   onClickLink: PropTypes.func.isRequired,
   faviconUrl: PropTypes.string,
@@ -55,6 +89,8 @@ UILinkListElement.propTypes = {
   onShowRssDetails: PropTypes.func.isRequired,
   rssDetails: ImmutablePropTypes.listOf(PropTypes.shape()),
   selectedLinkForDetails: PropTypes.string,
+  link: PropTypes.shape().isRequired,
+  listColumns: ImmutablePropTypes.listOf(PropTypes.string).isRequired,
 };
 UILinkListElement.defaultProps = {
   faviconUrl: null,
@@ -66,6 +102,7 @@ UILinkListElement.defaultProps = {
 const mapStateToProps = state => ({
   selectedLinkForDetails: state.mainData.selectedLinkForDetails,
   rssDetails: state.mainData.feedUpdatesDetails,
+  listColumns: state.mainData.listColumns,
 });
 
 const mapDispatchToProps = dispatch => ({

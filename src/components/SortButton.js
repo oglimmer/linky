@@ -8,11 +8,11 @@ import { changeSortingLink } from '../redux/actions/links';
 
 // ----------------------Presentational Component-----------------------------------
 
-const SortButton = ({ byColumn, text, onClick, selected }) => (
+const SortButton = ({ byColumn, text, onClick, selected, order }) => (
   <Button onClick={() => onClick(byColumn)} className="btn-xs">
-    {selected === byColumn ? '>' : ''}
     {text}
-    {selected === byColumn ? '<' : ''}
+    {selected === byColumn && order === 1 ? ' ↑' : ''}
+    {selected === byColumn && order === -1 ? ' ↓' : ''}
   </Button>
 );
 SortButton.propTypes = {
@@ -20,12 +20,14 @@ SortButton.propTypes = {
   onClick: PropTypes.func.isRequired,
   byColumn: PropTypes.string.isRequired,
   selected: PropTypes.string.isRequired,
+  order: PropTypes.number.isRequired,
 };
 
 // ----------------------Container Component-----------------------------------
 
 const mapStateToProps = state => ({
   selected: state.mainData.sortingByColumn,
+  order: state.mainData.sortingByColumnOrder,
 });
 
 const mapDispatchToProps = dispatch => ({

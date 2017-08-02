@@ -2,7 +2,7 @@
 import Immutable from 'immutable';
 
 import { ADD_LINK, DEL_LINK, SET_LINKS, UPDATE_LINK, RSS_SET_DETAILS_ID,
-  RSS_UPDATES, RSS_UPDATES_DETAILS, REMOVE_TAG_FROM_LINKS,
+  RSS_UPDATES, RSS_UPDATES_DETAILS, REMOVE_TAG_FROM_LINKS, TOGGLE_COLUMN_VIEW,
   CHANGE_SORTING_LINKS, CLICK_LINK, SELECT_TAG, RESET, RENAME_TAG_LINKLIST } from './../actionTypes';
 
 import { initialStateMainData, DEFAULT_LINK } from './../DataModels';
@@ -44,6 +44,28 @@ const removeTagLinklistUpdateState = (state, action) => {
     }
   });
   return Immutable.List(linkList);
+};
+
+const changeSortingLinksUpdateObj = (state, action) => {
+  if (state.sortingByColumn === action.byColumn) {
+    return {
+      sortingByColumnOrder: state.sortingByColumnOrder === 1 ? -1 : 1,
+    };
+  }
+  return {
+    sortingByColumn: action.byColumn,
+  };
+};
+
+const changeColumnViewUpdateObj = (state, action) => {
+  const index = state.listColumns.findIndex(n => n === action.columnName);
+  const updateObj = {};
+  if (index === -1) {
+    updateObj.listColumns = state.listColumns.push(action.columnName);
+  } else if (state.listColumns.size > 1) {
+    updateObj.listColumns = state.listColumns.remove(index);
+  }
+  return updateObj;
 };
 
 export default function mainData(state = initialStateMainData, action) {
@@ -91,9 +113,9 @@ export default function mainData(state = initialStateMainData, action) {
         selectedTag: action.tag,
       });
     case CHANGE_SORTING_LINKS:
-      return Object.assign({}, state, {
-        sortingByColumn: action.byColumn,
-      });
+      return Object.assign({}, state, changeSortingLinksUpdateObj(state, action));
+    case TOGGLE_COLUMN_VIEW:
+      return Object.assign({}, state, changeColumnViewUpdateObj(state, action));
     case CLICK_LINK:
       return Object.assign({}, state, {
         linkList: state.linkList.update(

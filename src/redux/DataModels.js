@@ -35,7 +35,9 @@ export const initialStateMainData = {
   feedUpdatesDetails: Immutable.List(),
   selectedLinkForDetails: null,
   sortingByColumn: 'mostUsed',
+  sortingByColumnOrder: 1,
   selectedTag: null,
+  listColumns: Immutable.List(['pageTitle']),
 };
 
 export const initialStateTagData = {

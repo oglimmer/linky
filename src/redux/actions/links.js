@@ -8,7 +8,7 @@ import { diff } from '../../util/ArrayUtil';
 
 import { CLICK_LINK, CHANGE_SORTING_LINKS, SELECT_TAG, ADD_LINK, UPDATE_LINK,
   DEL_LINK, RSS_UPDATES, RSS_UPDATES_DETAILS, RSS_SET_DETAILS_ID, SET_LINKS,
-  RENAME_TAG_LINKLIST, REMOVE_TAG_FROM_LINKS } from '../actionTypes';
+  RENAME_TAG_LINKLIST, REMOVE_TAG_FROM_LINKS, TOGGLE_COLUMN_VIEW } from '../actionTypes';
 
 import { fetchTagHierarchy, manipulateTagCounter } from './tagHierarchy';
 import { setErrorMessage, setTempMessage, setInfoMessage } from './feedback';
@@ -22,6 +22,10 @@ export function clickLink(id) {
 
 export function changeSortingLink(byColumn) {
   return { type: CHANGE_SORTING_LINKS, byColumn };
+}
+
+export function toggleColumnView(columnName) {
+  return { type: TOGGLE_COLUMN_VIEW, columnName };
 }
 
 export function selectTag(tag) {
