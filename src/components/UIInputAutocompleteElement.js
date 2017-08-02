@@ -21,6 +21,7 @@ const UIInputAutocompleteElmenet = ({ tags, suggestions, addTag, delTag }) => (
         allowNew={!false}
         placeholder="[a-z0-9-]"
         autofocus={false}
+        delimiters={[9, 13, 32]}
       />
     </Col>
   </span>
