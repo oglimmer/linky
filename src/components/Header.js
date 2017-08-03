@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 
 import LinkNavItem from './LinkNavItem';
 import LogoutButton from './LogoutButton';
+import InputNavItem from './InputNavItem';
 
 
 const Header = ({ authToken }) => (
@@ -21,6 +22,7 @@ const Header = ({ authToken }) => (
       <Nav>
         { authToken ? <LinkNavItem to="/tags">Tags</LinkNavItem> : '' }
         { authToken ? <LinkNavItem to="/importExport">Import/Export</LinkNavItem> : '' }
+        { authToken ? <InputNavItem /> : '' }
       </Nav>
       <Nav pullRight>
         <LinkNavItem to="/help">Help</LinkNavItem>

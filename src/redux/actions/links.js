@@ -12,6 +12,7 @@ import { CLICK_LINK, CHANGE_SORTING_LINKS, SELECT_TAG, ADD_LINK, UPDATE_LINK,
 
 import { fetchTagHierarchy, manipulateTagCounter } from './tagHierarchy';
 import { setErrorMessage, setTempMessage, setInfoMessage } from './feedback';
+import { setInSearchMode } from '../actions';
 
 const RSS_UPDATE_FREQUENCY = 1000 * 60 * 5;
 
@@ -266,4 +267,15 @@ export function startRssUpdates() {
       }, RSS_UPDATE_FREQUENCY);
     }
   };
+}
+
+export function sendSearch(searchString) {
+  return (dispatch, getState) =>
+    fetch.get(`/rest/search/links?q=${searchString}`, getState().auth.token)
+    .then(response => response.json())
+    .then((json) => {
+      dispatch(setInSearchMode(true));
+      dispatch(setLinks(json));
+    })
+    .catch(ex => dispatch(setErrorMessage(ex)));
 }

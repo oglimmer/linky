@@ -5,7 +5,8 @@ import winston from 'winston';
 import properties from '../util/linkyproperties';
 
 const dbProps = properties.server.db;
-const url = `${dbProps.protocol}://${dbProps.host}:${dbProps.port}/${dbProps.name}`;
+export const couchdbServer = `${dbProps.protocol}://${dbProps.host}:${dbProps.port}`;
+const url = `${couchdbServer}/${dbProps.name}`;
 
 const config = {
   url,

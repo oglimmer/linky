@@ -3,7 +3,8 @@ import { actions } from 'react-redux-form';
 
 import fetch from '../util/fetch';
 
-import { RESET, SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, TOGGLE_VISIBILITY } from './actionTypes';
+import { RESET, SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, TOGGLE_VISIBILITY,
+  SET_IN_SEARCH_MODE } from './actionTypes';
 
 import { initialLoadLinks } from './actions/links';
 import { setErrorMessage, setInfoMessage, setTempMessage } from './actions/feedback';
@@ -23,6 +24,10 @@ function clearAuthToken() {
 
 export function toggleVisibilityMenuBar(forceShow) {
   return { type: TOGGLE_VISIBILITY, forceShow: forceShow || false };
+}
+
+export function setInSearchMode(mode) {
+  return { type: SET_IN_SEARCH_MODE, mode };
 }
 
 export function logout() {

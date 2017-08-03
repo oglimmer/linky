@@ -3,6 +3,7 @@ import linkController from '../controller/linkController';
 import importExportController from '../controller/importExportController';
 import authorizationController from '../controller/authorizationController';
 import imageController from '../controller/imageController';
+import searchController from '../controller/searchController';
 
 export default (app) => {
   app.post('/rest/links', authorizationController.checkAuthorization, linkController.createLink);
@@ -14,4 +15,5 @@ export default (app) => {
   app.patch('/rest/links/import', authorizationController.checkAuthorization, importExportController.import);
   app.get('/rest/export/links', authorizationController.checkAuthorization, importExportController.export);
   app.get('/rest/import/ready', authorizationController.checkAuthorization, importExportController.importReady);
+  app.get('/rest/search/links', authorizationController.checkAuthorization, searchController.search);
 };
