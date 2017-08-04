@@ -271,7 +271,7 @@ export function startRssUpdates() {
 
 export function sendSearch(searchString) {
   return (dispatch, getState) =>
-    fetch.get(`/rest/search/links?q=${searchString}`, getState().auth.token)
+    fetch.get(`/rest/search/links?q=${encodeURIComponent(searchString)}`, getState().auth.token)
     .then(response => response.json())
     .then((json) => {
       dispatch(setInSearchMode(true));

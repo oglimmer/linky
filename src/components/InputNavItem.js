@@ -22,7 +22,14 @@ class InputNavItem extends React.Component {
   render() {
     return (
       <div className="col-sm-6 col-md-6 pull-right">
-        <form className="navbar-form" role="search">
+        <form
+          className="navbar-form"
+          role="search"
+          onSubmit={(event) => {
+            event.preventDefault();
+            this.props.onClick(this.state.value);
+          }}
+        >
           <div className="input-group">
             <input
               type="text"
@@ -41,6 +48,17 @@ class InputNavItem extends React.Component {
               >
                 <i className="glyphicon glyphicon-search" />
               </button>
+              { this.state.value ?
+                <button
+                  className="btn btn-default"
+                  type="button"
+                  onClick={() => {
+                    this.props.onClear();
+                    this.setState({ value: '' });
+                  }}
+                >
+                  <i className="glyphicon glyphicon-ban-circle" />
+                </button> : '' }
             </div>
           </div>
         </form>
@@ -50,6 +68,7 @@ class InputNavItem extends React.Component {
 }
 InputNavItem.propTypes = {
   onClick: PropTypes.func.isRequired,
+  onClear: PropTypes.func.isRequired,
 };
 
 const mapDispatchToProps = dispatch => ({
@@ -60,6 +79,10 @@ const mapDispatchToProps = dispatch => ({
       dispatch(setInSearchMode(false));
       dispatch(fetchLinks('portal'));
     }
+  },
+  onClear: () => {
+    dispatch(setInSearchMode(false));
+    dispatch(fetchLinks('portal'));
   },
 });
 
