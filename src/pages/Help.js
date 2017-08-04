@@ -17,6 +17,18 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
       functionality. So to make my life a bit easier I just integrated all those &#39;login via a
       3rd party webpage&#39; buttons.
     </p>
+    <h3>How is search working? / Why do I get `wrong` results?</h3>
+    <p>
+      Search is using lucene as the search backend engine. Therefore you can / need to use{' '}
+      <a href="http://lucene.apache.org/core/6_6_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description">
+        lucene query syntax
+      </a>. If you find that too complicated just put a plus symbol (+) in front of your search
+      and it searches only for exactly your word. Use `+*your word*` to search your word in the most
+      general way.
+    </p>
+    <p>
+      Lucene is set to allow leading wildcards.
+    </p>
     <h3>Why have tags different colors in the tags hierarchy?</h3>
     <p>
       Linky uses 3 different colors for tags as they can fall into 3 different types: (1)
