@@ -21,7 +21,7 @@ class InputNavItem extends React.Component {
 
   render() {
     return (
-      <div className="col-sm-6 col-md-6 pull-right">
+      <li role="presentation">
         <form
           className="navbar-form"
           role="search"
@@ -62,7 +62,7 @@ class InputNavItem extends React.Component {
             </div>
           </div>
         </form>
-      </div>
+      </li>
     );
   }
 }
