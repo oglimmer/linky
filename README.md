@@ -20,7 +20,25 @@ This project features:
 
 # initial setup
 
+## basic setup
+
 Install couchdb and import the views (see https://www.npmjs.com/package/couchviews and build/couchdb/)
+
+## setup for search
+
+If you want to use search from the menu you need to start a lucene server.
+
+* checkout the latest version of [couchdb-lucene](https://github.com/rnewson/couchdb-lucene) (tested with 2.1.0)
+* if you want to be able to use leading wildcards: change `allowLeadingWildcard` to true in `src/main/resources/couchdb-lucene.ini`
+* run `mvn` to build the lucene server
+* find your couchdb config and add the following lines to its local.ini
+
+```
+[httpd_global_handlers]
+_fti = {couch_httpd_proxy, handle_proxy_req, <<"http://localhost:5985">>}
+```
+
+* unzip `couchdb-lucene-<VERSION>-dist.zip` from the target folder and start couchdb-lucene via `./bin/run` from there
 
 # dev setup
 
