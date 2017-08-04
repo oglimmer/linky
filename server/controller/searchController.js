@@ -22,7 +22,7 @@ class SearchProcessor extends BaseProcessor {
   * process() {
     try {
       const query = encodeURIComponent(this.data.q);
-      const url = `${couchdbServer}/_fti/local/linky/_design/lucene/by_alla?include_docs=true&q=${query}%20%2Buserid%3A${this.data.userid}`;
+      const url = `${couchdbServer}/_fti/local/linky/_design/lucene/by_all?include_docs=true&q=${query}%20%2Buserid%3A${this.data.userid}`;
       const searchResult = yield request.get({
         url,
         json: true,
