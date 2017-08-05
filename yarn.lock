@@ -2543,7 +2543,7 @@ fastparse@^1.1.1:
 
 "favicon@https://github.com/oglimmer/node-favicon/tarball/master":
   version "0.1.1"
-  resolved "https://github.com/oglimmer/node-favicon/tarball/master#ede2e15a8d6c03cf6080243241776250349ceb34"
+  resolved "https://github.com/oglimmer/node-favicon/tarball/master#9214eac8408360f55adaf27a5fe0d803b6363ead"
   dependencies:
     request "2.x.x"
 
