@@ -131,9 +131,11 @@ const resolveUrl = (url, pageTitle, locked) => new Promise((resolve, reject) => 
     const match = findTitleRegEx.exec(buffer);
     if (match && match.length > 1) {
       const entities = new AllHtmlEntities();
-      title = entities.decode(match[1]);
-      if (title.length > 255) {
-        title = `${title.substring(0, 255)}...`;
+      const titleFromHtml = entities.decode(match[1]);
+      if (titleFromHtml.length > 255) {
+        title = `${titleFromHtml.substring(0, 255)}...`;
+      } else if (titleFromHtml) {
+        title = titleFromHtml;
       }
       httpGetCall.abort();
       doresolve({ linkUrl, title });
