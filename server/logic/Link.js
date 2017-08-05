@@ -132,6 +132,9 @@ const resolveUrl = (url, pageTitle, locked) => new Promise((resolve, reject) => 
     if (match && match.length > 1) {
       const entities = new AllHtmlEntities();
       title = entities.decode(match[1]);
+      if (title.length > 255) {
+        title = `${title.substring(0, 255)}...`;
+      }
       httpGetCall.abort();
       doresolve({ linkUrl, title });
     }
