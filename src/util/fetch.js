@@ -15,7 +15,14 @@ export default {
       headers: {
         authorization: `Bearer ${authToken}`,
       },
-    });
+    })
+      .then(response => response.json())
+      .then((json) => {
+        if (json.message) {
+          throw new Error(json.message);
+        }
+        return json;
+      });
   },
 
   postCredentials: function postCredentials(url, body) {

@@ -93,7 +93,6 @@ export function fetchRssUpdatesDetails(id) {
       return null;
     }
     return fetch.get(`/rest/links/${id}/rssDetails`, getState().auth.token)
-    .then(response => response.json())
     .then((json) => {
       dispatch(setRssUpdates(id, json.result));
       dispatch(setRssUpdatesDetails(id, json.display));
@@ -115,7 +114,6 @@ function fetchRssUpdates() {
         lastUpdates[linkElement.id] = Date.now();
         ps.push(new Promise((resolve, reject) => {
           fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
-          .then(response => response.json())
           .then((json) => {
             totalNewUpdates += json.result;
             dispatch(setRssUpdates(linkElement.id, json.result));
@@ -147,7 +145,6 @@ function fetchRssUpdates() {
 
 export function fetchLinks(tag) {
   return (dispatch, getState) => fetch.get(`/rest/links/${tag}`, getState().auth.token)
-    .then(response => response.json())
     .then(linkList => dispatch(setLinks(linkList)));
 }
 
@@ -272,7 +269,6 @@ export function startRssUpdates() {
 export function sendSearch(searchString) {
   return (dispatch, getState) =>
     fetch.get(`/rest/search/links?q=${encodeURIComponent(searchString)}`, getState().auth.token)
-    .then(response => response.json())
     .then((json) => {
       dispatch(setInSearchMode(true));
       dispatch(setLinks(json));

@@ -31,7 +31,6 @@ function updateCountInHierarchy(tagName, count) {
 
 export function fetchTagHierarchy() {
   return (dispatch, getState) => fetch.get('/rest/tags/hierarchy', getState().auth.token)
-    .then(response => response.json())
     .then(tagHierarchy => dispatch(setTagHierarchy(tagHierarchy)));
 }
 

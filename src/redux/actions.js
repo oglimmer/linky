@@ -60,7 +60,6 @@ const CHECK_IMPORT_DONE_FREQUENCY = 2500;
 
 const checkImportDone = (dispatch, getState) => {
   fetch.get('/rest/import/ready', getState().auth.token)
-    .then(response => response.json())
     .then((json) => {
       if (json.importDone) {
         dispatch(actions.change('importExport.buttonsDisable', false));
@@ -75,7 +74,6 @@ const checkImportDone = (dispatch, getState) => {
 
 export function initAsyncWaits() {
   return (dispatch, getState) => fetch.get('/rest/import/ready', getState().auth.token)
-    .then(response => response.json())
     .then((json) => {
       if (!json.importDone) {
         dispatch(setInfoMessage('Import in progress...'));
@@ -99,7 +97,6 @@ export function exportBookmarks() {
     dispatch(setTempMessage('sending data to server ...'));
     dispatch(actions.change('importExport.buttonsDisable', true));
     return fetch.get('/rest/export/links', getState().auth.token)
-      .then(response => response.json())
       .then(json => dispatch(actions.change('importExport.bookmarks', json.content)))
       .then(() => {
         dispatch(setInfoMessage('All data exported. Copy content from `NETSCAPE-Bookmark-file-1` into a file and import it into a browser of your choice.'));
@@ -111,7 +108,6 @@ export function exportBookmarks() {
 
 export function getMeUserInformation() {
   return (dispatch, getState) => fetch.get('/rest/users/me', getState().auth.token)
-    .then(response => response.json())
     .then((json) => {
       dispatch(setErrorMessage(`This is what we have stored about you: ${JSON.stringify(json)}`));
     })

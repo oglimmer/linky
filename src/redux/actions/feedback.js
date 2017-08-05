@@ -4,10 +4,11 @@ import { SET_ERROR_MESSAGE, SET_INFO_MESSAGE, SET_TEMP_MESSAGE } from '../action
 
 export function setErrorMessage(errorMessage) {
   const action = { type: SET_ERROR_MESSAGE, errorMessage };
-  if (typeof errorMessage !== 'string') {
+  if (errorMessage instanceof Error) {
+    action.errorMessage = errorMessage.message;
+  } else if (typeof errorMessage !== 'string') {
     action.errorMessage = JSON.stringify(errorMessage);
   }
-  console.log(errorMessage);
   return action;
 }
 
