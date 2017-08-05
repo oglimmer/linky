@@ -146,7 +146,13 @@ function fetchRssUpdates() {
 export function fetchLinks(tag) {
   return (dispatch, getState) => fetch.get(`/rest/links/${tag}`, getState().auth.token)
     .then(linkList => dispatch(setLinks(linkList)))
-    .catch(error => dispatch(setErrorMessage(error)));
+    .catch((error) => {
+      if (error.message.indexOf('Invalid auth token') !== -1) {
+        dispatch(setErrorMessage('Session token expired. Reload this page!'));
+      } else {
+        dispatch(setErrorMessage(error));
+      }
+    });
 }
 
 

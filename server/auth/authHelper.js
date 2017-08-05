@@ -69,7 +69,7 @@ const verifyState = (req, res, state) => JwtUtil.verify(state).then((fromState) 
   const fromCookie = JwtUtil.decode(req.cookies.stateClaim);
   res.clearCookie('stateClaim');
   if (fromState.randomToken !== fromCookie.randomToken) {
-    throw Error(`Failed to validate state. ${fromState} != ${fromCookie}`);
+    throw Error(`Failed to validate state. ${JSON.stringify(fromState)} != ${JSON.stringify(fromCookie)}`);
   }
 });
 
