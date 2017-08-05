@@ -38,26 +38,29 @@ class GetFaviconProcessor extends BaseProcessor {
       } catch (noCacheFile) {
         const rec = yield linkDao.getById(this.data.linkid);
         const outputStream = fs.createWriteStream(file);
-        request
-          .get(rec.faviconUrl)
-          .on('response', (response) => {
-            const contentType = response.headers['content-type'];
-            this.res.append('content-type', contentType);
-            this.res.append('Cache-Control', 'max-age=31536000');
-            fs.writeFileSync(`${file}.contentType`, contentType);
-          })
-          .on('data', (data) => {
-            this.res.write(data);
-            outputStream.write(data);
-          })
-          .on('complete', () => {
-            this.res.end();
-            outputStream.end();
-          })
-          .on('error', () => {
-            this.res.end();
-            outputStream.end();
-          });
+        request({
+          method: 'GET',
+          uri: rec.faviconUrl,
+          gzip: true,
+        })
+        .on('response', (response) => {
+          const contentType = response.headers['content-type'];
+          this.res.append('content-type', contentType);
+          this.res.append('Cache-Control', 'max-age=31536000');
+          fs.writeFileSync(`${file}.contentType`, contentType);
+        })
+        .on('data', (data) => {
+          this.res.write(data);
+          outputStream.write(data);
+        })
+        .on('complete', () => {
+          this.res.end();
+          outputStream.end();
+        })
+        .on('error', () => {
+          this.res.end();
+          outputStream.end();
+        });
       }
     } catch (err) {
       winston.loggers.get('application').error(err);
