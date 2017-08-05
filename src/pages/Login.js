@@ -17,6 +17,12 @@ const click = (target) => {
   document.location.href = `/auth/${target}`;
 };
 
+const loginDemo = (dispatch, history) => {
+  dispatch(checkAuth('demo@linky.oglimmer.de', 'demo')).then(() => {
+    history.replace('/links/portal');
+  }, () => {});
+};
+
 const showUserPasswordLogin = /* CONSTANT_START SHOW_USER_PASSWORD_FORM */process.env.NODE_ENV === 'development'/* CONSTANT_END */;
 
 const Login = ({ dispatch, history }) => (
@@ -24,6 +30,9 @@ const Login = ({ dispatch, history }) => (
     <div className="center-form panel">
       <div className="panel-body">
         <h2 className="text-center">Log in</h2>
+        <Button className="btn btn-block" onClick={() => loginDemo(dispatch, history)}>
+          <i className="ion-ios-pricetag" /> Demo account
+        </Button>
         <Button className="btn btn-block btn-facebook" onClick={() => click('facebook')}>
           <i className="ion-logo-facebook" /> Sign in with Facebook
         </Button>
