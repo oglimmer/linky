@@ -274,11 +274,13 @@ export function startRssUpdates() {
 }
 
 export function sendSearch(searchString) {
+  const currentTime = new Date();
   return (dispatch, getState) =>
     fetch.get(`/rest/search/links?q=${encodeURIComponent(searchString)}`, getState().auth.token)
     .then((json) => {
       dispatch(setInSearchMode(true));
       dispatch(setLinks(json));
+      console.log(`Search took ${new Date().getTime() - currentTime.getTime()} millis`);
     })
     .catch(ex => dispatch(setErrorMessage(ex)));
 }
