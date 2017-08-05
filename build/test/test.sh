@@ -5,14 +5,22 @@ if [ -z "$BASE_URL" ]; then
 fi
 REST_URL=$BASE_URL/rest
 
+if [ -z "$EMAIL" ]; then
+  EMAIL=demo@linky.oglimmer.de
+fi
+if [ -z "$PASS" ]; then
+  PASS=demo
+fi
+
+
 if [ "$1" == "createuser" ]; then
-  curl -s -X POST --data '{"email":"foo@test.com","password":"foo"}' \
+  curl -s -X POST --data '{"email":"'$EMAIL'","password":"'$PASS'"}' \
     -H "Content-Type: application/json" $REST_URL/users
 fi
 
 if [ "$1" == "authenticate" ]; then
   authResp=$(curl -s -X POST \
-    --data '{"email":"foo@test.com","password":"foo"}' \
+    --data '{"email":"'$EMAIL'","password":"'$PASS'"}' \
     -H "Content-Type: application/json" $REST_URL/authenticate)
   if [ "$authResp" != "" ]; then
     token=$(echo "$authResp" | json token)
@@ -24,8 +32,13 @@ fi
 
 if [ "$1" == "createlink" ]; then
   [ -z "$AUTH_TOKEN" ] && echo "AUTH_TOKEN not set" && exit 1
+  url=$2
+  [ -z "$url" ] && url=http://oglimmer.de
+  tags=$3
+  [ -z "$tags" ] && tags=portal
+  DATA='{"url":"'$url'","tags":"'$tags'","notes":"","pageTitle":"","rssUrl":""}'
   curl -s -X POST \
-    --data '{"url":"http://oglimmer.de","tags":"portal","notes":"","pageTitle":"","rssUrl":""}' \
+    --data "$DATA" \
     -H "Content-Type: application/json" -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/links
 fi
 
