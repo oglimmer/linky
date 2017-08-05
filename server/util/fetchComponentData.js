@@ -63,7 +63,7 @@ const processAuthToken = (authToken, dispatch, req, res) => {
       res.clearCookie('authToken');
       return visitorToken(req, res);
     });
-}
+};
 
 export default (dispatch, req, res) => {
   const { authToken } = req.cookies;
