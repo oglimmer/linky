@@ -8,30 +8,7 @@ import jwt from './JwtUtil';
 import routes from '../../src/routes/routes';
 import authHelper from '../auth/authHelper';
 
-export default (dispatch, req, res) => {
-  if (req.cookies.authToken) {
-    const { authToken } = req.cookies;
-    winston.loggers.get('application').debug(`FetchComponentData::AUTH_TOKEN=${authToken}`);
-    let dataLoadFnt = null;
-    // some only matches once
-    routes.routesFromToken(authToken).some((route) => {
-      const match = matchPath(req.url, route);
-      if (match && route.loadData) {
-        dataLoadFnt = route.loadData.bind(null, dispatch, match);
-      }
-      return match;
-    });
-    return jwt.verify(authToken)
-      .then(() => dispatch(setAuthToken(authToken)))
-      .then(() => (dataLoadFnt ? dataLoadFnt() : Promise.resolve()))
-      .then(() => dispatch(initAsyncWaits()))
-      .catch((e) => {
-        if (e.name !== 'TokenExpiredError' && e.name !== 'JsonWebTokenError') {
-          winston.loggers.get('application').error(e);
-          res.status(500).send('Server error');
-        }
-      });
-  }
+const visitorToken = (req, res) => {
   if (req.cookies.vistorToken) {
     const { vistorToken } = req.cookies;
     winston.loggers.get('application').debug(`FetchComponentData::vistorToken = ${vistorToken}`);
@@ -47,12 +24,51 @@ export default (dispatch, req, res) => {
             }
           }
           const hintParam = hint ? `hint=${hint}` : '';
-          winston.loggers.get('application').debug(`FetchComponentData::Forwarding to /auth/${authType}`);
-          res.redirect(`/auth/${authType}?${hintParam}`);
+          const targetUrl = `/auth/${authType}?${hintParam}`;
+          winston.loggers.get('application').debug(`FetchComponentData::Forwarding to ${targetUrl}`);
+          res.redirect(targetUrl);
           throw new Error('forward');
         }
+        res.clearCookie('vistorToken');
         return null;
       });
   }
   return Promise.resolve();
+};
+
+const initialLoadFromRoute = (authToken, dispatch, url) => {
+  let dataLoadFnt = null;
+  routes.routesFromToken(authToken).some((route) => {
+    const match = matchPath(url, route);
+    if (match && route.loadData && !dataLoadFnt) {
+      dataLoadFnt = route.loadData(dispatch, match);
+    }
+    return match;
+  });
+  return dataLoadFnt;
+};
+
+const processAuthToken = (authToken, dispatch, req, res) => {
+  winston.loggers.get('application').debug(`FetchComponentData::AUTH_TOKEN=${authToken}`);
+  return jwt.verify(authToken)
+    .then(() => dispatch(setAuthToken(authToken)))
+    .then(() => initialLoadFromRoute(authToken, dispatch, req.url))
+    .then(() => dispatch(initAsyncWaits()))
+    .catch((e) => {
+      if (e.name !== 'TokenExpiredError' && e.name !== 'JsonWebTokenError') {
+        winston.loggers.get('application').error(e);
+        res.status(500).send('Server error');
+        return null;
+      }
+      res.clearCookie('authToken');
+      return visitorToken(req, res);
+    });
+}
+
+export default (dispatch, req, res) => {
+  const { authToken } = req.cookies;
+  if (authToken) {
+    return processAuthToken(authToken, dispatch, req, res);
+  }
+  return visitorToken(req, res);
 };

@@ -145,7 +145,8 @@ function fetchRssUpdates() {
 
 export function fetchLinks(tag) {
   return (dispatch, getState) => fetch.get(`/rest/links/${tag}`, getState().auth.token)
-    .then(linkList => dispatch(setLinks(linkList)));
+    .then(linkList => dispatch(setLinks(linkList)))
+    .catch(error => dispatch(setErrorMessage(error)));
 }
 
 
