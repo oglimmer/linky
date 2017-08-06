@@ -67,11 +67,15 @@ export const rewriteFavicon = (rec) => {
 
 // URL
 
-export const equalRelevant = (strA, strB) => {
+export const minifyLink = (link) => {
   const noTrailingSlash = str => (str.endsWith('/') ? str.substr(0, str.length - 1) : str);
   const noHttpProtocol = str => (str.startsWith('http://') ? str.substr('http://'.length) : str);
   const noHttpsProtocol = str => (str.startsWith('https://') ? str.substr('https://'.length) : str);
   const noProtocol = str => noHttpsProtocol(noHttpProtocol(str));
+  return noProtocol(noTrailingSlash(link));
+};
+
+export const equalRelevant = (strA, strB) => {
   if (!strA && !strB) {
     return true;
   }
@@ -81,7 +85,7 @@ export const equalRelevant = (strA, strB) => {
   if (strA === strB) {
     return true;
   }
-  return noProtocol(noTrailingSlash(strA)) === noProtocol(noTrailingSlash(strB));
+  return minifyLink(strA) === minifyLink(strB);
 };
 
 const isHtml = (response) => {

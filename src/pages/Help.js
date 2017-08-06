@@ -73,6 +73,10 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
       <b>duedate</b>: shows all links having a tag in going by the format yyyy-mm-dd.
     </p>
     <p>
+      <b>duplicate</b>: shows all links having a link url assigned which is assigned to another link
+      as well.
+    </p>
+    <p>
       <b>locked</b>: use this tag to remove a link from the nightly validation. All links on non
       public urls should have, otherwise linky constantly marks your link as broken or changes it
       to something like the intranet login page.

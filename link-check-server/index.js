@@ -8,8 +8,8 @@ import moment from 'moment';
 import favicon from '../server/util/favicon';
 import linkDao, { LinkDao } from '../server/dao/linkDao';
 import tagDao from '../server/dao/tagDao';
-import { URLUPDATED, BROKEN, LOCKED, DUEDATE, DUE } from '../src/util/TagRegistry';
-import { dateRegex, getNextIndex, equalRelevant } from '../server/logic/Link';
+import { URLUPDATED, BROKEN, LOCKED, DUEDATE, DUE, DUPLICATE } from '../src/util/TagRegistry';
+import { dateRegex, getNextIndex, equalRelevant, minifyLink } from '../server/logic/Link';
 import { init } from '../server/logic/TagHierarchy';
 
 const cloneAndPush = (arr, eleToPush) => {
@@ -74,6 +74,7 @@ const updateUrl = rec => new Promise((resolve, reject) => {
 });
 
 const changedUserId = new Set();
+const allLinks = new Map();
 
 const persist = (rec) => {
   if (rec.$$DIRTY$$) {
@@ -107,7 +108,25 @@ const checkDue = (rec) => {
   return Object.assign({}, rec, updateObj);
 };
 
-const processRow = rec => processUrlFavicon(rec).then(checkDue).then(persist);
+const counterLink = (rec) => {
+  const nimifiedUrl = minifyLink(rec.linkUrl);
+  let counterMap = allLinks.get(rec.userid);
+  if (!counterMap) {
+    counterMap = new Map();
+    allLinks.set(rec.userid, counterMap);
+  }
+  const val = counterMap.get(nimifiedUrl);
+  if (!val) {
+    counterMap.set(nimifiedUrl, 1);
+  } else {
+    counterMap.set(nimifiedUrl, val + 1);
+  }
+};
+
+const processRow = (rec) => {
+  counterLink(rec);
+  return processUrlFavicon(rec).then(checkDue).then(persist);
+};
 
 const updateTagHierarchies = () => {
   changedUserId.forEach((userid) => {
@@ -135,8 +154,33 @@ const updateTagHierarchies = () => {
   });
 };
 
+// THIS MUST RETURN A PROMISE
+const processDuplicates = () => Promise.all(Array.from(allLinks.entries()).map(([userid, map]) => {
+  const linkList = Array.from(map.entries()).filter(([, value]) => value > 1).map(([key]) => key);
+  return linkDao.listByUserid(userid)
+    .then(rows => rows
+      .map(row => row.value)
+      .filter(rec => linkList.find(link => link === minifyLink(rec.linkUrl)))
+      .filter(rec => !hasTag(rec.tags, DUPLICATE))
+      .map((rec) => {
+        console.log(`${new Date()}: adding duplicate for ${userid} to ${rec.linkUrl}`);
+        rec.tags.push(DUPLICATE);
+        return rec;
+      }),
+    )
+    .then((docs) => {
+      if (docs.length > 0) {
+        changedUserId.add(userid);
+        return linkDao.bulk({ docs });
+      }
+      return Promise.resolve();
+    });
+}));
+
 const processRows = (recs) => {
-  BlueBirdPromise.map(recs, processRow, { concurrency: 20 }).then(updateTagHierarchies);
+  BlueBirdPromise.map(recs, processRow, { concurrency: 20 })
+    .then(processDuplicates)
+    .then(updateTagHierarchies);
 };
 
 console.log(`${new Date()}: starting link-check-server`);
