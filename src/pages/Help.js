@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { TAGS } from '../util/TagRegistry';
 
 import { getMeUserInformation } from '../redux/actions';
+import BuildInfo from '../util/BuildInfo';
 
 const HelpPage = ({ authToken, onMeUserInformation }) => (
   <div>
@@ -28,6 +29,23 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
     </p>
     <p>
       Lucene is set to allow leading wildcards.
+    </p>
+    <h3>How is import/export working?</h3>
+    <p>
+      <b>Export</b>: after hitting the export button, the system generates a HTML file in the
+      format of `NETSCAPE-Bookmark-file-1` into the field `NETSCAPE-Bookmark-file-1`. Copy
+      the content from this field into a file new file called `Bookmarks.html`. Use this file
+      to import your bookmarks into any browser.
+    </p>
+    <p>
+      <b>Import</b>: You probably need to start with an export of your bookmarks from your
+      current browser. For <a href="https://support.google.com/chrome/answer/96816?hl=en">
+      Chrome see here</a>, <a href="https://support.mozilla.org/en-US/kb/export-firefox-bookmarks-to-backup-or-transfer">
+      Firefox see here</a>, Safari go to menu `File` -&#62; `Export Bookmarks`. Open the
+      generated HTML file with an editor of your choice. Copy the content into the field
+      `NETSCAPE-Bookmark-file-1`. Use `Tag Prefix` to prefix all imported tags, so you can easily
+      differentiate your imported tags from existing ones. Use `Root node for tags` to specify
+      the root node for your imported tags.
     </p>
     <h3>Why have tags different colors in the tags hierarchy?</h3>
     <p>
@@ -84,7 +102,7 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
       <b>vistorToken</b>: Lifetime: 1 year. id to identify your last used oauth provider. So
       we can automatically redirect you them and re-login is transparent to you.
     </p>
-    <p>
+    <div>
       <b>authToken</b>: Lifetime: session. <a href="https://jwt.io/">JWT</a> style authorization
       token. The payload contains only your user-id within this system, next to iat and exp.
       { authToken ? (
@@ -112,6 +130,19 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
           When logged in, you can see here all personal information we have stored about you.
         </div>
       ) }
+    </div>
+    <h3>Known limitations</h3>
+    <div>
+      <ul>
+        <li>Drag and drop in the `tags` page doesn&#39;t work on mobile devices.</li>
+        <li>When clicking on a RSS line item it doesn&#39;t get removed as a `new` item.</li>
+        <li>After using the search the list cannot be sorted by lucene&#39;s score.</li>
+      </ul>
+    </div>
+    <h3>Where can I file a bug?</h3>
+    <p>
+      As this project is hosted on github.com, please use <a href="https://github.com/oglimmer/linky/issues">
+      Issues</a> there. Rather like to talk to me? {BuildInfo.IMPRESSUM}
     </p>
   </div>
 );
