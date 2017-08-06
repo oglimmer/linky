@@ -17,7 +17,7 @@ import TagHierarchyLogic from '../logic/TagHierarchy';
 export const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
 export const dateRegex = new RegExp('^[\\d]{4}-[\\d]{2}-[\\d]{2}$');
 
-const split = tags => tags.split(' ').filter(e => simpleWordRegex.test(e));
+const split = tags => tags.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
 
 export const getTags = (rawTags) => { if (!rawTags) return [UNTAGGED]; return split(rawTags); };
 

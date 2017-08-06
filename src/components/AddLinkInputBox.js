@@ -100,7 +100,7 @@ const mapDispatchToProps = dispatch => ({
   onSubmit: (formData, linkId) => {
     if (formData.url.trim()) {
       dispatch(
-        persistLink(linkId, formData.url.trim(), formData.tags.trim(),
+        persistLink(linkId, formData.url.trim(), formData.tags.trim().toLowerCase(),
           formData.rssUrl.trim(), formData.pageTitle.trim(), formData.notes.trim()));
       dispatch(resetAddLinkFields());
       dispatch(toggleVisibilityMenuBar());
