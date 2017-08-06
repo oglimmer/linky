@@ -8,7 +8,6 @@ import moment from 'moment';
 import favicon from '../server/util/favicon';
 import linkDao, { LinkDao } from '../server/dao/linkDao';
 import tagDao from '../server/dao/tagDao';
-import { removeTrailingSlash } from '../server/util/StringUtil';
 import { URLUPDATED, BROKEN, LOCKED, DUEDATE, DUE } from '../src/util/TagRegistry';
 import { dateRegex, getNextIndex, equalRelevant } from '../server/logic/Link';
 import { init } from '../server/logic/TagHierarchy';
@@ -50,7 +49,7 @@ const updateUrl = rec => new Promise((resolve, reject) => {
   httpGetCall.on('response', (response) => {
     clearTimeout(timeout);
     httpGetCall.abort();
-    const newUrl = removeTrailingSlash(response.request.href);
+    const newUrl = response.request.href;
     const updateObj = {};
     if (!(equalRelevant(newUrl, url))) {
       console.log(`${new Date()}: link ${url} changed to ${newUrl}`);

@@ -7,7 +7,6 @@ import favicon from '../util/favicon';
 import linkDao from '../dao/linkDao';
 
 import { DEFAULT_LINK } from '../../src/redux/DataModels';
-import { removeTrailingSlash } from '../util/StringUtil';
 import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS, LOCKED, DUEDATE } from '../../src/util/TagRegistry';
 
 import tagDao from '../dao/tagDao';
@@ -118,7 +117,7 @@ const resolveUrl = (url, pageTitle, locked) => new Promise((resolve, reject) => 
   let title = pageTitle || url;
   let linkUrl = url;
   httpGetCall.on('response', (response) => {
-    linkUrl = removeTrailingSlash(response.request.href);
+    linkUrl = response.request.href;
     if (pageTitle || !isHtml(response)) {
       httpGetCall.abort();
       doresolve({ linkUrl, title });
