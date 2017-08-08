@@ -160,20 +160,20 @@ export function changeTag(tag) {
   return dispatch => dispatch(push(tag));
 }
 
-function handlingLinkListChange(linkId, newLink, selectedTag) {
+function handlingLinkListChange(linkId, link, selectedTag) {
   return (dispatch) => {
     if (!linkId) {
       // a new item: add to current list if it has the selectedTag
-      if (newLink.tags.find(e => e === selectedTag)) {
-        dispatch(addLinkPost(newLink));
+      if (link.tags.find(e => e === selectedTag)) {
+        dispatch(addLinkPost(link));
       }
-    } else if (!newLink.tags.find(e => e === selectedTag)) {
+    } else if (!link.tags.find(e => e === selectedTag)) {
       // not new, so delete if it doesn't have the selected tag anymore
-      dispatch(delLinkPost(newLink.id));
+      dispatch(delLinkPost(link.id));
     } else {
       // not new and not deleted from the selectedTag, so update
-      dispatch(updateLinkPost(newLink.id, newLink.linkUrl, newLink.tags, newLink.rssUrl,
-        newLink.pageTitle, newLink.notes));
+      dispatch(updateLinkPost(link.id, link.linkUrl, link.tags, link.rssUrl,
+        link.pageTitle, link.notes));
     }
   };
 }
@@ -197,14 +197,21 @@ export function persistLink(linkId, url, tags, rssUrl, pageTitle, notes) {
       fetch.put(`/rest/links/${linkId}`, { url, tags, rssUrl, pageTitle, notes }, getState().auth.token) :
       fetch.post('/rest/links', { url, tags, rssUrl, pageTitle, notes }, getState().auth.token))
       .then(response => response.json())
-      .then((newLink) => {
-        if (newLink.message) {
-          dispatch(setErrorMessage(newLink.message));
+      .then((responseUpdates) => {
+        if (responseUpdates.message) {
+          dispatch(setErrorMessage(responseUpdates.message));
         } else {
-          dispatch(setInfoMessage(`${newLink.linkUrl} with tags = ${newLink.tags} successfully saved.`));
-          dispatch(handlingLinkListChange(linkId, newLink, selectedTag, dispatch));
-          const oldElement = linkList.find(e => e.id === linkId);
-          dispatch(handlingTagListChange(newLink, oldElement ? oldElement.tags : []));
+          const updateLink = (link) => {
+            const oldElement = linkList.find(e => e.id === link.id);
+            dispatch(handlingLinkListChange(oldElement ? oldElement.id : null,
+              link, selectedTag, dispatch));
+            dispatch(handlingTagListChange(link, oldElement ? oldElement.tags : []));
+          };
+          const newLink = responseUpdates.primary;
+          const additionalInfo = responseUpdates.collateral && responseUpdates.collateral.length > 0 ? ` Also updated ${responseUpdates.collateral.length} other link(s).` : '';
+          dispatch(setInfoMessage(`${newLink.linkUrl} with tags = ${newLink.tags} successfully saved. ${additionalInfo}`));
+          updateLink(newLink);
+          responseUpdates.collateral.forEach(updateLink);
         }
       })
       .catch(error => dispatch(setErrorMessage(error)));

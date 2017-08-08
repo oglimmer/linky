@@ -11,7 +11,7 @@ const leave = (req, res) => {
     const { target } = req.query;
     const { authToken } = req.cookies;
 
-    bluebird.coroutine(function* () {
+    bluebird.coroutine(function* findRedirect() {
       try {
         const claim = yield JwtUtil.verify(authToken);
         const loadedLinkObj = yield linkDao.getById(target);
@@ -20,7 +20,7 @@ const leave = (req, res) => {
         }
         res.redirect(loadedLinkObj.linkUrl);
 
-        bluebird.coroutine(function* () {
+        bluebird.coroutine(function* uploadLink() {
           try {
             const updatedLink = loadedLinkObj;
             updatedLink.callCounter += 1;

@@ -5,7 +5,6 @@ import request from 'request-promise';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 
-import { rewriteFavicon } from '../logic/Link';
 import { couchdbServer } from '../dao/NanoConnection';
 
 class SearchProcessor extends BaseProcessor {
@@ -34,7 +33,6 @@ class SearchProcessor extends BaseProcessor {
         if (mappedRow.userid !== this.data.userid) {
           throw new Error('Failed to verify userid');
         }
-        rewriteFavicon(mappedRow);
         return mappedRow;
       });
       this.res.send(responseArr);

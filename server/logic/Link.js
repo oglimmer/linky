@@ -59,15 +59,9 @@ const ensureWithduedateTag = (tagsArr) => {
 const removeForbiddenTags = tagsArray =>
   tagsArray.filter(e => !FORBIDDEN_TAGS.find(t => t === e));
 
-// FAVICON
-export const rewriteFavicon = (rec) => {
-  const recToMod = rec;
-  recToMod.faviconUrl = rec.faviconUrl && `https://linky.oglimmer.de/rest/links/${rec.id}/favicon`;
-};
-
 // URL
 
-export const minifyLink = (link) => {
+export const purifyLink = (link) => {
   const noTrailingSlash = str => (str.endsWith('/') ? str.substr(0, str.length - 1) : str);
   const noHttpProtocol = str => (str.startsWith('http://') ? str.substr('http://'.length) : str);
   const noHttpsProtocol = str => (str.startsWith('https://') ? str.substr('https://'.length) : str);
@@ -85,7 +79,7 @@ export const equalRelevant = (strA, strB) => {
   if (strA === strB) {
     return true;
   }
-  return minifyLink(strA) === minifyLink(strB);
+  return purifyLink(strA) === purifyLink(strB);
 };
 
 const isHtml = (response) => {
@@ -189,7 +183,7 @@ export function updateTagHierarchy(userid, tags, parent = 'root') {
   });
 }
 
-const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, notes }) =>
+const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, notes, userid }) =>
   Object.assign({}, DEFAULT_LINK, {
     type: 'link',
     tags,
@@ -198,6 +192,7 @@ const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, notes }) =
     rssUrl,
     pageTitle,
     notes,
+    userid,
   });
 
 export const validateAndEnhanceTags = (tags, rssUrl) =>
@@ -211,7 +206,7 @@ export const validateAndEnhanceTags = (tags, rssUrl) =>
     ),
   );
 
-export const createRecord = (rec) => {
+export const createRecord = (rec, userid) => {
   const { url, rssUrl, tagsAsString, tagsAsArray, pageTitle, notes } = rec;
   const fixedUrl = fixUrl(url);
   const fixedRssUrl = fixUrl(rssUrl);
@@ -227,6 +222,7 @@ export const createRecord = (rec) => {
         rssUrl: fixedRssUrl,
         pageTitle: title,
         notes,
+        userid,
       })),
     )
     .catch(() => createObject({
@@ -235,6 +231,7 @@ export const createRecord = (rec) => {
       rssUrl: fixedRssUrl,
       pageTitle: fixedUrl,
       notes,
+      userid,
     }));
 };
 

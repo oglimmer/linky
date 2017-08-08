@@ -5,11 +5,11 @@ import linkDao from '../dao/linkDao';
 import tagDao from '../dao/tagDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
-import { fixUrl, validateAndEnhanceTags, getTags, rewriteFavicon,
+import { fixUrl, validateAndEnhanceTags, getTags,
   createRecord, presistRecord, updateTagHierarchy } from '../logic/Link';
+import { findDuplicatesSingleAddEditLink } from '../util/DuplicateFinder';
 
 import { READONLY_TAGS } from '../../src/util/TagRegistry';
-
 
 class CreateLinkProcessor extends BaseProcessor {
 
@@ -19,23 +19,23 @@ class CreateLinkProcessor extends BaseProcessor {
 
   collectBodyParameters() {
     const { url, rssUrl, tags, pageTitle, notes } = this.req.body;
-    return createRecord({ url, rssUrl, tagsAsString: tags, pageTitle, notes })
-      .then((rec) => { this.data = rec; });
+    this.data = { url, rssUrl, tagsAsString: tags, pageTitle, notes };
   }
 
   /* eslint-disable class-methods-use-this */
   propertiesToValidate() {
-    return [{ name: 'linkUrl' }];
+    return [{ name: 'url' }];
   }
   /* eslint-enable class-methods-use-this */
 
   * process() {
     try {
-      const { id } = yield presistRecord(this.data);
-      this.data.id = id;
-      rewriteFavicon(this.data);
-      this.res.send(this.data);
-      updateTagHierarchy(this.data.userid, this.data.tags);
+      const newLinkRec = yield createRecord(this.data, this.data.userid);
+      const collateral = yield findDuplicatesSingleAddEditLink(this.data.userid, newLinkRec);
+      const { id } = yield presistRecord(newLinkRec);
+      newLinkRec.id = id;
+      this.res.send({ primary: newLinkRec, collateral });
+      updateTagHierarchy(this.data.userid, newLinkRec.tags);
       winston.loggers.get('application').debug('Create link id=%s to db: %j', id, this.data);
     } catch (err) {
       winston.loggers.get('application').error('Failed to create link. Error = %j', err);
@@ -84,12 +84,12 @@ class UpdateLinkProcessor extends BaseProcessor {
         pageTitle: this.data.pageTitle,
         notes: this.data.notes,
       });
+      const collateral = yield findDuplicatesSingleAddEditLink(this.data.userid, recToWrite);
       yield linkDao.insert(recToWrite);
       /* eslint-disable no-underscore-dangle */
       recToWrite.id = recToWrite._id;
-      rewriteFavicon(recToWrite);
       /* eslint-enable no-underscore-dangle */
-      this.res.send(recToWrite);
+      this.res.send({ primary: recToWrite, collateral });
       updateTagHierarchy(this.data.userid, this.data.tags);
       winston.loggers.get('application').debug('Update link: %j', recToWrite);
     } catch (err) {
@@ -193,7 +193,6 @@ class GetLinkProcessor extends BaseProcessor {
       const responseArr = rows.map((row) => {
         const { _id, _rev, ...mappedRow } = row.value;
         mappedRow.id = _id;
-        rewriteFavicon(mappedRow);
         return mappedRow;
       });
       this.res.send(responseArr);

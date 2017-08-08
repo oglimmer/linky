@@ -1,6 +1,8 @@
 
 import tagDao from '../dao/tagDao';
 
+export const hasTag = (arr, tagName) => arr.find(e => e === tagName);
+
 const getCountForNode = (allTags, nodeName) => {
   const matchingEle = allTags.find(e => e[0] === nodeName);
   if (matchingEle) {
@@ -61,5 +63,6 @@ const load = (userid, parentForNew = 'root') => tagDao.getHierarchyByUser(userid
 export default {
   loadResponseData,
   load,
+  hasTag,
 };
 

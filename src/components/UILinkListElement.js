@@ -33,6 +33,13 @@ const display = (columnName, text) => {
   }
 };
 
+const rewriteFavicon = (faviconUrl, id) => {
+  if (faviconUrl) {
+    return `/rest/links/${id}/favicon`;
+  }
+  return '/static/default.png';
+};
+
 const UILinkListElement = ({ id, onUpdateLink, onClickLink, faviconUrl, listColumns,
   feedUpdates, hasRssUrl, onShowRssDetails, rssDetails, selectedLinkForDetails, link }) => (
     <span>
@@ -42,7 +49,7 @@ const UILinkListElement = ({ id, onUpdateLink, onClickLink, faviconUrl, listColu
           if (index === 0) {
             return (
               <div key={Math.random()}>
-                <img width="16" src={faviconUrl || '/static/default.png'} alt="favicon" />
+                <img width="16" src={rewriteFavicon(faviconUrl, id)} alt="favicon" />
                 {' '}
                 {display(columnName, text)}
                 { feedUpdates ? (

@@ -11,6 +11,7 @@ import tagLogic from '../logic/TagHierarchy';
 import asyncWaitDao from '../dao/asyncWaitDao';
 import { createRecord, updateTagHierarchy, simpleWordRegex, equalRelevant } from '../logic/Link';
 import { toNetscape } from '../../src/util/Hierarchy';
+import { ImportDuplicateFinder } from '../../server/util/DuplicateFinder';
 
 const rndName = () => {
   let text = '';
@@ -79,6 +80,7 @@ class ImportProcessor extends BaseProcessor {
       this.validate();
       const $ = cheerio.load(this.data.bookmarks);
       const allTags = new Set();
+      const duplicateFinder = new ImportDuplicateFinder(allTags);
       BlueBirdPromise.map($('a').toArray(), (a) => {
         const $a = $(a);
         const title = $a.text();
@@ -97,16 +99,19 @@ class ImportProcessor extends BaseProcessor {
           tagsAsArray: categories,
           pageTitle: title,
           notes: null,
-        })
+        }, this.data.userid)
         .then((rec) => {
           rec.tags.forEach(c => allTags.add(c));
-          const updateObj = { userid: this.data.userid };
+          const updateObj = {};
           if (!equalRelevant(rec.linkUrl, url)) {
             updateObj.notes = `Original url was ${url}`;
           }
-          return Object.assign({}, rec, updateObj);
+          const finalRec = Object.assign({}, rec, updateObj);
+          duplicateFinder.counterLink(finalRec);
+          return finalRec;
         });
       }, { concurrency: 5 })
+        .then(docs => duplicateFinder.onImport(docs))
         .then(docs => linkDao.bulk({ docs }))
         .then(() => updateTagHierarchy(this.data.userid, allTags, this.data.importNode))
         .then(() => {
