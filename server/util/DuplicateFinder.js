@@ -7,8 +7,8 @@ import linkDao from '../dao/linkDao';
 
 
 /* eslint-disable no-underscore-dangle */
-export const findDuplicatesSingleAddEditLink = (userid, newLinkRec) => {
-  return linkDao.listByUseridAndUrl(userid, purifyLink(newLinkRec.linkUrl))
+export const findDuplicatesSingleAddEditLink = (userid, newLinkRec) =>
+  linkDao.listByUseridAndUrl(userid, purifyLink(newLinkRec.linkUrl))
     .then(existingLinksWithSameUrl =>
       existingLinksWithSameUrl.filter(row => row._id !== newLinkRec._id))
     .then((existingLinksWithSameUrl) => {
@@ -33,7 +33,6 @@ export const findDuplicatesSingleAddEditLink = (userid, newLinkRec) => {
       }
       return [];
     });
-}
 /* eslint-disable no-underscore-dangle */
 
 class DuplicateFinderBase {
