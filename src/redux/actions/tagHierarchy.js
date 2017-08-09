@@ -45,6 +45,11 @@ export function initialLoadTags() {
   };
 }
 
+/*
+ * two arrays are equal if each element on pos x equals in name and parent on pos x on the other
+ * (index and count are of interest, as index is represented by the pos and count isn't saved in
+ * the tagHierarchy)
+ */
 const equalArray = (a1, a2) => {
   const a1Size = a1.size ? a1.size : a1.length;
   const a2Size = a2.size ? a2.size : a2.length;
@@ -56,11 +61,7 @@ const equalArray = (a1, a2) => {
     if (!elementA2) {
       return false;
     }
-    return Object.keys(elementA1).every((keyInEleA1) => {
-      const valueEleA1 = elementA1.get ? elementA1.get(keyInEleA1) : elementA1[keyInEleA1];
-      const valueEleA2 = elementA2.get ? elementA2.get(keyInEleA1) : elementA2[keyInEleA1];
-      return valueEleA1 === valueEleA2;
-    });
+    return elementA1.name === elementA2.name && elementA1.parent === elementA2.parent;
   });
 };
 
