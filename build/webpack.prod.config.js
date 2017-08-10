@@ -7,7 +7,6 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const GitRevisionPlugin = require('git-revision-webpack-plugin');
 const StringReplacePlugin = require('string-replace-webpack-plugin');
-const execSync = require('child_process').execSync;
 
 const serverPropsLoader = require('../server/util/serverPropsLoader');
 const BuildInfo = require('../src/util/BuildInfo');
@@ -43,7 +42,9 @@ module.exports = {
   },
 
   plugins: [
-    new GitRevisionPlugin(),
+    new GitRevisionPlugin({
+      branch: true,
+    }),
     new LodashModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       'process.env': {
@@ -126,18 +127,7 @@ module.exports = {
                 if (varName === 'SHOW_USER_PASSWORD_FORM') {
                   return 'false';
                 }
-                if (varName === 'GIT_COMMIT_HASH') {
-                  const hash = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim().substring(0, 7);
-                  return `'${hash}'`;
-                }
-                if (varName === 'GIT_BRANCHNAME') {
-                  const branchname = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
-                  return `'${branchname}'`;
-                }
-                if (varName === 'BUILDDATE') {
-                  const now = new Date();
-                  return `'${now}'`;
-                }
+
                 if (varName === 'SERVER_PROPS_LOADER') {
                   const name = defaultValue.trim().substr(1, defaultValue.length - 2);
                   return `'${BuildInfo[name]}'`;
