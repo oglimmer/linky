@@ -268,7 +268,7 @@ input {
 /* error/info/warning messages */
 
 .alert {
-  position: absolute;
+  position: fixed;
   left: 0px;
   top: -5px;
   margin-top: 5px;
@@ -279,7 +279,7 @@ input {
 .alert-success {
   -webkit-animation: seconds 15.0s forwards;
   animation: seconds 15.0s forwards;
-  position: absolute;
+  position: fixed;
 }
 @-webkit-keyframes seconds {
   from {
