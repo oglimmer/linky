@@ -4,45 +4,69 @@ import Immutable from 'immutable';
 import { assert } from './Assert';
 
 export const getNodeByName = (tagHierarchy, tagName) => {
-  assert(typeof tagName === 'string', `${tagName} is not a string!`);
+  assert(typeof tagName === 'string', `${JSON.stringify(tagName)} is not a string!`);
   return tagHierarchy.find(e => e.name === tagName);
 };
 
-export const getChildren = (tagHierarchy, tagName) => {
-  const targetNode = getNodeByName(tagHierarchy, tagName);
-  if (targetNode) {
-    /* eslint-disable no-use-before-define */
-    return tagHierarchy.filter(e => e.parent === targetNode.name)
-      .filter(child => filterExpressionVisible(child, tagName, tagHierarchy));
-    /* eslint-ensable no-use-before-define */
+export class CachedTagHierarchy {
+
+  constructor(tagHierarchy) {
+    this.nodeByName = new Map();
+    this.children = new Map();
+    this.siblings = new Map();
+    this.tagHierarchy = tagHierarchy;
   }
-  return Immutable.List();
-};
 
-const filterExpressionVisible = (node, tagName, tagHierarchy) => {
-  // show a node if it has links or it is the selected node
-  if (node.count > 0 || node.name === tagName || node.name === 'portal') {
-    return true;
+  filterExpressionVisible(node, tagName) {
+    // show a node if it has links or it is the selected node
+    if (node.count > 0 || node.name === tagName || node.name === 'portal') {
+      return true;
+    }
+    // also show it if it has at least 1 valid child
+    const childrenOfSibling = this.getChildren(node.name);
+    return childrenOfSibling.size > 0;
   }
-  // also show it if it has at least 1 valid child
-  const childrenOfSibling = getChildren(tagHierarchy, node.name);
-  return childrenOfSibling.size > 0;
-};
 
-export const getSiblings = (tagHierarchy, tagName) => {
-  const targetNode = getNodeByName(tagHierarchy, tagName);
-  if (targetNode) {
-    return tagHierarchy.filter(e => e.parent === targetNode.parent)
-      .filter(sibling => filterExpressionVisible(sibling, tagName, tagHierarchy));
+  getSiblings(tagName) {
+    let nodes = this.siblings.get(tagName);
+    if (typeof nodes === 'undefined') {
+      const targetNode = this.getNodeByName(tagName);
+      if (targetNode) {
+        nodes = this.tagHierarchy.filter(e => e.parent === targetNode.parent)
+          .filter(child => this.filterExpressionVisible(child, tagName));
+      } else {
+        nodes = Immutable.List();
+      }
+      this.siblings.set(tagName, nodes);
+    }
+    return nodes;
   }
-  return Immutable.List();
-};
 
-export const getParentName = (tagHierarchy, tagName) => getNodeByName(tagHierarchy, tagName).parent;
+  getChildren(tagName) {
+    let nodes = this.children.get(tagName);
+    if (typeof nodes === 'undefined') {
+      const targetNode = this.getNodeByName(tagName);
+      if (targetNode) {
+        nodes = this.tagHierarchy.filter(e => e.parent === targetNode.name)
+          .filter(sibling => this.filterExpressionVisible(sibling, tagName));
+      } else {
+        nodes = Immutable.List();
+      }
+      this.children.set(tagName, nodes);
+    }
+    return nodes;
+  }
 
-export const getParentSiblings = (tagHierarchy, parentName) =>
-  getSiblings(tagHierarchy, parentName);
+  getNodeByName(tagName) {
+    let node = this.nodeByName.get(tagName);
+    if (typeof node === 'undefined') {
+      node = getNodeByName(this.tagHierarchy, tagName);
+      this.nodeByName.set(tagName, node);
+    }
+    return node;
+  }
 
+}
 
 /*
  * INPUT:
@@ -262,13 +286,4 @@ export const flatten = (hierarchy) => {
   const resultList = [];
   flattenObj(hierarchy, null, 0, resultList);
   return Immutable.List(resultList);
-};
-
-export default {
-  getNodeByName,
-  getParentName,
-  getSiblings,
-  getChildren,
-  toHierarchy,
-  flatten,
 };

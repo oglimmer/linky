@@ -1,34 +1,39 @@
 import Immutable from 'immutable';
 
-import { getChildren, getSiblings, toHierarchy, flatten, toNetscape } from './Hierarchy';
+import { CachedTagHierarchy, toHierarchy, flatten, toNetscape } from './Hierarchy';
 
 it('getSiblings: a', () => {
   const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }];
-  const result = getSiblings(a, 'a');
+  const cachedTagHierarchy = new CachedTagHierarchy(a);
+  const result = cachedTagHierarchy.getSiblings('a');
   expect(result).toEqual([{ name: 'a', parent: 'root' }]);
 });
 
 it('getSiblings: a-b1', () => {
   const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }, { name: 'b', parent: 'root', count: 1 }];
-  const result = getSiblings(a, 'a');
+  const cachedTagHierarchy = new CachedTagHierarchy(a);
+  const result = cachedTagHierarchy.getSiblings('a');
   expect(result).toEqual([{ name: 'a', parent: 'root' }, { name: 'b', parent: 'root', count: 1 }]);
 });
 
 it('getSiblings: a-b2', () => {
   const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root', count: 1 }, { name: 'b', parent: 'root' }];
-  const result = getSiblings(a, 'b');
+  const cachedTagHierarchy = new CachedTagHierarchy(a);
+  const result = cachedTagHierarchy.getSiblings('b');
   expect(result).toEqual([{ name: 'a', parent: 'root', count: 1 }, { name: 'b', parent: 'root' }]);
 });
 
 it('getChildren: a', () => {
   const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }];
-  const result = getChildren(a, 'a');
+  const cachedTagHierarchy = new CachedTagHierarchy(a);
+  const result = cachedTagHierarchy.getChildren('a');
   expect(result).toEqual([]);
 });
 
 it('getChildren: a-aa', () => {
   const a = [{ name: 'root', parent: null }, { name: 'a', parent: 'root' }, { name: 'aa', parent: 'a', count: 1 }];
-  const result = getChildren(a, 'a');
+  const cachedTagHierarchy = new CachedTagHierarchy(a);
+  const result = cachedTagHierarchy.getChildren('a');
   expect(result).toEqual([{ name: 'aa', parent: 'a', count: 1 }]);
 });
 

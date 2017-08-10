@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import Immutable from 'immutable';
 
 import { changeTag } from '../redux/actions/links';
-import { getSiblings, getChildren, getParentName, getParentSiblings } from '../util/Hierarchy';
+import { CachedTagHierarchy } from '../util/Hierarchy';
 
 const divStyle = { marginTop: 9, marginBottom: 9 };
 
@@ -15,20 +15,21 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
   if (!selectedTag) {
     return null;
   }
-  let parentTagName = getParentName(tagHierarchy, selectedTag);
-  let parents = getParentSiblings(tagHierarchy, parentTagName);
-  let siblings = getSiblings(tagHierarchy, selectedTag);
-  let children = getChildren(tagHierarchy, selectedTag);
+  const cachedTagHierarchy = new CachedTagHierarchy(tagHierarchy);
+  let parentTagName = cachedTagHierarchy.getNodeByName(selectedTag).parent;
+  let parents = cachedTagHierarchy.getSiblings(parentTagName);
+  let siblings = cachedTagHierarchy.getSiblings(selectedTag);
+  let children = cachedTagHierarchy.getChildren(selectedTag);
   let originalParentTagName;
   let labels = ['Parents', 'Siblings', 'Children'];
   if (children.size === 0) {
-    const parentOfParentName = getParentName(tagHierarchy, parentTagName);
+    const parentOfParentName = cachedTagHierarchy.getNodeByName(parentTagName).parent;
     if (parentOfParentName && parentOfParentName !== 'root') {
       originalParentTagName = parentTagName;
       parentTagName = parentOfParentName;
       children = siblings;
       siblings = parents;
-      parents = getParentSiblings(tagHierarchy, parentTagName);
+      parents = cachedTagHierarchy.getSiblings(parentTagName);
       labels = ['Grandparents', 'Parents', 'Siblings'];
     }
   }
@@ -52,7 +53,7 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
                 onClick={() => onClick(tag.name)}
                 className={getLabel(tag.name, parentTagName)}
               >
-                {tag.name} ({tag.count})
+                {tag.name} ({tag.count}/{cachedTagHierarchy.getChildren(tag.name).size})
               </span>
               {' '}
             </span>))}
@@ -68,7 +69,7 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
             onClick={() => onClick(tag.name)}
             className={getLabel(tag.name, originalParentTagName)}
           >
-            {tag.name} ({tag.count})
+            {tag.name} ({tag.count}/{cachedTagHierarchy.getChildren(tag.name).size})
           </span>
           {' '}
         </span>),
@@ -83,7 +84,7 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
               onClick={() => onClick(tag.name)}
               className={getLabel(tag.name)}
             >
-              {tag.name} ({tag.count})
+              {tag.name} ({tag.count}/{cachedTagHierarchy.getChildren(tag.name).size})
             </span>
             {' '}
           </span>),
