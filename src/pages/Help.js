@@ -18,17 +18,16 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
       functionality. So to make my life a bit easier I just integrated all those &#39;login via a
       3rd party webpage&#39; buttons.
     </p>
-    <h3>How is search working? / Why do I get `wrong` results?</h3>
+    <h3>How is search working?</h3>
     <p>
-      Search is using lucene as the search backend engine. Therefore you can / need to use{' '}
-      <a href="http://lucene.apache.org/core/6_6_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description">
-        lucene query syntax
-      </a>. If you find that too complicated just put a plus symbol (+) in front of your search
-      and it searches only for exactly your word. Use `+*your word*` to search your word in the most
-      general way.
+      * and ? are regular wildcards.
     </p>
     <p>
-      Lucene is set to allow leading wildcards.
+      Start with `tags:`, `url:`, `notes:`, `rss:` or `title:` to search just this field.
+      Otherwise a search will look into all fields.
+    </p>
+    <p>
+      Search is using lucene as the search backend engine and leading wildcards is set to allowed.
     </p>
     <h3>How is import/export working?</h3>
     <p>
@@ -163,12 +162,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  onMeUserInformation: () => {
-    dispatch(getMeUserInformation());
-    /* eslint-disable no-alert */
-    alert('Scroll to the top ;)');
-    /* eslint-enable no-alert */
-  },
+  onMeUserInformation: () => dispatch(getMeUserInformation()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HelpPage);
