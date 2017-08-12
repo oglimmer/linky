@@ -59,7 +59,10 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
       </ul>
     </div>
     <p>
-      <b>all</b>: shows always all links added to the system by you.
+      <b>all</b>: shows always all links added to the system by you. You cannot remove this tag.
+    </p>
+    <p>
+      <b>archive</b>: shows always all archives.
     </p>
     <p>
       <b>broken</b>: shows all links failing a nightly http get validation.

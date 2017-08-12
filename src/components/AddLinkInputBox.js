@@ -6,12 +6,13 @@ import { Form } from 'react-redux-form';
 import { connect } from 'react-redux';
 
 import { toggleVisibilityMenuBar } from '../redux/actions';
-import { persistLink, delLink, resetAddLinkFields } from '../redux/actions/links';
+import { persistLink, delLink, resetAddLinkFields, createArchive } from '../redux/actions/links';
 import UIInputElement from '../components/UIInputElement';
 import UIInputAutocompleteElement from '../components/UIInputAutocompleteElement';
+import { ARCHIVE } from '../util/TagRegistry';
 
 const AddLinkInputBox = (
-  { onSubmit, linkId, onClose, onDelete, isAddEnabled }) => {
+  { onSubmit, linkId, onClose, onDelete, isAddEnabled, onArchive, hasArchivedTag }) => {
   if (!isAddEnabled) {
     return null;
   }
@@ -67,6 +68,16 @@ const AddLinkInputBox = (
             >
               Del
             </Button>
+            {' '}
+          </span> : '' }
+        { linkId !== null && !hasArchivedTag ?
+          <span>
+            <Button
+              onClick={() => onArchive(linkId)}
+              type="button"
+            >
+              Archive
+            </Button>
           </span> : '' }
         {' '}
         <Button onClick={onClose} type="button">Cancel</Button>
@@ -79,8 +90,10 @@ AddLinkInputBox.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  onArchive: PropTypes.func.isRequired,
   linkId: PropTypes.string,
   isAddEnabled: PropTypes.bool.isRequired,
+  hasArchivedTag: PropTypes.bool.isRequired,
 };
 AddLinkInputBox.defaultProps = {
   linkId: null,
@@ -88,11 +101,20 @@ AddLinkInputBox.defaultProps = {
 
 // ----------------------------------------------------------------
 
+const calcHasArchivedTag = (state) => {
+  const linkObj = state.mainData.linkList.find(l => l.id === state.addUrl.id);
+  if (!linkObj) {
+    return false;
+  }
+  return !!linkObj.tags.find(t => t === ARCHIVE);
+};
+
 const mapStateToPropsAddLinkInputBox = state => ({
   linkId: state.addUrl.id,
   isAddEnabled: state.menuBar.addEnabled,
   tags: state.addUrl.tags.split(' ').map(e => ({ id: e, name: e })),
   suggestions: state.tagHierarchyData.tagHierarchy.map(e => ({ id: e.name, name: e.name })),
+  hasArchivedTag: calcHasArchivedTag(state),
 });
 
 
@@ -114,6 +136,9 @@ const mapDispatchToProps = dispatch => ({
     dispatch(delLink(linkId));
     dispatch(resetAddLinkFields());
     dispatch(toggleVisibilityMenuBar());
+  },
+  onArchive: (linkId) => {
+    dispatch(createArchive(linkId));
   },
 });
 

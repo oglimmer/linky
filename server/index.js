@@ -110,7 +110,7 @@ if (!debugMode || debugMode !== 'web') {
   const proxyBind = process.env.PROXY_BIND || '127.0.0.1';
   winston.loggers.get('application').info(`Using proxy ${proxyBind}:${proxyPort} to REST endpoints`);
   /* eslint-disable no-param-reassign */
-  ['/rest', '/leave', '/auth', '/authback'].forEach((restPath) => {
+  ['/rest', '/leave', '/auth', '/authback', '/archive'].forEach((restPath) => {
     app.use(restPath, proxy(`${proxyBind}:${proxyPort}`, {
       // express-http-proxy cuts off the prefix of the url matching restPath
       proxyReqPathResolver: req => `${restPath}${req.url}`,

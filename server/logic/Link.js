@@ -183,7 +183,7 @@ export function updateTagHierarchy(userid, tags, parent = 'root') {
   });
 }
 
-const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, notes, userid }) =>
+export const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, notes, userid }) =>
   Object.assign({}, DEFAULT_LINK, {
     type: 'link',
     tags,

@@ -5,14 +5,19 @@ import winston from 'winston';
 
 import linkyDb from './NanoConnection';
 
-const insert = Promise.promisify(linkyDb.insert);
-const view = Promise.promisify(linkyDb.view);
-const get = Promise.promisify(linkyDb.get);
-const destroy = Promise.promisify(linkyDb.destroy);
-const bulk = Promise.promisify(linkyDb.bulk);
-const fetch = Promise.promisify(linkyDb.fetch);
-
 class BaseDataAccessObject {
+
+  constructor(db = linkyDb) {
+    this.dbrefs = {
+      insert: Promise.promisify(db.insert),
+      view: Promise.promisify(db.view),
+      get: Promise.promisify(db.get),
+      destroy: Promise.promisify(db.destroy),
+      bulk: Promise.promisify(db.bulk),
+      fetch: Promise.promisify(db.fetch),
+      attachment: db.attachment,
+    };
+  }
 
   /* eslint-disable class-methods-use-this */
   getFirstElement(rows) {
@@ -26,16 +31,28 @@ class BaseDataAccessObject {
     });
   }
 
+  getFirstElementRaw(rows) {
+    return new Promise((fulfill) => {
+      assert(rows.length < 2);
+      if (rows.length === 0) {
+        fulfill(null);
+      } else {
+        fulfill(rows[0]);
+      }
+    });
+  }
+  /* eslint-enable class-methods-use-this */
+
   insert(obj) {
-    return insert(obj);
+    return this.dbrefs.insert(obj);
   }
 
   bulk(obj) {
-    return bulk(obj);
+    return this.dbrefs.bulk(obj);
   }
 
   fetch(obj) {
-    return fetch(obj);
+    return this.dbrefs.fetch(obj);
   }
 
   listByViewMultiParams(ddoc, viewName, start, end, params) {
@@ -43,7 +60,7 @@ class BaseDataAccessObject {
       startkey: start,
       endkey: end,
     }, params);
-    return view(ddoc, viewName, allParams).then(body => body.rows);
+    return this.dbrefs.view(ddoc, viewName, allParams).then(body => body.rows);
   }
 
   listByView(ddoc, viewName, key) {
@@ -51,15 +68,15 @@ class BaseDataAccessObject {
     if (key) {
       allParams.keys = [key];
     }
-    return view(ddoc, viewName, allParams).then(body => body.rows);
+    return this.dbrefs.view(ddoc, viewName, allParams).then(body => body.rows);
   }
 
   getById(id) {
-    return get(id);
+    return this.dbrefs.get(id);
   }
 
   delete(id, rev) {
-    return destroy(id, rev);
+    return this.dbrefs.destroy(id, rev);
   }
 
   deleteLatest(id, userid) {
@@ -75,7 +92,6 @@ class BaseDataAccessObject {
       .then(obj => this.delete(id, obj._rev));
     /* eslint-disable no-underscore-dangle */
   }
-  /* eslint-enable class-methods-use-this */
 
 }
 

@@ -11,13 +11,14 @@ export const ROOT = 'root';
 export const DUEDATE = 'duedate';
 export const DUE = 'due';
 export const DUPLICATE = 'duplicate';
+export const ARCHIVE = 'archive';
 
 export const TAGS = [ALL, BROKEN, RSS, UNTAGGED, URLUPDATED, PORTAL, LOCKED, ROOT, DUEDATE, DUE,
-  DUPLICATE];
+  DUPLICATE, ARCHIVE];
 
-export const READONLY_TAGS = [ALL, RSS, ROOT, PORTAL, DUEDATE, DUE];
+export const READONLY_TAGS = [ALL, RSS, ROOT, PORTAL, DUEDATE, DUE, ARCHIVE];
 
-export const FORBIDDEN_TAGS = [ROOT, DUEDATE];
+export const FORBIDDEN_TAGS = [ROOT, DUEDATE, ARCHIVE];
 
 export default {
   TAGS,
@@ -33,4 +34,5 @@ export default {
   DUEDATE,
   DUE,
   DUPLICATE,
+  ARCHIVE,
 };

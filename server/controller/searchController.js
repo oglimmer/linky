@@ -7,9 +7,9 @@ import BaseProcessor from './BaseProcessor';
 
 import { couchdbServer } from '../dao/NanoConnection';
 
-// don't escape *, ? and " - the user wants to use them in their special character's meaning
+// don't escape * and " - the user wants to use them in their special character's meaning
 // those should be escaped as well: '&&', '||', but I am too lazy to implement it right now
-const LUCENE_SPECIAL_CHARS = ['+', '-', '!', '(', ')', '{', '}', '[', ']', '^', '~', ':', '\\', '/'];
+const LUCENE_SPECIAL_CHARS = ['+', '-', '!', '(', ')', '{', '}', '[', ']', '^', '~', '?', ':', '\\', '/'];
 
 const escapeLuceneChars = (str) => {
   const buffer = [];
@@ -73,7 +73,6 @@ class SearchProcessor extends BaseProcessor {
       if (!luceneQuery) {
         luceneQuery = `+${escapeLuceneChars(userInput)}`;
       }
-      console.log(luceneQuery);
       const query = encodeURIComponent(luceneQuery);
       const url = `${couchdbServer}/_fti/local/linky/_design/lucene/by_all?include_docs=true&q=${query}%20%2Buserid%3A${this.data.userid}`;
       const searchResult = yield request.get({

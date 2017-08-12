@@ -189,6 +189,29 @@ function handlingTagListChange(newLink, oldTags) {
   };
 }
 
+const updateAfterPersistLink = (responseUpdates, linkList, selectedTag, dispatch, successMsg) => {
+  if (responseUpdates.message) {
+    dispatch(setErrorMessage(responseUpdates.message));
+  } else {
+    const updateLink = (link) => {
+      const oldElement = linkList.find(e => e.id === link.id);
+      dispatch(handlingLinkListChange(oldElement ? oldElement.id : null, link, selectedTag));
+      dispatch(handlingTagListChange(link, oldElement ? oldElement.tags : []));
+    };
+    const newLink = responseUpdates.primary;
+    if (successMsg) {
+      dispatch(setInfoMessage(successMsg));
+    } else {
+      const additionalInfo = responseUpdates.collateral && responseUpdates.collateral.length > 0 ? ` Also updated ${responseUpdates.collateral.length} other link(s).` : '';
+      dispatch(setInfoMessage(`${newLink.linkUrl} with tags = ${newLink.tags} successfully saved. ${additionalInfo}`));
+    }
+    updateLink(newLink);
+    if (responseUpdates.collateral) {
+      responseUpdates.collateral.forEach(updateLink);
+    }
+  }
+};
+
 export function persistLink(linkId, url, tags, rssUrl, pageTitle, notes) {
   return (dispatch, getState) => {
     dispatch(setTempMessage('sending data to server ...'));
@@ -198,21 +221,7 @@ export function persistLink(linkId, url, tags, rssUrl, pageTitle, notes) {
       fetch.post('/rest/links', { url, tags, rssUrl, pageTitle, notes }, getState().auth.token))
       .then(response => response.json())
       .then((responseUpdates) => {
-        if (responseUpdates.message) {
-          dispatch(setErrorMessage(responseUpdates.message));
-        } else {
-          const updateLink = (link) => {
-            const oldElement = linkList.find(e => e.id === link.id);
-            dispatch(handlingLinkListChange(oldElement ? oldElement.id : null,
-              link, selectedTag, dispatch));
-            dispatch(handlingTagListChange(link, oldElement ? oldElement.tags : []));
-          };
-          const newLink = responseUpdates.primary;
-          const additionalInfo = responseUpdates.collateral && responseUpdates.collateral.length > 0 ? ` Also updated ${responseUpdates.collateral.length} other link(s).` : '';
-          dispatch(setInfoMessage(`${newLink.linkUrl} with tags = ${newLink.tags} successfully saved. ${additionalInfo}`));
-          updateLink(newLink);
-          responseUpdates.collateral.forEach(updateLink);
-        }
+        updateAfterPersistLink(responseUpdates, linkList, selectedTag, dispatch);
       })
       .catch(error => dispatch(setErrorMessage(error)));
   };
@@ -290,4 +299,17 @@ export function sendSearch(searchString) {
       console.log(`Search took ${new Date().getTime() - currentTime.getTime()} millis`);
     })
     .catch(ex => dispatch(setErrorMessage(ex)));
+}
+
+export function createArchive(id) {
+  return (dispatch, getState) => {
+    dispatch(setTempMessage('sending data to server ...'));
+    const { linkList, selectedTag } = getState().mainData;
+    return fetch.post(`/rest/archive/${id}`, {}, getState().auth.token)
+      .then(response => response.json())
+      .then((responseUpdates) => {
+        updateAfterPersistLink(responseUpdates, linkList, selectedTag, dispatch, 'Archive successfully created.');
+      })
+      .catch(ex => dispatch(setErrorMessage(ex)));
+  };
 }
