@@ -142,7 +142,6 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
       <ul>
         <li>Drag and drop in the `tags` page doesn&#39;t work on mobile devices.</li>
         <li>When clicking on a RSS line item it doesn&#39;t get removed as a `new` item.</li>
-        <li>After using the search the list cannot be sorted by lucene&#39;s score.</li>
       </ul>
     </div>
     <h3>Where can I file a bug?</h3>
