@@ -76,7 +76,7 @@ class CreateArchiveProcessor extends BaseProcessor {
       yield scrape(options);
       zip(cachePath, archiveRec);
       const newRecord = createObject({
-        linkUrl: `/archive/${userHash}/${archiveRec.id}`,
+        linkUrl: `https://linky-archive.oglimmer.de/archive/${userHash}/${archiveRec.id}`,
         userid: this.data.userid,
         notes: `Archived ${linkRec.linkUrl} on ${new Date()}`,
         tags: [ALL, ARCHIVE],

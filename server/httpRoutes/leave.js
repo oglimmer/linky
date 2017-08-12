@@ -1,10 +1,17 @@
 import winston from 'winston';
 import bluebird from 'bluebird';
+import crypto from 'crypto';
 import JwtUtil from '../util/JwtUtil';
 import linkDao from '../dao/linkDao';
 import feedUpdatesDao from '../dao/feedUpdatesDao';
 
 /* eslint-disable no-underscore-dangle */
+
+const createUserHash = (userid) => {
+  const hashUser = crypto.createHash('sha256');
+  hashUser.update(userid);
+  return hashUser.digest('hex');
+};
 
 const leave = (req, res) => {
   if (req.cookies.authToken) {
@@ -18,7 +25,13 @@ const leave = (req, res) => {
         if (loadedLinkObj.userid !== claim.userid) {
           throw Error('Failed to verify user on referenced link');
         }
-        res.redirect(loadedLinkObj.linkUrl);
+        let targetUrl = loadedLinkObj.linkUrl;
+        if (targetUrl.startsWith('https://linky-archive.oglimmer.de/')) {
+          const tempClaim = { archiveUserHash: createUserHash(loadedLinkObj.userid) };
+          const tempAuthToken = yield JwtUtil.sign(tempClaim, '1h');
+          targetUrl += `?tmpAuthToken=${tempAuthToken}`;
+        }
+        res.redirect(targetUrl);
 
         bluebird.coroutine(function* uploadLink() {
           try {

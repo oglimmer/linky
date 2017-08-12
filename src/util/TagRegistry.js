@@ -18,7 +18,7 @@ export const TAGS = [ALL, BROKEN, RSS, UNTAGGED, URLUPDATED, PORTAL, LOCKED, ROO
 
 export const READONLY_TAGS = [ALL, RSS, ROOT, PORTAL, DUEDATE, DUE, ARCHIVE];
 
-export const FORBIDDEN_TAGS = [ROOT, DUEDATE, ARCHIVE];
+export const FORBIDDEN_TAGS = [ROOT]; // these tokens will be deleted if found
 
 export default {
   TAGS,
