@@ -28,9 +28,9 @@ const getParameterFromUrl = (req) => {
 };
 
 const ensureFilesOnCacheAndSecurity = (req, res, next) => {
-  const tmpAuthToken = req.query.tmpAuthToken ? req.query.tmpAuthToken : req.cookies.authToken;
+  const tmpAuthToken = req.query.tmpAuthToken ? req.query.tmpAuthToken : req.cookies.tmpAuthToken;
   if (req.query.tmpAuthToken) {
-    res.cookie('authToken', req.query.tmpAuthToken);
+    res.cookie('tmpAuthToken', req.query.tmpAuthToken);
     // security: don't keep the token in the url
     res.redirect(req.originalUrl.substr(0, req.originalUrl.indexOf('?')));
   } else {
