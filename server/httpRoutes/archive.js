@@ -3,7 +3,7 @@ import winston from 'winston';
 import express from 'express';
 import fs from 'fs-extra';
 import path from 'path';
-import unzip from 'unzip';
+import unzip from 'unzipper';
 import { Promise } from 'bluebird';
 
 import archiveDao from '../dao/archiveDao';
