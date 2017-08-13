@@ -3,6 +3,7 @@ import winston from 'winston';
 import { parseString } from 'xml2js';
 import request from 'request-promise';
 import { Promise } from 'bluebird';
+import iconv from 'iconv-lite';
 
 import linkDao from '../dao/linkDao';
 import feedUpdatesDao from '../dao/feedUpdatesDao';
@@ -165,14 +166,30 @@ class GetRssUpdatesProcessor extends BaseProcessor {
     this.data = { linkId };
   }
 
+  static getContent(response) {
+    let encoding = null;
+    const contentType = response.headers['content-type'];
+    if (contentType) {
+      const pos = contentType.indexOf('charset=');
+      if (pos > -1) {
+        encoding = contentType.substr(pos + 8);
+      }
+    }
+    return encoding ? iconv.decode(response.body, encoding) : response.body.toString();
+  }
+
   * process() {
     try {
       const rec = yield linkDao.getById(this.data.linkId);
       if (!rec || !rec.rssUrl) {
         this.res.send('ERROR. No rssUrl for this link.');
       } else {
-        const contentXmlStr = yield request.get({ uri: rec.rssUrl });
-        const content = yield parseStringPromise(contentXmlStr);
+        const response = yield request.get({
+          uri: rec.rssUrl,
+          encoding: null,
+          resolveWithFullResponse: true,
+        });
+        const content = yield parseStringPromise(GetRssUpdatesProcessor.getContent(response));
         const currentFeedData = getKeyContent(content);
         if (typeof currentFeedData === 'string') {
           ResponseUtil.sendErrorResponse500(currentFeedData, this.res);

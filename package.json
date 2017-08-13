@@ -34,6 +34,7 @@
     "fs-extra": "^4.0.1",
     "history": "^4.6.2",
     "html-entities": "^1.2.1",
+    "iconv-lite": "^0.4.18",
     "immutable": "^3.8.1",
     "ionicons": "^3.0.0",
     "isomorphic-fetch": "^2.2.1",
