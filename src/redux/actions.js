@@ -49,7 +49,7 @@ export function checkAuth(email, password) {
         dispatch(setAuthToken(json.token));
         return dispatch(initialLoadLinks('portal'));
       }))
-      .then(() => dispatch(fetchRssUpdates()))
+      .then(() => dispatch(fetchRssUpdates(true)))
       .catch((ex) => {
         dispatch(setErrorMessage(ex));
         throw ex;

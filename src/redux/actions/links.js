@@ -103,14 +103,14 @@ export function fetchRssUpdatesDetails(id) {
 }
 
 const lastUpdates = {};
-export function fetchRssUpdates() {
+export function fetchRssUpdates(forceUpdate = false) {
   return (dispatch, getState) => {
     const { linkList } = getState().mainData;
     const ps = [];
     let totalNewUpdates = 0;
     linkList.filter(e => e.rssUrl).forEach((linkElement) => {
       const lastFetch = lastUpdates[linkElement.id];
-      if (!lastFetch || lastFetch < Date.now() - RSS_UPDATE_FREQUENCY) {
+      if (forceUpdate || !lastFetch || lastFetch < Date.now() - RSS_UPDATE_FREQUENCY) {
         lastUpdates[linkElement.id] = Date.now();
         ps.push(new Promise((resolve, reject) => {
           fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
