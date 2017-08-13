@@ -184,12 +184,13 @@ class GetRssUpdatesProcessor extends BaseProcessor {
       if (!rec || !rec.rssUrl) {
         this.res.send('ERROR. No rssUrl for this link.');
       } else {
-        const response = yield request.get({
+        const feedHttpResponse = yield request.get({
           uri: rec.rssUrl,
           encoding: null,
           resolveWithFullResponse: true,
         });
-        const content = yield parseStringPromise(GetRssUpdatesProcessor.getContent(response));
+        const content = yield parseStringPromise(
+          GetRssUpdatesProcessor.getContent(feedHttpResponse));
         const currentFeedData = getKeyContent(content);
         if (typeof currentFeedData === 'string') {
           ResponseUtil.sendErrorResponse500(currentFeedData, this.res);
