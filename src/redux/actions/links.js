@@ -103,7 +103,7 @@ export function fetchRssUpdatesDetails(id) {
 }
 
 const lastUpdates = {};
-function fetchRssUpdates() {
+export function fetchRssUpdates() {
   return (dispatch, getState) => {
     const { linkList } = getState().mainData;
     const ps = [];

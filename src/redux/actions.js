@@ -6,7 +6,7 @@ import fetch from '../util/fetch';
 import { RESET, SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, TOGGLE_VISIBILITY,
   SET_IN_SEARCH_MODE } from './actionTypes';
 
-import { initialLoadLinks } from './actions/links';
+import { initialLoadLinks, fetchRssUpdates } from './actions/links';
 import { setErrorMessage, setInfoMessage, setTempMessage } from './actions/feedback';
 import { fetchTagHierarchy } from './actions/tagHierarchy';
 
@@ -42,17 +42,18 @@ export function checkAuth(email, password) {
       email,
       password,
     })
-    .then(response => response.json().then((json) => {
-      if (response.status !== 200) {
-        throw json.message;
-      }
-      dispatch(setAuthToken(json.token));
-      return dispatch(initialLoadLinks('portal'));
-    }))
-    .catch((ex) => {
-      dispatch(setErrorMessage(ex));
-      throw ex;
-    });
+      .then(response => response.json().then((json) => {
+        if (response.status !== 200) {
+          throw json.message;
+        }
+        dispatch(setAuthToken(json.token));
+        return dispatch(initialLoadLinks('portal'));
+      }))
+      .then(() => dispatch(fetchRssUpdates()))
+      .catch((ex) => {
+        dispatch(setErrorMessage(ex));
+        throw ex;
+      });
   };
 }
 
