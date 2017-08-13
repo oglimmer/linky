@@ -1,17 +1,12 @@
 import winston from 'winston';
 import bluebird from 'bluebird';
-import crypto from 'crypto';
+
 import JwtUtil from '../util/JwtUtil';
 import linkDao from '../dao/linkDao';
 import feedUpdatesDao from '../dao/feedUpdatesDao';
+import { hashSha256Hex } from '../util/HashUtil';
 
 /* eslint-disable no-underscore-dangle */
-
-const createUserHash = (userid) => {
-  const hashUser = crypto.createHash('sha256');
-  hashUser.update(userid);
-  return hashUser.digest('hex');
-};
 
 const leave = (req, res) => {
   if (req.cookies.authToken) {
@@ -27,7 +22,7 @@ const leave = (req, res) => {
         }
         let targetUrl = loadedLinkObj.linkUrl;
         if (targetUrl.startsWith('https://linky-archive.oglimmer.de/')) {
-          const tempClaim = { archiveUserHash: createUserHash(loadedLinkObj.userid) };
+          const tempClaim = { archiveUserHash: hashSha256Hex(loadedLinkObj.userid) };
           const tempAuthToken = yield JwtUtil.sign(tempClaim, '1h');
           targetUrl += `?tmpAuthToken=${tempAuthToken}`;
         }

@@ -2,6 +2,7 @@
 import BaseDataAccessObject from './BaseDataAccessObject';
 
 import { archiveDb } from './NanoConnection';
+import { hashSha256Hex } from '../util/HashUtil';
 
 class ArchiveDao extends BaseDataAccessObject {
 
@@ -9,8 +10,9 @@ class ArchiveDao extends BaseDataAccessObject {
     super(archiveDb);
   }
 
-  getByExtId(extId) {
-    return this.listByView('archives', 'byExtId', extId).then(this.getFirstElementRaw);
+  getByUserIdAndArchiveLinkId(userid, archivedLinkid) {
+    const key = `${hashSha256Hex(userid)}/${archivedLinkid}`;
+    return this.listByView('archives', 'byUserIdAndArchiveLinkId', key).then(this.getFirstElement);
   }
 
   attachmentInsert(docname, attname, att, contenttype, params) {

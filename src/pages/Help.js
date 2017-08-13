@@ -38,8 +38,8 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
     </p>
     <p>
       <b>Import</b>: You probably need to start with an export of your bookmarks from your
-      current browser. For <a href="https://support.google.com/chrome/answer/96816?hl=en">
-      Chrome see here</a>, <a href="https://support.mozilla.org/en-US/kb/export-firefox-bookmarks-to-backup-or-transfer">
+      current browser. For <a href="https://support.google.com/chrome/answer/96816?hl=en" target="_blank" rel="noopener noreferrer">
+      Chrome see here</a>, <a href="https://support.mozilla.org/en-US/kb/export-firefox-bookmarks-to-backup-or-transfer" target="_blank" rel="noopener noreferrer">
       Firefox see here</a>, Safari go to menu `File` -&#62; `Export Bookmarks`. Open the
       generated HTML file with an editor of your choice. Copy the content into the field
       `NETSCAPE-Bookmark-file-1`. Use `Tag Prefix` to prefix all imported tags, so you can easily

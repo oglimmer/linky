@@ -139,6 +139,8 @@ const mapDispatchToProps = dispatch => ({
   },
   onArchive: (linkId) => {
     dispatch(createArchive(linkId));
+    dispatch(toggleVisibilityMenuBar());
+    dispatch(resetAddLinkFields());
   },
 });
 

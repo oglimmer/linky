@@ -1,8 +1,11 @@
 
 import winston from 'winston';
+import fs from 'fs-extra';
+import path from 'path';
 
 import linkDao from '../dao/linkDao';
 import tagDao from '../dao/tagDao';
+import archiveDao from '../dao/archiveDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 import { fixUrl, validateAndEnhanceTags, getTags,
@@ -10,6 +13,8 @@ import { fixUrl, validateAndEnhanceTags, getTags,
 import { findDuplicatesSingleAddEditLink } from '../util/DuplicateFinder';
 
 import { READONLY_TAGS } from '../../src/util/TagRegistry';
+
+import properties from '../util/linkyproperties';
 
 class CreateLinkProcessor extends BaseProcessor {
 
@@ -220,8 +225,20 @@ class DeleteProcessor extends BaseProcessor {
 
   * process() {
     try {
-      yield linkDao.deleteLatest(this.data.linkid, this.data.userid);
+      linkDao.deleteLatest(this.data.linkid, this.data.userid);
       this.res.send();
+      // if this was an `archive` delete its archive object and the file cache
+      const archiveRec = yield archiveDao.getByUserIdAndArchiveLinkId(
+        this.data.userid, this.data.linkid);
+      if (archiveRec) {
+        /* eslint-disable no-underscore-dangle */
+        winston.loggers.get('application').debug('Deleted archive for link. LinkId=%s / ArchiveId=%s', this.data.linkid, archiveRec._id);
+        archiveDao.deleteLatest(archiveRec._id, this.data.userid);
+        const cachePath = path.join(
+          properties.server.archive.cachePath, archiveRec.userHash, archiveRec._id);
+        /* eslint-enable no-underscore-dangle */
+        fs.remove(cachePath);
+      }
       winston.loggers.get('application').debug('Deleted link with id=%s', this.data.linkid);
     } catch (err) {
       winston.loggers.get('application').error(err);

@@ -3,7 +3,6 @@ import winston from 'winston';
 import scrape from 'website-scraper';
 import path from 'path';
 import archiver from 'archiver';
-import crypto from 'crypto';
 
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
@@ -11,11 +10,14 @@ import linkDao from '../dao/linkDao';
 import archiveDao from '../dao/archiveDao';
 import { updateTagHierarchy, createObject } from '../logic/Link';
 import { ALL, ARCHIVE } from '../../src/util/TagRegistry';
+import { hashSha256Hex } from '../util/HashUtil';
 
 import properties from '../util/linkyproperties';
 
+/* eslint-disable no-underscore-dangle */
+
 const zip = (pathToZip, archiveRec) => new Promise((resolve, reject) => {
-  const output = archiveDao.attachmentInsert(archiveRec.id, 'archive', null, 'application/zip', { rev: archiveRec.rev });
+  const output = archiveDao.attachmentInsert(archiveRec._id, 'archive', null, 'application/zip', { rev: archiveRec._rev });
   const archive = archiver('zip', {
     zlib: { level: 5 },
   });
@@ -37,12 +39,6 @@ const zip = (pathToZip, archiveRec) => new Promise((resolve, reject) => {
   archive.finalize();
 });
 
-const createUserHash = (userid) => {
-  const hashUser = crypto.createHash('sha256');
-  hashUser.update(userid);
-  return hashUser.digest('hex');
-};
-
 class CreateArchiveProcessor extends BaseProcessor {
 
   constructor(req, res, next) {
@@ -54,40 +50,65 @@ class CreateArchiveProcessor extends BaseProcessor {
     this.data = { linkid };
   }
 
+  initArchiveRec(userHash, url) {
+    const archiveRec = {
+      userid: this.data.userid,
+      userHash,
+      createdDate: new Date(),
+      originalLinkid: this.data.linkid,
+      url,
+      type: 'archive',
+    };
+    return archiveDao.insert(archiveRec).then(({ id, rev }) => {
+      archiveRec._id = id;
+      archiveRec._rev = rev;
+      return archiveRec;
+    });
+  }
+
+  static updateArchiveRec(archiveRec, archiveLinkRecId) {
+    /* eslint-disable no-param-reassign */
+    archiveRec.archiveLinkid = archiveLinkRecId;
+    return archiveDao.insert(archiveRec).then(({ rev }) => {
+      archiveRec._rev = rev;
+    });
+    /* eslint-enable no-param-reassign */
+  }
+
+  createLinkRec(userHash, archiveRecId, linkRec) {
+    const newRecord = createObject({
+      linkUrl: `https://linky-archive.oglimmer.de/archive/${userHash}/${archiveRecId}`,
+      userid: this.data.userid,
+      notes: `Archived ${linkRec.linkUrl} on ${new Date()}`,
+      tags: [ALL, ARCHIVE],
+      pageTitle: `[ARCHIVE] ${linkRec.pageTitle}`,
+      faviconUrl: linkRec.faviconUrl,
+    });
+    return linkDao.insert(newRecord).then(({ id }) => {
+      newRecord.id = id;
+      return newRecord;
+    });
+  }
+
   * process() {
     try {
-      const linkRec = yield linkDao.getById(this.data.linkid);
-      if (linkRec.userid !== this.data.userid) {
+      const originalLinkRec = yield linkDao.getById(this.data.linkid);
+      if (originalLinkRec.userid !== this.data.userid) {
         throw new Error('Forbidden');
       }
-      const archiveRec = yield archiveDao.insert({
-        userid: this.data.userid,
-        createdDate: new Date(),
-        linkid: this.data.linkid,
-        url: linkRec.linkUrl,
-        type: 'archive',
-      });
-      const userHash = createUserHash(this.data.userid);
-      const cachePath = path.join(properties.server.archive.cachePath, userHash, archiveRec.id);
-      const options = {
-        urls: [linkRec.linkUrl],
+      const userHash = hashSha256Hex(this.data.userid);
+      const archiveRec = yield this.initArchiveRec(userHash, originalLinkRec.linkUrl);
+      const cachePath = path.join(properties.server.archive.cachePath, userHash, archiveRec._id);
+      yield scrape({
+        urls: [originalLinkRec.linkUrl],
         directory: cachePath,
-      };
-      yield scrape(options);
-      zip(cachePath, archiveRec);
-      const newRecord = createObject({
-        linkUrl: `https://linky-archive.oglimmer.de/archive/${userHash}/${archiveRec.id}`,
-        userid: this.data.userid,
-        notes: `Archived ${linkRec.linkUrl} on ${new Date()}`,
-        tags: [ALL, ARCHIVE],
-        pageTitle: `[ARCHIVE] ${linkRec.pageTitle}`,
-        faviconUrl: linkRec.faviconUrl,
       });
-      const { id } = yield linkDao.insert(newRecord);
-      newRecord.id = id;
-      updateTagHierarchy(this.data.userid, newRecord.tags);
-      this.res.send({ primary: newRecord });
-      winston.loggers.get('application').debug('Created archive db: %j', newRecord);
+      const archiveLinkRec = yield this.createLinkRec(userHash, archiveRec._id, originalLinkRec);
+      yield CreateArchiveProcessor.updateArchiveRec(archiveRec, archiveLinkRec.id);
+      updateTagHierarchy(this.data.userid, archiveLinkRec.tags);
+      zip(cachePath, archiveRec);
+      this.res.send({ primary: archiveLinkRec });
+      winston.loggers.get('application').debug('Created archive db: %j', archiveLinkRec);
     } catch (err) {
       winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
