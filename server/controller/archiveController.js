@@ -3,6 +3,7 @@ import winston from 'winston';
 import scrape from 'website-scraper';
 import path from 'path';
 import archiver from 'archiver';
+import fs from 'fs-extra';
 
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
@@ -90,6 +91,30 @@ class CreateArchiveProcessor extends BaseProcessor {
     });
   }
 
+  static scrape(cachePath, url) {
+    // we need to store all content-types into the file `SCRAPED_MIME_TYPE_MAP`.
+    // see server/httpRoutes/archive.js at "FILE `SCRAPED_MIME_TYPE_MAP`"
+    const urlToContentTypeMap = new Map();
+    const fileNameToContentTypeMap = new Map();
+    return scrape({
+      urls: [url],
+      directory: cachePath,
+      httpResponseHandler: (response) => {
+        if (response.statusCode === 404) {
+          return Promise.reject(new Error('status is 404'));
+        }
+        const contentType = response.headers['content-type'];
+        urlToContentTypeMap.set(response.request.uri.href, contentType);
+        return Promise.resolve(response.body);
+      },
+      onResourceSaved: (resource) => {
+        const mimeType = urlToContentTypeMap.get(resource.url);
+        fileNameToContentTypeMap.set(resource.filename, mimeType);
+      },
+    })
+      .then(() => fs.writeFile(path.join(cachePath, 'SCRAPED_MIME_TYPE_MAP'), JSON.stringify(fileNameToContentTypeMap)));
+  }
+
   * process() {
     try {
       const originalLinkRec = yield linkDao.getById(this.data.linkid);
@@ -99,10 +124,7 @@ class CreateArchiveProcessor extends BaseProcessor {
       const userHash = hashSha256Hex(this.data.userid);
       const archiveRec = yield this.initArchiveRec(userHash, originalLinkRec.linkUrl);
       const cachePath = path.join(properties.server.archive.cachePath, userHash, archiveRec._id);
-      yield scrape({
-        urls: [originalLinkRec.linkUrl],
-        directory: cachePath,
-      });
+      yield CreateArchiveProcessor.scrape(cachePath, originalLinkRec.linkUrl);
       const archiveLinkRec = yield this.createLinkRec(userHash, archiveRec._id, originalLinkRec);
       yield CreateArchiveProcessor.updateArchiveRec(archiveRec, archiveLinkRec.id);
       updateTagHierarchy(this.data.userid, archiveLinkRec.tags);

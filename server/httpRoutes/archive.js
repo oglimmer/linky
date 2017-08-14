@@ -27,6 +27,16 @@ const getParameterFromUrl = (req) => {
   return [archivePath, archiveid, userhash];
 };
 
+const getUserArchiveFilename = (url) => {
+  let extId = url.substr(1); // remove starting /
+  const userhash = extId.substr(0, extId.indexOf('/')); // char seq between two slashes
+  extId = extId.substr(extId.indexOf('/') + 1); // cut userid
+  const endPos = extId.indexOf('/');
+  const filename = endPos === -1 ? 'index.html' : extId.substr(endPos + 1);
+  const archiveid = endPos === -1 ? extId : extId.substr(0, endPos);
+  return [userhash, archiveid, filename];
+};
+
 const ensureFilesOnCacheAndSecurity = (req, res, next) => {
   const tmpAuthToken = req.query.tmpAuthToken ? req.query.tmpAuthToken : req.cookies.tmpAuthToken;
   if (req.query.tmpAuthToken) {
@@ -66,7 +76,24 @@ const ensureFilesOnCacheAndSecurity = (req, res, next) => {
 
 export default (app) => {
   app.use('/archive', ensureFilesOnCacheAndSecurity);
-  app.use('/archive', express.static(path.join(properties.server.archive.cachePath)));
+  app.use('/archive', express.static(path.join(properties.server.archive.cachePath), {
+    setHeaders: (res) => {
+      const url = res.req.url;
+      // FILE `SCRAPED_MIME_TYPE_MAP`
+      // .php files contain virtually anything (like html, js or css). so the content-type
+      // cannot be derived from the file extension. therefore we use the file
+      // `SCRAPED_MIME_TYPE_MAP` which was saved during web scrape time
+      if (url.endsWith('.php')) {
+        const [userhash, archiveid, filename] = getUserArchiveFilename(url);
+        const mimeFile = path.join(properties.server.archive.cachePath, userhash, archiveid, 'SCRAPED_MIME_TYPE_MAP');
+        const map = new Map(JSON.parse(fs.readFileSync(mimeFile, { encoding: 'utf-8' })));
+        const contentType = map.get(filename);
+        if (contentType) {
+          res.setHeader('content-type', contentType);
+        }
+      }
+    },
+  }));
   app.use('/archive', (req, res) => {
     res.status(404).send('404 - Page Not Found');
   });
