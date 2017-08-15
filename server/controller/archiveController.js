@@ -111,6 +111,11 @@ class CreateArchiveProcessor extends BaseProcessor {
         const mimeType = urlToContentTypeMap.get(resource.url);
         fileNameToContentTypeMap.set(resource.filename, mimeType);
       },
+      request: {
+        headers: {
+          'User-Agent': properties.server.archive.userAgent,
+        },
+      },
     })
       .then(() => fs.writeFile(path.join(cachePath, 'SCRAPED_MIME_TYPE_MAP'), JSON.stringify(fileNameToContentTypeMap)));
   }
