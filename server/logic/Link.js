@@ -7,7 +7,8 @@ import favicon from '../util/favicon';
 import linkDao from '../dao/linkDao';
 
 import { DEFAULT_LINK } from '../../src/redux/DataModels';
-import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS, LOCKED, DUEDATE } from '../../src/util/TagRegistry';
+import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS, LOCKED, DUEDATE,
+  ARCHIVE } from '../../src/util/TagRegistry';
 
 import tagDao from '../dao/tagDao';
 import TagHierarchyLogic from '../logic/TagHierarchy';
@@ -42,6 +43,18 @@ const ensureRssTag = (tagsArr, rssUrl) => {
     tagsArr.push(RSS);
   }
   if (!rssUrl && tagsArr && tagsArr.find(findFctn)) {
+    tagsArr.splice(tagsArr.findIndex(findFctn), 1);
+  }
+  return tagsArr;
+};
+
+const ensureArchiveTag = (tagsArr, linkUrl) => {
+  const findFctn = t => t === ARCHIVE;
+  if (linkUrl.startsWith('https://linky-archive.oglimmer.de/')) {
+    if (tagsArr && !tagsArr.find(findFctn)) {
+      tagsArr.push(ARCHIVE);
+    }
+  } else if (tagsArr && tagsArr.find(findFctn)) {
     tagsArr.splice(tagsArr.findIndex(findFctn), 1);
   }
   return tagsArr;
@@ -195,15 +208,17 @@ export const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, not
     userid,
   });
 
-export const validateAndEnhanceTags = (tags, rssUrl) =>
-  ensureWithduedateTag( // add duedate if date given
-    ensureRssTag( // add rss if rss-url given
-      ensureAllTag( // ensure all
-        removeForbiddenTags( // remove user added forbidden tags
-          toLowerCase(tags), // all to lower case
-        ),
-      ), rssUrl,
-    ),
+export const validateAndEnhanceTags = (tags, rssUrl, linkUrl) =>
+  ensureArchiveTag( // add archive if url starts with https://linky-archive.oglimmer.de
+    ensureWithduedateTag( // add duedate if date given
+      ensureRssTag( // add rss if rss-url given
+        ensureAllTag( // ensure all
+          removeForbiddenTags( // remove user added forbidden tags
+            toLowerCase(tags), // all to lower case
+          ),
+        ), rssUrl,
+      ),
+    ), linkUrl,
   );
 
 export const createRecord = (rec, userid) => {
@@ -211,7 +226,7 @@ export const createRecord = (rec, userid) => {
   const fixedUrl = fixUrl(url);
   const fixedRssUrl = fixUrl(rssUrl);
   const fixedTags = Object.prototype.hasOwnProperty.call(rec, 'tagsAsString') ? getTags(tagsAsString) : getTagsFromArray(tagsAsArray);
-  const tags = validateAndEnhanceTags(fixedTags, fixedRssUrl);
+  const tags = validateAndEnhanceTags(fixedTags, fixedRssUrl, fixedUrl);
   const locked = !!tags.find(t => t === LOCKED);
   return resolveUrl(fixedUrl, pageTitle, locked)
     .then(({ linkUrl, title }) => favicon(linkUrl)

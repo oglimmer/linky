@@ -61,7 +61,7 @@ class UpdateLinkProcessor extends BaseProcessor {
     const { linkid } = this.req.params;
     const linkUrl = fixUrl(this.req.body.url);
     const rssUrl = fixUrl(this.req.body.rssUrl);
-    const tags = validateAndEnhanceTags(getTags(this.req.body.tags), rssUrl);
+    const tags = validateAndEnhanceTags(getTags(this.req.body.tags), rssUrl, linkUrl);
     const { pageTitle, notes } = this.req.body;
     this.data = {
       linkid,
