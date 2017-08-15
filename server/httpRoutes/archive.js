@@ -14,27 +14,31 @@ const getParameterFromUrl = (req) => {
   let extId = req.url.substr(1); // remove starting /
   const userhash = extId.substr(0, extId.indexOf('/')); // char seq between two slashes
   extId = extId.substr(extId.indexOf('/') + 1); // cut userid
+  if (extId.indexOf('?') > -1) {
+    extId = extId.substr(0, extId.indexOf('?'));
+  }
   let endPos = extId.indexOf('/');
+  let filename;
   if (endPos === -1) {
-    if (extId.indexOf('?') > -1) {
-      endPos = extId.indexOf('?');
-    } else {
-      endPos = extId.length;
-    }
+    filename = 'index.html';
+    endPos = extId.length;
+  } else {
+    filename = extId.substr(endPos + 1);
   }
   const archiveid = extId.substr(0, endPos);
   const archivePath = path.join(properties.server.archive.cachePath, userhash, archiveid);
-  return [archivePath, archiveid, userhash];
+  return [archivePath, archiveid, userhash, filename];
 };
 
-const getUserArchiveFilename = (url) => {
-  let extId = url.substr(1); // remove starting /
-  const userhash = extId.substr(0, extId.indexOf('/')); // char seq between two slashes
-  extId = extId.substr(extId.indexOf('/') + 1); // cut userid
-  const endPos = extId.indexOf('/');
-  const filename = endPos === -1 ? 'index.html' : extId.substr(endPos + 1);
-  const archiveid = endPos === -1 ? extId : extId.substr(0, endPos);
-  return [userhash, archiveid, filename];
+const handleContentTypeForSpecialUrls = (req, userhash, archiveid, filename) => {
+  if (req.url.endsWith('.php')) {
+    const mimeFile = path.join(properties.server.archive.cachePath, userhash, archiveid, 'SCRAPED_MIME_TYPE_MAP');
+    const map = new Map(JSON.parse(fs.readFileSync(mimeFile, { encoding: 'utf-8' })));
+    const contentType = map.get(filename);
+    if (contentType) {
+      req.SAVED_CONTENTTYPE = contentType;
+    }
+  }
 };
 
 const ensureFilesOnCacheAndSecurity = (req, res, next) => {
@@ -46,27 +50,31 @@ const ensureFilesOnCacheAndSecurity = (req, res, next) => {
   } else {
     JwtUtil.verify(tmpAuthToken)
       .then((claim) => {
-        const [archivePath, archiveid, userhash] = getParameterFromUrl(req);
+        const [archivePath, archiveid, userhash, filename] = getParameterFromUrl(req);
         if (userhash !== claim.archiveUserHash) {
           throw new Error();
         }
-        fs.stat(archivePath).then(() => {
-          next();
-        }).catch(() => {
-          Promise.all([
-            archiveDao.getById(archiveid),
-            fs.ensureDir(archivePath),
-          ]).then(([rec]) => {
-            if (rec) {
-              winston.loggers.get('application').debug('unzipping %s ...', archiveid);
-              const targetStream = unzip.Extract({ path: archivePath });
-              targetStream.on('close', () => {
-                next();
-              });
-              archiveDao.attachmentGet(archiveid, 'archive').pipe(targetStream);
-            }
+        fs.stat(archivePath)
+          .then(() => {
+            handleContentTypeForSpecialUrls(req, userhash, archiveid, filename);
+            next();
+          })
+          .catch(() => {
+            Promise.all([
+              archiveDao.getById(archiveid),
+              fs.ensureDir(archivePath),
+            ]).then(([rec]) => {
+              if (rec) {
+                winston.loggers.get('application').debug('unzipping %s ...', archiveid);
+                const targetStream = unzip.Extract({ path: archivePath });
+                targetStream.on('close', () => {
+                  handleContentTypeForSpecialUrls(req, userhash, archiveid, filename);
+                  next();
+                });
+                archiveDao.attachmentGet(archiveid, 'archive').pipe(targetStream);
+              }
+            });
           });
-        });
       })
       .catch(() => {
         res.status(403).send('403 - Forbidden');
@@ -78,19 +86,12 @@ export default (app) => {
   app.use('/archive', ensureFilesOnCacheAndSecurity);
   app.use('/archive', express.static(path.join(properties.server.archive.cachePath), {
     setHeaders: (res) => {
-      const url = res.req.url;
       // FILE `SCRAPED_MIME_TYPE_MAP`
       // .php files contain virtually anything (like html, js or css). so the content-type
       // cannot be derived from the file extension. therefore we use the file
       // `SCRAPED_MIME_TYPE_MAP` which was saved during web scrape time
-      if (url.endsWith('.php')) {
-        const [userhash, archiveid, filename] = getUserArchiveFilename(url);
-        const mimeFile = path.join(properties.server.archive.cachePath, userhash, archiveid, 'SCRAPED_MIME_TYPE_MAP');
-        const map = new Map(JSON.parse(fs.readFileSync(mimeFile, { encoding: 'utf-8' })));
-        const contentType = map.get(filename);
-        if (contentType) {
-          res.setHeader('content-type', contentType);
-        }
+      if (res.req.SAVED_CONTENTTYPE) {
+        res.setHeader('content-type', res.req.SAVED_CONTENTTYPE);
       }
     },
   }));
