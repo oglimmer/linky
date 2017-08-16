@@ -21,7 +21,7 @@ const leave = (req, res) => {
           throw Error('Failed to verify user on referenced link');
         }
         let targetUrl = loadedLinkObj.linkUrl;
-        if (targetUrl.startsWith('https://linky-archive.oglimmer.de/')) {
+        if (targetUrl.startsWith('https://archive.linky1.com/')) {
           const tempClaim = { archiveUserHash: hashSha256Hex(loadedLinkObj.userid) };
           const tempAuthToken = yield JwtUtil.sign(tempClaim, '1h');
           targetUrl += `?tmpAuthToken=${tempAuthToken}`;

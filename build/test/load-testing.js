@@ -1,5 +1,5 @@
 
-// export LINKY_SERVER=https://linky.oglimmer.de
+// export LINKY_SERVER=https://linky1.com
 // node -r babel-register -r babel-polyfill server/integration-tests/load-testing.js
 
 import request from 'request-promise';

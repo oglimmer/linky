@@ -18,7 +18,7 @@ const click = (target) => {
 };
 
 const loginDemo = (dispatch, history) => {
-  dispatch(checkAuth('demo@linky.oglimmer.de', 'demo')).then(() => {
+  dispatch(checkAuth('demo@linky1.com', 'demo')).then(() => {
     history.replace('/links/portal');
   }, () => {});
 };

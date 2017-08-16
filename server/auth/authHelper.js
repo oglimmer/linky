@@ -96,7 +96,7 @@ const getRemoteUserJson = (type, authTokenResponse) => {
     headers: {
       authorization: `Bearer ${authTokenResponse.access_token}`,
       Accept: 'application/json',
-      'User-Agent': 'linky.oglimmer.de',
+      'User-Agent': 'linky1.com',
     },
   }).then(bodyUser => ({
     authTokenResponse,
@@ -118,7 +118,7 @@ const processRefresh = (req, res, refreshToken, type) => {
     };
     const headers = {
       Accept: 'application/json',
-      'User-Agent': 'linky.oglimmer.de',
+      'User-Agent': 'linky1.com',
     };
     if (type === 'reddit') {
       headers.authorization = `Basic ${new Buffer(
@@ -152,7 +152,7 @@ const processRefresh = (req, res, refreshToken, type) => {
         form,
         headers: {
           Accept: 'application/json',
-          'User-Agent': 'linky.oglimmer.de',
+          'User-Agent': 'linky1.com',
         },
       }))
       .then(tokenResponse => ({

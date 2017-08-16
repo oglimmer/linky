@@ -1,7 +1,7 @@
 # linky
 A link management system - or maybe just a playground for reactjs, node and stuff ;)
 
-Installed at [https://linky.oglimmer.de](https://linky.oglimmer.de)
+Installed at [https://linky1.com](https://linky1.com)
 
 This project features:
 

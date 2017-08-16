@@ -40,7 +40,7 @@ const getAuthToken = (code, type) => {
   };
   const headers = {
     Accept: 'application/json',
-    'User-Agent': 'linky.oglimmer.de',
+    'User-Agent': 'linky1.com',
   };
   if (type === 'reddit') {
     headers.authorization = `Basic ${new Buffer(`${properties.server.auth[type].clientId}:${properties.server.auth[type].clientSecret}`).toString('base64')}`;

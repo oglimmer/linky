@@ -6,7 +6,7 @@ fi
 REST_URL=$BASE_URL/rest
 
 if [ -z "$EMAIL" ]; then
-  EMAIL=demo@linky.oglimmer.de
+  EMAIL=demo@linky1.com
 fi
 if [ -z "$PASS" ]; then
   PASS=demo

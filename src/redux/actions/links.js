@@ -133,7 +133,7 @@ export function fetchRssUpdates(forceUpdate = false) {
         } else {
           /* eslint-disable no-new */
           new Notification(`${totalNewUpdates} unread RSS feeds found!`, {
-            icon: 'https://linky.oglimmer.de/favicon.ico',
+            icon: 'https://linky1.com/favicon.ico',
           });
           /* eslint-enable no-new */
         }

@@ -78,7 +78,7 @@ class CreateArchiveProcessor extends BaseProcessor {
 
   createLinkRec(userHash, archiveRecId, linkRec) {
     const newRecord = createObject({
-      linkUrl: `https://linky-archive.oglimmer.de/archive/${userHash}/${archiveRecId}`,
+      linkUrl: `https://archive.linky1.com/archive/${userHash}/${archiveRecId}`,
       userid: this.data.userid,
       notes: `Archived ${linkRec.linkUrl} on ${new Date()}`,
       tags: [ALL, ARCHIVE],

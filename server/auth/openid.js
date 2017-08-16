@@ -48,7 +48,7 @@ const getIdToken = (code, type) => {
       form,
       headers: {
         Accept: 'application/json',
-        'User-Agent': 'linky.oglimmer.de',
+        'User-Agent': 'linky1.com',
       },
     }));
 };

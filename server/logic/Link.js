@@ -50,7 +50,7 @@ const ensureRssTag = (tagsArr, rssUrl) => {
 
 const ensureArchiveTag = (tagsArr, linkUrl) => {
   const findFctn = t => t === ARCHIVE;
-  if (linkUrl.startsWith('https://linky-archive.oglimmer.de/')) {
+  if (linkUrl.startsWith('https://archive.linky1.com/')) {
     if (tagsArr && !tagsArr.find(findFctn)) {
       tagsArr.push(ARCHIVE);
     }
@@ -209,7 +209,7 @@ export const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, not
   });
 
 export const validateAndEnhanceTags = (tags, rssUrl, linkUrl) =>
-  ensureArchiveTag( // add archive if url starts with https://linky-archive.oglimmer.de
+  ensureArchiveTag( // add archive if url starts with https://archive.linky1.com
     ensureWithduedateTag( // add duedate if date given
       ensureRssTag( // add rss if rss-url given
         ensureAllTag( // ensure all

@@ -127,7 +127,7 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
               shell script
             </a>.
             Set the shell variable AUTH_TOKEN to your token,
-            set BASE_URL to https://linky.oglimmer.de and try:
+            set BASE_URL to https://linky1.com and try:
             &#39;./test.sh getlinks&#39;
           </div>
         </div>
