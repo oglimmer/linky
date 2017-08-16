@@ -6,7 +6,7 @@ import BlueBirdPromise from 'bluebird';
 import moment from 'moment';
 
 import favicon from '../server/util/favicon';
-import linkDao, { LinkDao } from '../server/dao/linkDao';
+import linkDao from '../server/dao/linkDao';
 import tagDao from '../server/dao/tagDao';
 import { URLUPDATED, BROKEN, LOCKED, DUEDATE, DUE } from '../src/util/TagRegistry';
 import { dateRegex, getNextIndex, equalRelevant } from '../server/logic/Link';
