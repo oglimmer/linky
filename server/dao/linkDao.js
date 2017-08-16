@@ -3,7 +3,7 @@ import BaseDataAccessObject from './BaseDataAccessObject';
 
 export class LinkDao extends BaseDataAccessObject {
 
-  static listAll() {
+  listAll() {
     return this.dbrefs.view('links', 'byUserid').then(body => body.rows.map(e => e.value));
   }
 

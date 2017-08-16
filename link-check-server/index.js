@@ -146,7 +146,7 @@ const processRows = (recs) => {
 };
 
 console.log(`${new Date()}: starting link-check-server`);
-LinkDao.listAll().then(processRows);
+linkDao.listAll().then(processRows);
 
 process.on('exit', () => {
   console.log(`${new Date()}: exiting link-check-server`);
