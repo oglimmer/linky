@@ -12,6 +12,6 @@ export default () => (
       {BuildInfo.COMMITHASH}
     </a>
     {' '} | {' '}
-    <Link to="/impressum">Impressum/Kontakt/Datenschutz</Link>
+    <Link to="/contact">Contact</Link>
   </div>
 );

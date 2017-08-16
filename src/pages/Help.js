@@ -147,7 +147,7 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
     <h3>Where can I file a bug?</h3>
     <p>
       As this project is hosted on github.com, please use <a href="https://github.com/oglimmer/linky/issues">
-      Issues</a> there. Rather like to talk to me? {BuildInfo.IMPRESSUM}
+      Issues</a> there. Rather like to talk to me? {BuildInfo.CONTACT}
     </p>
   </div>
 );

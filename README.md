@@ -138,5 +138,5 @@ Special parameter only used in integration tests. Defines the protocol, server a
 - everthing else delivers the server-side pre-rendered html page from NODE
   - /
   - /links/:tag
-  - /impressum
+  - /contact
   - /tags

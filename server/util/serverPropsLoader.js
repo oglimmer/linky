@@ -3,9 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const execSync = require('child_process').execSync;
 
-let IMPRESSUM = '';
-if (fs.existsSync('/etc/linky-impressum.txt')) {
-  IMPRESSUM = `${fs.readFileSync('/etc/linky-impressum.txt')}`;
+let CONTACT = '';
+if (fs.existsSync('/etc/linky-contact.txt')) {
+  CONTACT = `${fs.readFileSync('/etc/linky-contact.txt')}`;
 }
 
 let commitHashRaw;
@@ -31,7 +31,7 @@ const BUILDDATE = new Date().toString();
 /* eslint-disable no-param-reassign */
 
 module.exports = (data) => {
-  data.IMPRESSUM = IMPRESSUM;
+  data.CONTACT = CONTACT;
   data.COMMITHASH = COMMITHASH;
   data.BRANCHNAME = BRANCHNAME;
   data.BUILDDATE = BUILDDATE;

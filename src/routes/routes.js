@@ -7,7 +7,7 @@ import { Route, Redirect } from 'react-router-dom';
 import Login from '../pages/Login';
 import PortalPage from '../pages/PortalPage';
 import TagPage from '../pages/TagPage';
-import Impressum from '../pages/Impressum';
+import Contact from '../pages/Contact';
 import ImportExport from '../pages/ImportExport';
 import Help from '../pages/Help';
 
@@ -84,8 +84,8 @@ const routes = auth => [
   {
     tagName: Route,
     exact: true,
-    path: '/impressum',
-    component: Impressum,
+    path: '/contact',
+    component: Contact,
     loadData: null,
   },
   {
