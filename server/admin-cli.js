@@ -63,15 +63,15 @@ const listSummaryUserById = (id, user) => {
   let totalLinks = 0;
   Promise.all([
     view('feedUpdates', 'byUserId', { key: id })
-    .then(resultFU => resultFU.rows)
-    .then((rowsFU) => {
-      totalUpdates = rowsFU.length;
-    }),
+      .then(resultFU => resultFU.rows)
+      .then((rowsFU) => {
+        totalUpdates = rowsFU.length;
+      }),
     view('links', 'byUserid', { key: id })
-    .then(resultL => resultL.rows)
-    .then((rowsL) => {
-      totalLinks = rowsL.length;
-    }),
+      .then(resultL => resultL.rows)
+      .then((rowsL) => {
+        totalLinks = rowsL.length;
+      }),
   ]).then(() => {
     console.log(`${user}, ${totalLinks}, ${totalUpdates}`);
   });
@@ -188,10 +188,10 @@ if (command === 'summary') {
 
 if (false) {
   view('visitors', 'byVisitorId')
-   .then(result => result.rows)
-   .then(rows => rows.map(r => r.value))
-   .then(rows => rows.forEach((row) => {
-     console.log(`Delete visitor = ${row._id}, ${row._rev}`);
-     destroy(row._id, row._rev);
-   }));
+    .then(result => result.rows)
+    .then(rows => rows.map(r => r.value))
+    .then(rows => rows.forEach((row) => {
+      console.log(`Delete visitor = ${row._id}, ${row._rev}`);
+      destroy(row._id, row._rev);
+    }));
 }

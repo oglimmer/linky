@@ -1,4 +1,3 @@
-
 import assert from 'assert';
 import bluebird from 'bluebird';
 import winston from 'winston';
@@ -6,8 +5,8 @@ import winston from 'winston';
 import ResponseUtil from '../../src/util/ResponseUtil';
 
 
-/* abstract */ class BaseProcessor {
-
+/* abstract */
+class BaseProcessor {
   constructor(req, res, next, securePath) {
     this.req = req;
     this.res = res;
@@ -87,7 +86,6 @@ import ResponseUtil from '../../src/util/ResponseUtil';
       this.doProcessPart2();
     }
   }
-
 }
 
 export default BaseProcessor;

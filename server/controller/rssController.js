@@ -155,7 +155,6 @@ const getDisplayContent = (content, newIds) => {
 
 
 class GetRssUpdatesProcessor extends BaseProcessor {
-
   constructor(req, res, next, includingDisplay) {
     super(req, res, next, true);
     this.includingDisplay = includingDisplay;

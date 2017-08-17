@@ -9,7 +9,6 @@ import TagHierarchyLogic from '../logic/TagHierarchy';
 import { READONLY_TAGS } from '../../src/util/TagRegistry';
 
 class GetTagHierarchyProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -24,11 +23,9 @@ class GetTagHierarchyProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 class PersistTagHierarchyProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -99,11 +96,9 @@ class PersistTagHierarchyProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 class RemoveTagProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -154,7 +149,6 @@ class RemoveTagProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 export default {

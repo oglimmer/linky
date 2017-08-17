@@ -2,7 +2,6 @@
 import BaseDataAccessObject from './BaseDataAccessObject';
 
 class AsyncWaitDao extends BaseDataAccessObject {
-
   getAllAsyncWaits() {
     return this.listByView('asyncWait', 'allAsyncwaits')
       .then(data => data.map(e => e.value));
@@ -17,7 +16,6 @@ class AsyncWaitDao extends BaseDataAccessObject {
     return this.listByViewMultiParams('asyncWait', 'byUserIdAndObject', [userid, object], [userid, object], {})
       .then(this.getFirstElement);
   }
-
 }
 
 export default new AsyncWaitDao();

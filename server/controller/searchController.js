@@ -50,7 +50,6 @@ const purifyUrl = (userInput) => {
 };
 
 class SearchProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -95,7 +94,6 @@ class SearchProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 export default {

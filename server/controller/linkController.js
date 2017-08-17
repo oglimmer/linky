@@ -17,7 +17,6 @@ import { READONLY_TAGS } from '../../src/util/TagRegistry';
 import properties from '../util/linkyproperties';
 
 class CreateLinkProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -48,11 +47,9 @@ class CreateLinkProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 class UpdateLinkProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -103,12 +100,10 @@ class UpdateLinkProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 // changes tag A to tag B on tagHierarchy and linkList
 class BatchUpdateLinkChangeTagProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -177,11 +172,9 @@ class BatchUpdateLinkChangeTagProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 class GetLinkProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -208,11 +201,9 @@ class GetLinkProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 class DeleteProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -246,7 +237,6 @@ class DeleteProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 export default {

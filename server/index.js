@@ -161,35 +161,35 @@ if (!debugMode || debugMode !== 'rest') {
     }
 
     fetchComponentData(store.dispatch, req, res)
-    .then(() => {
-      const context = {};
-      const reactHtml = ReactDOMServer.renderToString(
-        <StaticRouter location={req.url} context={context}>
-          <Provider store={store}>
-            <div>
-              <AlertAdapter />
-              <Routing store={store} />
-            </div>
-          </Provider>
-        </StaticRouter>,
-      );
+      .then(() => {
+        const context = {};
+        const reactHtml = ReactDOMServer.renderToString(
+          <StaticRouter location={req.url} context={context}>
+            <Provider store={store}>
+              <div>
+                <AlertAdapter />
+                <Routing store={store} />
+              </div>
+            </Provider>
+          </StaticRouter>,
+        );
 
-      if (context.url) {
-        res.writeHead(301, {
-          Location: context.url,
-        });
-        res.end();
-      } else {
-        const initialState = JSON.stringify(store.getState());
-        res.render('index.ejs', { reactHtml, initialState });
-      }
-    })
-    .catch((err) => {
-      if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
-        winston.loggers.get('application').error(err);
-        res.status(500).send('Server error');
-      }
-    });
+        if (context.url) {
+          res.writeHead(301, {
+            Location: context.url,
+          });
+          res.end();
+        } else {
+          const initialState = JSON.stringify(store.getState());
+          res.render('index.ejs', { reactHtml, initialState });
+        }
+      })
+      .catch((err) => {
+        if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
+          winston.loggers.get('application').error(err);
+          res.status(500).send('Server error');
+        }
+      });
   });
 }
 

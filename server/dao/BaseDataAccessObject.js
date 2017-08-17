@@ -6,7 +6,6 @@ import winston from 'winston';
 import linkyDb from './NanoConnection';
 
 class BaseDataAccessObject {
-
   constructor(db = linkyDb) {
     this.dbrefs = {
       insert: Promise.promisify(db.insert),
@@ -92,7 +91,6 @@ class BaseDataAccessObject {
       .then(obj => this.delete(id, obj._rev));
     /* eslint-disable no-underscore-dangle */
   }
-
 }
 
 export default BaseDataAccessObject;

@@ -10,21 +10,20 @@ const sign = Promise.promisify(jwt.sign);
 const verify = Promise.promisify(jwt.verify);
 
 class JwtUtil {
-
   static decode(claim) {
     return jwt.decode(claim);
   }
 
   static verifyOpenId(authToken, openIdConfigUrl) {
     return request.get({ url: openIdConfigUrl, json: true })
-    .then(openIdConfig => request.get({ url: openIdConfig.jwks_uri, json: true }))
-    .then(response => jose.JWK.asKeyStore(response))
-    .then((keyStore) => {
-      const decodedToken = jwt.decode(authToken, { complete: true });
-      return keyStore.get(decodedToken.header.kid);
-    })
-    .then(key => jose.JWS.createVerify(key).verify(authToken))
-    .then(claim => JSON.parse(claim.payload.toString()));
+      .then(openIdConfig => request.get({ url: openIdConfig.jwks_uri, json: true }))
+      .then(response => jose.JWK.asKeyStore(response))
+      .then((keyStore) => {
+        const decodedToken = jwt.decode(authToken, { complete: true });
+        return keyStore.get(decodedToken.header.kid);
+      })
+      .then(key => jose.JWS.createVerify(key).verify(authToken))
+      .then(claim => JSON.parse(claim.payload.toString()));
   }
 
   static verify(authToken) {
@@ -37,7 +36,6 @@ class JwtUtil {
       expiresIn,
     });
   }
-
 }
 
 export default JwtUtil;

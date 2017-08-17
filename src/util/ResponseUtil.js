@@ -5,7 +5,6 @@ function isObject(value) {
 }
 
 class ResponseUtil {
-
   static sendErrorResponse500(err, res) {
     ResponseUtil.sendErrorResponse(500, err, res);
   }
@@ -30,7 +29,6 @@ class ResponseUtil {
     const text = `${name} must not be empty`;
     ResponseUtil.sendErrorResponse(code, text, res);
   }
-
 }
 
 export default ResponseUtil;

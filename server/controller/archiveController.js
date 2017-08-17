@@ -41,7 +41,6 @@ const zip = (pathToZip, archiveRec) => new Promise((resolve, reject) => {
 });
 
 class CreateArchiveProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -142,7 +141,6 @@ class CreateArchiveProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 export default {

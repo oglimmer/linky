@@ -36,13 +36,13 @@ if (process.env.NODE_ENV === 'integrationtest') {
       },
       json: true,
     })
-    .then((result) => {
-      expect(result.id).toBeDefined();
-      return result;
-    })
+      .then((result) => {
+        expect(result.id).toBeDefined();
+        return result;
+      })
     // .then((result) => { id = result.id; })
-    .then(() => done())
-    .catch(err => done.fail(err));
+      .then(() => done())
+      .catch(err => done.fail(err));
   });
 
   test('authenticate user', (done) => {
@@ -57,13 +57,13 @@ if (process.env.NODE_ENV === 'integrationtest') {
       },
       json: true,
     })
-    .then((result) => {
-      expect(result.token).toBeDefined();
-      return result;
-    })
-    .then((result) => { token = result.token; })
-    .then(() => done())
-    .catch(err => done.fail(err));
+      .then((result) => {
+        expect(result.token).toBeDefined();
+        return result;
+      })
+      .then((result) => { token = result.token; })
+      .then(() => done())
+      .catch(err => done.fail(err));
   });
 
   test('create links', (done) => {
@@ -81,23 +81,23 @@ if (process.env.NODE_ENV === 'integrationtest') {
         },
         json: true,
       })
-      .then((result) => {
-        expect(result.id).toBeDefined();
-        expect(result.linkUrl).toBeDefined();
-        expect(result.tags).toBeDefined();
-        expect(result.callCounter).toBeDefined();
-        expect(result.lastCalled).toBeDefined();
-        expect(result.createdDate).toBeDefined();
-        expect(result.rssUrl).toBeDefined();
-      })
-      .then(() => {
-        if (i < 10) {
-          call(i + 1);
-        } else {
-          done();
-        }
-      })
-      .catch(err => done.fail(err));
+        .then((result) => {
+          expect(result.id).toBeDefined();
+          expect(result.linkUrl).toBeDefined();
+          expect(result.tags).toBeDefined();
+          expect(result.callCounter).toBeDefined();
+          expect(result.lastCalled).toBeDefined();
+          expect(result.createdDate).toBeDefined();
+          expect(result.rssUrl).toBeDefined();
+        })
+        .then(() => {
+          if (i < 10) {
+            call(i + 1);
+          } else {
+            done();
+          }
+        })
+        .catch(err => done.fail(err));
     };
     let j = 0;
     while (j < 5) {
@@ -115,19 +115,19 @@ if (process.env.NODE_ENV === 'integrationtest') {
       },
       json: true,
     })
-    .then((result) => {
-      result.forEach((e) => {
-        expect(e.id).toBeDefined();
-        expect(e.linkUrl).toBeDefined();
-        expect(e.tags).toBeDefined();
-        expect(e.callCounter).toBeDefined();
-        expect(e.lastCalled).toBeDefined();
-        expect(e.createdDate).toBeDefined();
-        expect(e.rssUrl).toBeDefined();
-      });
-    })
-    .then(() => done())
-    .catch(err => done.fail(err));
+      .then((result) => {
+        result.forEach((e) => {
+          expect(e.id).toBeDefined();
+          expect(e.linkUrl).toBeDefined();
+          expect(e.tags).toBeDefined();
+          expect(e.callCounter).toBeDefined();
+          expect(e.lastCalled).toBeDefined();
+          expect(e.createdDate).toBeDefined();
+          expect(e.rssUrl).toBeDefined();
+        });
+      })
+      .then(() => done())
+      .catch(err => done.fail(err));
   });
 } else {
   test('fake', () => {

@@ -15,7 +15,6 @@ class VerificationError extends Error {
 }
 
 class Verification {
-
   constructor({ req, res, next }) {
     this.req = req;
     this.res = res;
@@ -60,7 +59,6 @@ class Verification {
     return JwtUtil.verify(authToken);
   }
   /* eslint-enable class-methods-use-this */
-
 }
 
 // replace this by npm restify-jwt

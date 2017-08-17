@@ -32,7 +32,6 @@ const getCategories = ($a) => {
 };
 
 class ImportProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -100,16 +99,16 @@ class ImportProcessor extends BaseProcessor {
           pageTitle: title,
           notes: null,
         }, this.data.userid)
-        .then((rec) => {
-          rec.tags.forEach(c => allTags.add(c));
-          const updateObj = {};
-          if (!equalRelevant(rec.linkUrl, url)) {
-            updateObj.notes = `Original url was ${url}`;
-          }
-          const finalRec = Object.assign({}, rec, updateObj);
-          duplicateFinder.counterLink(finalRec);
-          return finalRec;
-        });
+          .then((rec) => {
+            rec.tags.forEach(c => allTags.add(c));
+            const updateObj = {};
+            if (!equalRelevant(rec.linkUrl, url)) {
+              updateObj.notes = `Original url was ${url}`;
+            }
+            const finalRec = Object.assign({}, rec, updateObj);
+            duplicateFinder.counterLink(finalRec);
+            return finalRec;
+          });
       }, { concurrency: 5 })
         .then(docs => duplicateFinder.onImport(docs))
         .then(docs => linkDao.bulk({ docs }))
@@ -126,11 +125,9 @@ class ImportProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 class ExportProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -148,11 +145,9 @@ class ExportProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 class ImportReadyProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -168,7 +163,6 @@ class ImportReadyProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 export default {

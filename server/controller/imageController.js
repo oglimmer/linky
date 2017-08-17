@@ -10,7 +10,6 @@ import BaseProcessor from './BaseProcessor';
 import properties from '../util/linkyproperties';
 
 class GetFaviconProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -43,31 +42,30 @@ class GetFaviconProcessor extends BaseProcessor {
           uri: rec.faviconUrl,
           gzip: true,
         })
-        .on('response', (response) => {
-          const contentType = response.headers['content-type'];
-          this.res.append('content-type', contentType);
-          this.res.append('Cache-Control', 'max-age=31536000');
-          fs.writeFileSync(`${file}.contentType`, contentType);
-        })
-        .on('data', (data) => {
-          this.res.write(data);
-          outputStream.write(data);
-        })
-        .on('complete', () => {
-          this.res.end();
-          outputStream.end();
-        })
-        .on('error', () => {
-          this.res.end();
-          outputStream.end();
-        });
+          .on('response', (response) => {
+            const contentType = response.headers['content-type'];
+            this.res.append('content-type', contentType);
+            this.res.append('Cache-Control', 'max-age=31536000');
+            fs.writeFileSync(`${file}.contentType`, contentType);
+          })
+          .on('data', (data) => {
+            this.res.write(data);
+            outputStream.write(data);
+          })
+          .on('complete', () => {
+            this.res.end();
+            outputStream.end();
+          })
+          .on('error', () => {
+            this.res.end();
+            outputStream.end();
+          });
       }
     } catch (err) {
       winston.loggers.get('application').error(err);
       ResponseUtil.sendErrorResponse500(err, this.res);
     }
   }
-
 }
 
 export default {

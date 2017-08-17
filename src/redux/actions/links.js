@@ -93,12 +93,12 @@ export function fetchRssUpdatesDetails(id) {
       return null;
     }
     return fetch.get(`/rest/links/${id}/rssDetails`, getState().auth.token)
-    .then((json) => {
-      dispatch(setRssUpdates(id, json.result));
-      dispatch(setRssUpdatesDetails(id, json.display));
-      dispatch(setRssDetailsId(id));
-    })
-    .catch(ex => dispatch(setErrorMessage(ex)));
+      .then((json) => {
+        dispatch(setRssUpdates(id, json.result));
+        dispatch(setRssUpdatesDetails(id, json.display));
+        dispatch(setRssDetailsId(id));
+      })
+      .catch(ex => dispatch(setErrorMessage(ex)));
   };
 }
 
@@ -114,15 +114,15 @@ export function fetchRssUpdates(forceUpdate = false) {
         lastUpdates[linkElement.id] = Date.now();
         ps.push(new Promise((resolve, reject) => {
           fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
-          .then((json) => {
-            totalNewUpdates += json.result;
-            dispatch(setRssUpdates(linkElement.id, json.result));
-            resolve();
-          })
-          .catch((ex) => {
-            dispatch(setErrorMessage(ex));
-            reject(ex);
-          });
+            .then((json) => {
+              totalNewUpdates += json.result;
+              dispatch(setRssUpdates(linkElement.id, json.result));
+              resolve();
+            })
+            .catch((ex) => {
+              dispatch(setErrorMessage(ex));
+              reject(ex);
+            });
         }));
       }
     });
@@ -293,12 +293,12 @@ export function sendSearch(searchString) {
   const currentTime = new Date();
   return (dispatch, getState) =>
     fetch.get(`/rest/search/links?q=${encodeURIComponent(searchString)}`, getState().auth.token)
-    .then((json) => {
-      dispatch(setInSearchMode(true));
-      dispatch(setLinks(json));
-      console.log(`Search took ${new Date().getTime() - currentTime.getTime()} millis`);
-    })
-    .catch(ex => dispatch(setErrorMessage(ex)));
+      .then((json) => {
+        dispatch(setInSearchMode(true));
+        dispatch(setLinks(json));
+        console.log(`Search took ${new Date().getTime() - currentTime.getTime()} millis`);
+      })
+      .catch(ex => dispatch(setErrorMessage(ex)));
 }
 
 export function createArchive(id) {

@@ -11,7 +11,6 @@ import BaseProcessor from './BaseProcessor';
 import properties from '../util/linkyproperties';
 
 class CreateUserProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, false);
   }
@@ -45,11 +44,9 @@ class CreateUserProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 class AuthenticateProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, false);
   }
@@ -99,11 +96,9 @@ class AuthenticateProcessor extends BaseProcessor {
       this.res.end();
     }
   }
-
 }
 
 class GetUserProcessor extends BaseProcessor {
-
   constructor(req, res, next) {
     super(req, res, next, true);
   }
@@ -124,7 +119,6 @@ class GetUserProcessor extends BaseProcessor {
     }
     this.res.end();
   }
-
 }
 
 export default {

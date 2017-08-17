@@ -7,22 +7,21 @@ import { Control } from 'react-redux-form';
 import FormControlAdapter from './FormControlAdapter';
 
 const UIInputElement = ({ label, componentClass, model, placeholder, autoFocus,
-  autoComplete, cols }) => (
-    <span>
-      <Col componentClass={ControlLabel} sm={1}>{label}</Col>
-      <Col sm={cols}>
-        <Control
-          type={componentClass === 'password' ? 'password' : 'text'}
-          componentClass={componentClass}
-          model={`.${model}`}
-          component={FormControlAdapter}
-          autoFocus={autoFocus}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-        />
-      </Col>
-    </span>
-);
+  autoComplete, cols }) =>
+  (<span>
+    <Col componentClass={ControlLabel} sm={1}>{label}</Col>
+    <Col sm={cols}>
+      <Control
+        type={componentClass === 'password' ? 'password' : 'text'}
+        componentClass={componentClass}
+        model={`.${model}`}
+        component={FormControlAdapter}
+        autoFocus={autoFocus}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+      />
+    </Col>
+  </span>);
 
 UIInputElement.propTypes = {
   label: PropTypes.string.isRequired,

@@ -30,50 +30,49 @@ const getSortingInfo = (sortingByColumn, obj) => {
 };
 
 const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, sortingByColumnOrder,
-  onClickLink, feedUpdatesList }) => (
-    <ListGroup>
-      <ListGroupItem>
-        Sort by:{' '}
-        <SortButton byColumn="mostUsed" text="Most used" />{' '}
-        <SortButton byColumn="lastUsed" text="Last used" />{' '}
-        <SortButton byColumn="lastAdded" text="Last Added" />{' '}
-        <SortButton byColumn="title" text="Title" />{' '}
-        <SortButton byColumn="url" text="Url" />{' '}
-        View:{' '}
-        <ViewOption name="pageTitle" label="Title" />
-        <ViewOption name="linkUrl" label="Url" />
-        <ViewOption name="notes" label="Notes" />
-        <ViewOption name="tags" label="Tags" />
-        <ViewOption name="rssUrl" label="RSS" />
-      </ListGroupItem>
-      { linkList.sort((a, b) => {
-        if (sortingByColumn === 'mostUsed') {
-          return sortingByColumnOrder * (b.callCounter - a.callCounter);
-        } else if (sortingByColumn === 'lastUsed') {
-          return sortingByColumnOrder * (new Date(b.lastCalled) - new Date(a.lastCalled));
-        } else if (sortingByColumn === 'lastAdded') {
-          return sortingByColumnOrder * (new Date(b.createdDate) - new Date(a.createdDate));
-        } else if (sortingByColumn === 'title') {
-          return sortingByColumnOrder * b.pageTitle.localeCompare(a.pageTitle);
-        } else if (sortingByColumn === 'url') {
-          return sortingByColumnOrder * b.linkUrl.localeCompare(a.linkUrl);
-        }
-        return 0;
-      }).map(link => (
-        <UILinkListElement
-          key={link.id}
-          id={link.id}
-          sortDetails={`[${getSortingInfo(sortingByColumn, link)}]`}
-          link={link}
-          onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '), link.rssUrl, link.pageTitle, link.notes)}
-          onClickLink={onClickLink}
-          faviconUrl={link.faviconUrl}
-          feedUpdates={feedUpdatesList.find(e => e.id === link.id)}
-          hasRssUrl={!!link.rssUrl}
-        />),
-      )}
-    </ListGroup>
-);
+  onClickLink, feedUpdatesList }) =>
+  (<ListGroup>
+    <ListGroupItem>
+      Sort by:{' '}
+      <SortButton byColumn="mostUsed" text="Most used" />{' '}
+      <SortButton byColumn="lastUsed" text="Last used" />{' '}
+      <SortButton byColumn="lastAdded" text="Last Added" />{' '}
+      <SortButton byColumn="title" text="Title" />{' '}
+      <SortButton byColumn="url" text="Url" />{' '}
+      View:{' '}
+      <ViewOption name="pageTitle" label="Title" />
+      <ViewOption name="linkUrl" label="Url" />
+      <ViewOption name="notes" label="Notes" />
+      <ViewOption name="tags" label="Tags" />
+      <ViewOption name="rssUrl" label="RSS" />
+    </ListGroupItem>
+    { linkList.sort((a, b) => {
+      if (sortingByColumn === 'mostUsed') {
+        return sortingByColumnOrder * (b.callCounter - a.callCounter);
+      } else if (sortingByColumn === 'lastUsed') {
+        return sortingByColumnOrder * (new Date(b.lastCalled) - new Date(a.lastCalled));
+      } else if (sortingByColumn === 'lastAdded') {
+        return sortingByColumnOrder * (new Date(b.createdDate) - new Date(a.createdDate));
+      } else if (sortingByColumn === 'title') {
+        return sortingByColumnOrder * b.pageTitle.localeCompare(a.pageTitle);
+      } else if (sortingByColumn === 'url') {
+        return sortingByColumnOrder * b.linkUrl.localeCompare(a.linkUrl);
+      }
+      return 0;
+    }).map(link => (
+      <UILinkListElement
+        key={link.id}
+        id={link.id}
+        sortDetails={`[${getSortingInfo(sortingByColumn, link)}]`}
+        link={link}
+        onUpdateLink={() => onUpdateLink(link.id, link.linkUrl, link.tags.join(' '), link.rssUrl, link.pageTitle, link.notes)}
+        onClickLink={onClickLink}
+        faviconUrl={link.faviconUrl}
+        feedUpdates={feedUpdatesList.find(e => e.id === link.id)}
+        hasRssUrl={!!link.rssUrl}
+      />),
+    )}
+  </ListGroup>);
 UILinkList.propTypes = {
   linkList: ImmutablePropTypes.listOf(PropTypes.shape(DEFAULT_LINK_PROP_TYPES)).isRequired,
   feedUpdatesList: ImmutablePropTypes.listOf(PropTypes.shape()).isRequired,

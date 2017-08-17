@@ -15,8 +15,8 @@ import { assert } from '../../util/Assert';
 /* eslint-disable no-nested-ternary */
 const getNextIndex = (state) => {
   const sortedRootElements = state.tagHierarchy
-  .filter(e => e.parent === 'root')
-  .sort((a, b) => (a.index < b.index ? 1 : (a.index === b.index ? 0 : -1)));
+    .filter(e => e.parent === 'root')
+    .sort((a, b) => (a.index < b.index ? 1 : (a.index === b.index ? 0 : -1)));
   if (sortedRootElements.size > 0) {
     return sortedRootElements.get(0).index + 1;
   }

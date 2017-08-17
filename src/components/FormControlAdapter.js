@@ -5,18 +5,17 @@ import { FormControl } from 'react-bootstrap';
 import { connect } from 'react-redux';
 
 const FormControlAdapter = ({ className, type, value, onChange,
-  autoFocus, placeholder, autoComplete, componentClass }) => (
-    <FormControl
-      className={className}
-      type={type}
-      value={value}
-      onChange={onChange}
-      autoFocus={autoFocus}
-      placeholder={placeholder}
-      autoComplete={autoComplete}
-      componentClass={componentClass}
-    />
-);
+  autoFocus, placeholder, autoComplete, componentClass }) =>
+  (<FormControl
+    className={className}
+    type={type}
+    value={value}
+    onChange={onChange}
+    autoFocus={autoFocus}
+    placeholder={placeholder}
+    autoComplete={autoComplete}
+    componentClass={componentClass}
+  />);
 FormControlAdapter.propTypes = {
   type: PropTypes.string.isRequired,
   value: PropTypes.string.isRequired,

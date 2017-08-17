@@ -7,7 +7,6 @@ import { setInSearchMode } from '../redux/actions';
 import { sendSearch, fetchLinks } from '../redux/actions/links';
 
 class InputNavItem extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = { value: '' };

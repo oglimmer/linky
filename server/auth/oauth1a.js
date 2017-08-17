@@ -80,23 +80,23 @@ const back = (req, res) => {
       headers,
       form,
     })
-    .then((bodyUrlEncoded) => {
-      const query = querystring.parse(bodyUrlEncoded);
-      // const oauthToken = query.oauth_token;
-      // const oauthTokenSecret = query.oauth_token_secret;
-      const userId = query.user_id;
-      const screenName = query.screen_name;
-      return {
-        id: userId,
-        screenName,
-      };
-    })
-    .then(remoteUserJson => authHelper.forward(req, res, type, remoteUserJson))
-    .catch((error) => {
-      winston.loggers.get('application').error('Failed to oauth2Back');
-      winston.loggers.get('application').error(error);
-      res.status(500).end();
-    });
+      .then((bodyUrlEncoded) => {
+        const query = querystring.parse(bodyUrlEncoded);
+        // const oauthToken = query.oauth_token;
+        // const oauthTokenSecret = query.oauth_token_secret;
+        const userId = query.user_id;
+        const screenName = query.screen_name;
+        return {
+          id: userId,
+          screenName,
+        };
+      })
+      .then(remoteUserJson => authHelper.forward(req, res, type, remoteUserJson))
+      .catch((error) => {
+        winston.loggers.get('application').error('Failed to oauth2Back');
+        winston.loggers.get('application').error(error);
+        res.status(500).end();
+      });
   }
 };
 

@@ -11,7 +11,8 @@
     "no-console": 0,
     "jest/no-disabled-tests": "warn",
     "jest/no-focused-tests": "error",
-    "jest/no-identical-title": "error"
+    "jest/no-identical-title": "error",
+    "jsx-a11y/href-no-hash": "off"
   },
   "env": {
     "browser": true,

@@ -98,7 +98,7 @@ const checkDue = (rec) => {
   const updateObj = {};
   if (hasTag(rec.tags, DUEDATE) && !hasTag(rec.tags, DUE)) {
     if (rec.tags.filter(tag => dateRegex.test(tag))
-        .some(tag => moment(tag, 'YYYY-MM-DD').isBefore(moment()))) {
+      .some(tag => moment(tag, 'YYYY-MM-DD').isBefore(moment()))) {
       console.log(`${new Date()}: link ${rec.linkUrl} was due.`);
       updateObj.tags = cloneAndPush(rec.tags, DUE);
       updateObj.$$DIRTY$$ = true;

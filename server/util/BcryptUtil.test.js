@@ -8,7 +8,7 @@ test('hash and compare test', () => {
     .then((result) => {
       expect(result).toBe(true);
     },
-  );
+    );
 });
 
 test('hash and compare negative test', () => {
@@ -19,6 +19,6 @@ test('hash and compare negative test', () => {
     .then((result) => {
       expect(result).toBe(false);
     },
-  );
+    );
 });
 

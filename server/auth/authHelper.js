@@ -123,18 +123,18 @@ const processRefresh = (req, res, refreshToken, type) => {
     if (type === 'reddit') {
       headers.authorization = `Basic ${new Buffer(
         `${properties.server.auth[type].clientId}:${properties.server.auth[type].clientSecret}`,
-        ).toString('base64')}`;
+      ).toString('base64')}`;
     }
     return request.post({ url: properties.server.auth[type].refreshUri,
       json: true,
       form,
       headers,
     })
-    .then(authTokenResponse => getRemoteUserJson(type, authTokenResponse))
-    .then(data => forward(req, res, type, data.user, data.authTokenResponse))
-    .then(() => {
-      throw new Error('forward');
-    });
+      .then(authTokenResponse => getRemoteUserJson(type, authTokenResponse))
+      .then(data => forward(req, res, type, data.user, data.authTokenResponse))
+      .then(() => {
+        throw new Error('forward');
+      });
   } else if (properties.server.auth[type].oauth === 'openid') {
     // Tested only for Yahoo!
     const form = {

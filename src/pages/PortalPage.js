@@ -12,7 +12,6 @@ import ToggleAddLinkMenuButton from '../components/ToggleAddLinkMenuButton';
 import { completeChangeTag } from '../redux/actions/links';
 
 class PortalPage extends React.Component {
-
   componentDidMount() {
     this.props.dispatch(completeChangeTag(this.props.match.params.tag));
   }

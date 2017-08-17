@@ -36,7 +36,6 @@ export const findDuplicatesSingleAddEditLink = (userid, newLinkRec) =>
 /* eslint-disable no-underscore-dangle */
 
 class DuplicateFinderBase {
-
   constructor() {
     this.allLinks = new Map();
   }
@@ -58,7 +57,6 @@ class DuplicateFinderBase {
 }
 
 export class CheckLinkDuplicateFinder extends DuplicateFinderBase {
-
   constructor(changedUserId) {
     super();
     this.changedUserId = changedUserId;
@@ -89,12 +87,10 @@ export class CheckLinkDuplicateFinder extends DuplicateFinderBase {
         });
     }));
   }
-
 }
 
 
 export class ImportDuplicateFinder extends DuplicateFinderBase {
-
   constructor(allTags) {
     super();
     this.allTags = allTags;
@@ -139,5 +135,4 @@ export class ImportDuplicateFinder extends DuplicateFinderBase {
     }
     return docs;
   }
-
 }

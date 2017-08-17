@@ -9,7 +9,6 @@ export const getNodeByName = (tagHierarchy, tagName) => {
 };
 
 export class CachedTagHierarchy {
-
   constructor(tagHierarchy) {
     this.nodeByName = new Map();
     this.children = new Map();
@@ -65,7 +64,6 @@ export class CachedTagHierarchy {
     }
     return node;
   }
-
 }
 
 /*

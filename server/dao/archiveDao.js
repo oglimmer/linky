@@ -5,7 +5,6 @@ import { archiveDb } from './NanoConnection';
 import { hashSha256Hex } from '../util/HashUtil';
 
 class ArchiveDao extends BaseDataAccessObject {
-
   constructor() {
     super(archiveDb);
   }
@@ -22,7 +21,6 @@ class ArchiveDao extends BaseDataAccessObject {
   attachmentGet(docname, attname) {
     return this.dbrefs.attachment.get(docname, attname);
   }
-
 }
 
 export default new ArchiveDao();

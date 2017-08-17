@@ -35,17 +35,17 @@ if (process.env.NODE_ENV === 'integrationtest') {
     const password = randomstring.generate();
     return generateUser({ email, password }).then(() => {
       request.post(createUser({ email, password }))
-      .then(html => done.fail(JSON.stringify(html)))
-      .catch((err) => {
-        expect(err.statusCode).toBe(500);
-        expect(err.error).toEqual({
-          message: 'Email address already in use',
-          reason: 'Email address already in use',
+        .then(html => done.fail(JSON.stringify(html)))
+        .catch((err) => {
+          expect(err.statusCode).toBe(500);
+          expect(err.error).toEqual({
+            message: 'Email address already in use',
+            reason: 'Email address already in use',
+          });
+          done();
         });
-        done();
-      });
     })
-    .catch(err => done.fail(err));
+      .catch(err => done.fail(err));
   });
 
   test('create user failed email in use uppercase', (done) => {
@@ -53,17 +53,17 @@ if (process.env.NODE_ENV === 'integrationtest') {
     const password = randomstring.generate();
     return generateUser({ email: email.toLowerCase(), password }).then(() => {
       request.post(createUser({ email: email.toUpperCase(), password }))
-      .then(html => done.fail(JSON.stringify(html)))
-      .catch((err) => {
-        expect(err.statusCode).toBe(500);
-        expect(err.error).toEqual({
-          message: 'Email address already in use',
-          reason: 'Email address already in use',
+        .then(html => done.fail(JSON.stringify(html)))
+        .catch((err) => {
+          expect(err.statusCode).toBe(500);
+          expect(err.error).toEqual({
+            message: 'Email address already in use',
+            reason: 'Email address already in use',
+          });
+          done();
         });
-        done();
-      });
     })
-    .catch(err => done.fail(err));
+      .catch(err => done.fail(err));
   });
 
   test('create user failed email in use lowercase', (done) => {
@@ -71,26 +71,26 @@ if (process.env.NODE_ENV === 'integrationtest') {
     const password = randomstring.generate();
     return generateUser({ email: email.toUpperCase(), password }).then(() => {
       request.post(createUser({ email: email.toLowerCase(), password }))
-      .then(html => done.fail(JSON.stringify(html)))
-      .catch((err) => {
-        expect(err.statusCode).toBe(500);
-        expect(err.error).toEqual({
-          message: 'Email address already in use',
-          reason: 'Email address already in use',
+        .then(html => done.fail(JSON.stringify(html)))
+        .catch((err) => {
+          expect(err.statusCode).toBe(500);
+          expect(err.error).toEqual({
+            message: 'Email address already in use',
+            reason: 'Email address already in use',
+          });
+          done();
         });
-        done();
-      });
     })
-    .catch(err => done.fail(err));
+      .catch(err => done.fail(err));
   });
 
   test('create user failed no data', (done) => {
     request.post(createUser({}))
-    .then(html => done.fail(html))
-    .catch((err) => {
-      checkAgainstNotEmpty(err, 500, 'email');
-      done();
-    });
+      .then(html => done.fail(html))
+      .catch((err) => {
+        checkAgainstNotEmpty(err, 500, 'email');
+        done();
+      });
   });
 
   test('create user failed empty email', (done) => {
@@ -98,11 +98,11 @@ if (process.env.NODE_ENV === 'integrationtest') {
       email: '',
       password: 'whatever',
     }))
-    .then(html => done.fail(html))
-    .catch((err) => {
-      checkAgainstNotEmpty(err, 500, 'email');
-      done();
-    });
+      .then(html => done.fail(html))
+      .catch((err) => {
+        checkAgainstNotEmpty(err, 500, 'email');
+        done();
+      });
   });
 
   test('create user failed spaced email', (done) => {
@@ -110,33 +110,33 @@ if (process.env.NODE_ENV === 'integrationtest') {
       email: ' ',
       password: 'whatever',
     }))
-    .then(html => done.fail(html))
-    .catch((err) => {
-      checkAgainstNotEmpty(err, 500, 'email');
-      done();
-    });
+      .then(html => done.fail(html))
+      .catch((err) => {
+        checkAgainstNotEmpty(err, 500, 'email');
+        done();
+      });
   });
   test('create user failed empty password', (done) => {
     request.post(createUser({
       email: `${randomstring.generate()}@foo.com`,
       password: '',
     }))
-    .then(html => done.fail(html))
-    .catch((err) => {
-      checkAgainstNotEmpty(err, 500, 'password');
-      done();
-    });
+      .then(html => done.fail(html))
+      .catch((err) => {
+        checkAgainstNotEmpty(err, 500, 'password');
+        done();
+      });
   });
 
   test('create user failed no password', (done) => {
     request.post(createUser({
       email: `${randomstring.generate()}@foo.com`,
     }))
-    .then(html => done.fail(html))
-    .catch((err) => {
-      checkAgainstNotEmpty(err, 500, 'password');
-      done();
-    });
+      .then(html => done.fail(html))
+      .catch((err) => {
+        checkAgainstNotEmpty(err, 500, 'password');
+        done();
+      });
   });
 
   test('create user failed space password', (done) => {
@@ -144,11 +144,11 @@ if (process.env.NODE_ENV === 'integrationtest') {
       email: `${randomstring.generate()}@foo.com`,
       password: ' ',
     }))
-    .then(html => done.fail(html))
-    .catch((err) => {
-      checkAgainstNotEmpty(err, 500, 'password');
-      done();
-    });
+      .then(html => done.fail(html))
+      .catch((err) => {
+        checkAgainstNotEmpty(err, 500, 'password');
+        done();
+      });
   });
 
   test('authenticate failed wrong password', (done) => {
@@ -159,17 +159,17 @@ if (process.env.NODE_ENV === 'integrationtest') {
         email,
         password: 'wrongpassword',
       }))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        expect(err.statusCode).toBe(401);
-        expect(err.error).toEqual({
-          message: 'Wrong user or password!',
-          reason: 'Wrong user or password!',
+        .then(html => done.fail(html))
+        .catch((err) => {
+          expect(err.statusCode).toBe(401);
+          expect(err.error).toEqual({
+            message: 'Wrong user or password!',
+            reason: 'Wrong user or password!',
+          });
+          done();
         });
-        done();
-      });
     })
-    .catch(err => done.fail(err));
+      .catch(err => done.fail(err));
   });
 
   test('authenticate failed empty password', (done) => {
@@ -180,13 +180,13 @@ if (process.env.NODE_ENV === 'integrationtest') {
         email,
         password: '',
       }))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        checkAgainstNotEmpty(err, 401, 'password');
-        done();
-      });
+        .then(html => done.fail(html))
+        .catch((err) => {
+          checkAgainstNotEmpty(err, 401, 'password');
+          done();
+        });
     })
-    .catch(err => done.fail(err));
+      .catch(err => done.fail(err));
   });
 
   test('authenticate failed no password', (done) => {
@@ -196,13 +196,13 @@ if (process.env.NODE_ENV === 'integrationtest') {
       request.post(authenticate({
         email,
       }))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        checkAgainstNotEmpty(err, 401, 'password');
-        done();
-      });
+        .then(html => done.fail(html))
+        .catch((err) => {
+          checkAgainstNotEmpty(err, 401, 'password');
+          done();
+        });
     })
-    .catch(err => done.fail(err));
+      .catch(err => done.fail(err));
   });
 
   test('authenticate failed no data', (done) => {
@@ -210,13 +210,13 @@ if (process.env.NODE_ENV === 'integrationtest') {
     const password = randomstring.generate();
     return generateUser({ email, password }).then(() => {
       request.post(authenticate({}))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        checkAgainstNotEmpty(err, 401, 'email');
-        done();
-      });
+        .then(html => done.fail(html))
+        .catch((err) => {
+          checkAgainstNotEmpty(err, 401, 'email');
+          done();
+        });
     })
-    .catch(err => done.fail(err));
+      .catch(err => done.fail(err));
   });
 } else {
   test('fake', () => {

@@ -61,19 +61,19 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
         ) }
       </div>
       <div>{labels[1]}:
-      { siblings.map(tag => (
-        <span key={Math.random()}>
-          <span
-            role="link"
-            tabIndex="0"
-            onClick={() => onClick(tag.name)}
-            className={getLabel(tag.name, originalParentTagName)}
-          >
-            {tag.name} ({tag.count}/{cachedTagHierarchy.getChildren(tag.name).size})
-          </span>
-          {' '}
-        </span>),
-      ) }
+        { siblings.map(tag => (
+          <span key={Math.random()}>
+            <span
+              role="link"
+              tabIndex="0"
+              onClick={() => onClick(tag.name)}
+              className={getLabel(tag.name, originalParentTagName)}
+            >
+              {tag.name} ({tag.count}/{cachedTagHierarchy.getChildren(tag.name).size})
+            </span>
+            {' '}
+          </span>),
+        ) }
       </div>
       { children && children.size > 0 ? (<span>{labels[2]}:
         { children.map(tag => (
@@ -88,7 +88,7 @@ const TagList = ({ tagHierarchy, onClick, selectedTag }) => {
             </span>
             {' '}
           </span>),
-      ) } </span>) : '' }
+        ) } </span>) : '' }
     </div>
   );
 };
