@@ -63,16 +63,17 @@ const ensureFilesOnCacheAndSecurity = (req, res, next) => {
             Promise.all([
               archiveDao.getById(archiveid),
               fs.ensureDir(archivePath),
-            ]).then(([rec]) => {
-              if (rec) {
-                winston.loggers.get('application').debug('unzipping %s ...', archiveid);
-                const targetStream = unzip.Extract({ path: archivePath });
-                targetStream.on('close', () => {
-                  handleContentTypeForSpecialUrls(req, userhash, archiveid, filename);
-                  next();
-                });
-                archiveDao.attachmentGet(archiveid, 'archive').pipe(targetStream);
-              }
+            ]).then(() => {
+              winston.loggers.get('application').debug('unzipping %s ...', archiveid);
+              const targetStream = unzip.Extract({ path: archivePath });
+              targetStream.on('close', () => {
+                handleContentTypeForSpecialUrls(req, userhash, archiveid, filename);
+                next();
+              });
+              archiveDao.attachmentGet(archiveid, 'archive').pipe(targetStream);
+            }).catch((err) => {
+              winston.loggers.get('application').warn('Unable to find %s - %s', archiveid, err);
+              next();
             });
           });
       })
