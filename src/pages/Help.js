@@ -114,7 +114,8 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
       { authToken ? (
         <div>
           <div>
-            Your current token is: {authToken}
+            Your current token is:
+            <div className="horizontalScroll">{authToken}</div>
           </div>
           <div>
             Click this button to see what we&#39;ve stored about your:{' '}

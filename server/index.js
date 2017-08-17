@@ -1,6 +1,10 @@
 
 import express from 'express';
 
+import contentSecurityPolicy from 'content-security-policy';
+import xFrameOptions from 'x-frame-options';
+import xXssProtection from 'x-xss-protection';
+import hsts from 'hsts';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
@@ -44,6 +48,8 @@ import AlertAdapter from '../src/components/AlertAdapter';
 
 import postStartupClean from './util/postStartupClean';
 
+import { hashSha256Base64 } from './util/HashUtil';
+
 serverPropsLoader(BuildInfo);
 
 const app = express();
@@ -79,6 +85,18 @@ if (!fs.existsSync(logDirectory)) {
   }));
 }
 
+const globalCSPConfig = Object.assign({},
+  contentSecurityPolicy.STARTER_OPTIONS, {
+    'style-src': ['https://fonts.googleapis.com', contentSecurityPolicy.SRC_SELF, contentSecurityPolicy.SRC_USAFE_INLINE],
+    'font-src': ['https://fonts.gstatic.com', contentSecurityPolicy.SRC_SELF],
+    'plugin-types': '',
+  },
+);
+const globalCSP = contentSecurityPolicy.getCSP(globalCSPConfig);
+app.use(globalCSP);
+app.use(xFrameOptions());
+app.use(xXssProtection());
+app.use(hsts());
 app.use(responseTime());
 app.use(bodyParser.json());
 app.use(compression());
@@ -180,7 +198,14 @@ if (!debugMode || debugMode !== 'rest') {
           });
           res.end();
         } else {
-          const initialState = JSON.stringify(store.getState());
+          const initialState = `window.$REDUX_STATE = ${JSON.stringify(store.getState())}`;
+          const initialStateHash = hashSha256Base64(initialState);
+          const setContentSecurityPolicy = contentSecurityPolicy.getCSP(Object.assign({},
+            globalCSPConfig, {
+              'script-src': [contentSecurityPolicy.SRC_SELF, `'sha256-${initialStateHash}'`],
+            },
+          ));
+          setContentSecurityPolicy(req, res, () => {});
           res.render('index.ejs', { reactHtml, initialState });
         }
       })
