@@ -1,100 +1,88 @@
-#!/usr/bin/env node -r babel-register -r babel-polyfill
+#!/usr/bin/env node
+
 // node -r babel-register -r babel-polyfill server/admin-cli.js
 
 import { Promise } from 'bluebird';
+import moment from 'moment';
 
 import userDao from './dao/userDao';
 import linkyDb from './dao/NanoConnection';
 
 const view = Promise.promisify(linkyDb.view);
 const destroy = Promise.promisify(linkyDb.destroy);
+const all = Promise.all.bind(Promise);
 
 /* eslint-disable no-underscore-dangle */
 
-const deleteUserById = (id, rev) => {
-  view('feedUpdates', 'byUserId', { key: id })
-    .then(resultFU => resultFU.rows)
-    .then(rowsFU => rowsFU.map(r => r.value))
-    .then(rowsFU => rowsFU.forEach((rowFU) => {
-      console.log(`delete feedUpdate ${rowFU._id}`);
-      destroy(rowFU._id, rowFU._rev);
-    }));
-  view('links', 'byUserid', { key: id })
-    .then(resultL => resultL.rows)
-    .then(rowsL => rowsL.map(r => r.value))
-    .then(rowsL => rowsL.forEach((rowL) => {
-      console.log(`delete link ${rowL.linkUrl}`);
-      destroy(rowL._id, rowL._rev);
-    }));
-  view('hierarchy', 'byUserId', { key: id })
-    .then(resultH => resultH.rows)
-    .then(rowsH => rowsH.map(r => r.value))
-    .then(rowsH => rowsH.forEach((rowH) => {
-      console.log('delete hierarchy');
-      destroy(rowH._id, rowH._rev);
-    }));
-  view('asyncWait', 'byUserId', { key: id })
-    .then(resultA => resultA.rows)
-    .then(rowsA => rowsA.map(r => r.value))
-    .then(rowsA => rowsA.forEach((rowA) => {
-      console.log('delete asyncWait');
-      destroy(rowA._id, rowA._rev);
-    }));
-  destroy(id, rev);
+const deleteUserById = async (id, rev) => {
+  const allLists = await all([
+    view('feedUpdates', 'byUserId', { key: id }),
+    view('links', 'byUserid', { key: id }),
+    view('hierarchy', 'byUserId', { key: id }),
+    view('asyncWait', 'byUserId', { key: id }),
+  ]);
+  const flatten = [].concat(...allLists.map(l => l.rows));
+  await Promise.all([
+    destroy(id, rev),
+    ...flatten.map(({ value }) => destroy(value._id, value._rev)),
+  ]);
+  console.log('delete completed.');
 };
 
-const listCompleteUserById = (id) => {
-  view('feedUpdates', 'byUserId', { key: id })
-    .then(resultFU => resultFU.rows)
-    .then(rowsFU => rowsFU.map(r => r.value))
-    .then(rowsFU => rowsFU.forEach((rowFU) => {
-      console.log(`feedUpdate \`${rowFU.data[0]}\``);
-    }));
-  view('links', 'byUserid', { key: id })
-    .then(resultL => resultL.rows)
-    .then(rowsL => rowsL.map(r => r.value))
-    .then(rowsL => rowsL.forEach((rowL) => {
-      console.log(`link \`${rowL.linkUrl}\`, callCounter:${rowL.callCounter}`);
-    }));
+const listSummaryUserById = async (id, user) => {
+  const [feedUpdates, links] = await Promise.all([
+    view('feedUpdates', 'byUserId', { key: id }),
+    view('links', 'byUserid', { key: id }),
+  ]);
+  const totalUpdates = feedUpdates.rows.length;
+  const totalLinks = links.rows.length;
+  console.log(`${user}, ${totalLinks}, ${totalUpdates}`);
 };
 
-const listSummaryUserById = (id, user) => {
-  let totalUpdates = 0;
-  let totalLinks = 0;
-  Promise.all([
-    view('feedUpdates', 'byUserId', { key: id })
-      .then(resultFU => resultFU.rows)
-      .then((rowsFU) => {
-        totalUpdates = rowsFU.length;
-      }),
-    view('links', 'byUserid', { key: id })
-      .then(resultL => resultL.rows)
-      .then((rowsL) => {
-        totalLinks = rowsL.length;
-      }),
-  ]).then(() => {
-    console.log(`${user}, ${totalLinks}, ${totalUpdates}`);
+const summary = async () => {
+  console.log('USER, TOTAL_LINKS, TOTAL_UPDATES');
+  const sourceUsers = await view('debug', 'allUsers');
+  sourceUsers.rows.forEach((row) => {
+    listSummaryUserById(row.id, `${row.id}:${row.key} (${row.value})`);
+  });
+  const emailUsers = await view('users', 'byEmail');
+  emailUsers.rows.forEach((row) => {
+    listSummaryUserById(row.id, `${row.id}:${row.value.email} (EMAIL)`);
   });
 };
 
-const deleteUserByEmail = (email) => {
-  userDao.getByEmail(email).then((row) => {
-    if (row) {
-      console.log(`Delete user = ${email}`);
-      deleteUserById(row._id, row._rev);
-    } else {
-      console.error(`User ${email} not found!`);
-    }
+const listuserbyid = async (param) => {
+  const [rec, feedUpdates, links] = await Promise.all([
+    userDao.getById(param),
+    view('feedUpdates', 'byUserId', { key: param }),
+    view('links', 'byUserid', { key: param }),
+  ]);
+  console.log(rec);
+  feedUpdates.rows.map(r => r.value).forEach((rowFU) => {
+    console.log(`feedUpdate \`${rowFU.data[0]}\``);
+  });
+  links.rows.map(r => r.value).forEach((rowL) => {
+    console.log(`link \`${rowL.linkUrl}\`, callCounter:${rowL.callCounter}`);
   });
 };
 
-const deleteUserBySourceId = (sourceId) => {
-  userDao.getBySourceId(sourceId).then((row) => {
-    if (row) {
-      console.log(`Delete user = ${sourceId}`);
-      deleteUserById(row._id, row._rev);
-    } else {
-      console.error(`User ${sourceId} not found!`);
+const deleteuserbyid = async (id) => {
+  try {
+    const rec = await userDao.getById(id);
+    console.log(`Delete user = ${id}`);
+    deleteUserById(rec._id, rec._rev);
+  } catch (err) {
+    console.log(`User id not found = ${id}`);
+  }
+};
+
+const deletevisitors = async (ageInDays) => {
+  const visitors = await view('visitors', 'byVisitorId');
+  visitors.rows.map(r => r.value).forEach((row) => {
+    const createdDate = moment(row.createdDate);
+    if (moment().subtract(ageInDays, 'days').isAfter(createdDate)) {
+      console.log(`Delete visitor = ${row._id}, ${row._rev}`);
+      destroy(row._id, row._rev);
     }
   });
 };
@@ -104,13 +92,10 @@ const args = process.argv;
 if (args.length < 3) {
   console.log('Command missing. Use: command [ID]');
   console.log('Available commands:');
-  console.log('deleteuserbyemail EMAIL');
-  console.log('deleteuserbysourceid SOURCEID');
-  console.log('deleteuserbyid ID|...');
-  console.log('listusersbyid ID');
-  console.log('listusersbyemail');
-  console.log('listusersbysourceid');
-  console.log('summary');
+  console.log('ls');
+  console.log('ls ID|...');
+  console.log('rm-user ID|...');
+  console.log('rm-visitors ageInDays');
   process.exit(1);
 }
 
@@ -119,79 +104,32 @@ const param = args[3];
 
 console.log(`Executing command ${command}...`);
 
-if (command === 'deleteuserbyemail') {
-  if (!param) {
-    console.error('Missing parameter');
-    process.exit(1);
-  }
-  deleteUserByEmail(param);
-}
-
-if (command === 'deleteuserbysourceid') {
-  if (!param) {
-    console.error('Missing parameter');
-    process.exit(1);
-  }
-  deleteUserBySourceId(param);
-}
-
-if (command === 'deleteuserbyid') {
+if (command === 'rm-user') {
   if (!param) {
     console.error('Missing at least one parameter');
     process.exit(1);
   }
-  args.filter((ele, ind) => ind > 2).forEach((id) => {
-    userDao.getById(id).then((rec) => {
-      console.log(`Delete user = ${id}`);
-      deleteUserById(rec._id, rec._rev);
-    }).catch(() => console.log(`User id not found = ${id}`));
-  });
+  const idsToDel = [...new Set(args.filter((ele, ind) => ind > 2))];
+  idsToDel.forEach(deleteuserbyid);
 }
 
-if (command === 'listusersbyemail') {
-  view('users', 'byEmail')
-    .then(result => result.rows)
-    .then(rows => rows.map(r => r.value))
-    .then(rows => rows.forEach((row) => {
-      console.log(`${row._id}:${row.email}`);
-    }));
+if (command === 'ls') {
+  if (!param) {
+    summary();
+  } else {
+    const idsToList = [...new Set(args.filter((ele, ind) => ind > 2))];
+    idsToList.forEach(listuserbyid);
+  }
 }
 
-if (command === 'listusersbysourceid') {
-  view('users', 'bySourceId')
-    .then(result => result.rows)
-    .then(rows => rows.map(r => r.value))
-    .then(rows => rows.forEach((row) => {
-      console.log(`${row.source}${row.sourceId}`);
-    }));
-}
-
-if (command === 'listusersbyid') {
+if (command === 'rm-visitors') {
   if (!param) {
     console.error('Missing parameter');
     process.exit(1);
   }
-  userDao.getById(param).then((rec) => {
-    console.log(rec);
-    listCompleteUserById(param);
-  });
-}
-
-if (command === 'summary') {
-  console.log('USER, TOTAL_LINKS, TOTAL_UPDATES');
-  view('debug', 'allUsers')
-    .then(result => result.rows)
-    .then(rows => rows.forEach((row) => {
-      listSummaryUserById(row.id, `${row.id}:${row.key} (${row.value})`);
-    }));
-}
-
-if (false) {
-  view('visitors', 'byVisitorId')
-    .then(result => result.rows)
-    .then(rows => rows.map(r => r.value))
-    .then(rows => rows.forEach((row) => {
-      console.log(`Delete visitor = ${row._id}, ${row._rev}`);
-      destroy(row._id, row._rev);
-    }));
+  if (typeof param !== 'number') {
+    console.error('parameter must be a number (age in days)');
+    process.exit(1);
+  }
+  deletevisitors(param);
 }
