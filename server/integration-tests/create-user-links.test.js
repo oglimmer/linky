@@ -81,14 +81,14 @@ if (process.env.NODE_ENV === 'integrationtest') {
         },
         json: true,
       })
-        .then((result) => {
-          expect(result.id).toBeDefined();
-          expect(result.linkUrl).toBeDefined();
-          expect(result.tags).toBeDefined();
-          expect(result.callCounter).toBeDefined();
-          expect(result.lastCalled).toBeDefined();
-          expect(result.createdDate).toBeDefined();
-          expect(result.rssUrl).toBeDefined();
+        .then(({ primary }) => {
+          expect(primary.id).toBeDefined();
+          expect(primary.linkUrl).toBeDefined();
+          expect(primary.tags).toBeDefined();
+          expect(primary.callCounter).toBeDefined();
+          expect(primary.lastCalled).toBeDefined();
+          expect(primary.createdDate).toBeDefined();
+          expect(primary.rssUrl).toBeDefined();
         })
         .then(() => {
           if (i < 10) {

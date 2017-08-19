@@ -15,7 +15,8 @@ then
   echo "Installing couchviews"
   npm install couchviews
   echo "Creating views"
-  ./node_modules/.bin/couchviews push http://couchdb:5984/linky /home/build/linky/build/couchdb
+  ./node_modules/.bin/couchviews push http://couchdb:5984/linky /home/build/linky/build/couchdb/linky
+  ./node_modules/.bin/couchviews push http://couchdb:5984/linky /home/build/linky/build/couchdb/linky-archive
   cd ..
   rm -rf createviews
 fi
