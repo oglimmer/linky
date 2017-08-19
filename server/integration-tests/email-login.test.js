@@ -30,193 +30,221 @@ if (process.env.NODE_ENV === 'integrationtest') {
     });
 
 
-  test('create user failed email in use mixedCase', (done) => {
+  test('create user failed email in use mixedCase', async (done) => {
     const email = `aaaBBB${randomstring.generate()}@foo.com`;
     const password = randomstring.generate();
-    return generateUser({ email, password }).then(() => {
-      request.post(createUser({ email, password }))
-        .then(html => done.fail(JSON.stringify(html)))
-        .catch((err) => {
-          expect(err.statusCode).toBe(500);
-          expect(err.error).toEqual({
-            message: 'Email address already in use',
-            reason: 'Email address already in use',
-          });
-          done();
+    try {
+      await generateUser({ email, password });
+      try {
+        const html = await request.post(createUser({ email, password }));
+        done.fail(JSON.stringify(html));
+      } catch (err) {
+        expect(err.statusCode).toBe(500);
+        expect(err.error).toEqual({
+          message: 'Email address already in use',
+          reason: 'Email address already in use',
         });
-    })
-      .catch(err => done.fail(err));
+        done();
+      }
+    } catch (err) {
+      done.fail(err);
+    }
   });
 
-  test('create user failed email in use uppercase', (done) => {
+  test('create user failed email in use uppercase', async (done) => {
     const email = `${randomstring.generate()}@foo.com`;
     const password = randomstring.generate();
-    return generateUser({ email: email.toLowerCase(), password }).then(() => {
-      request.post(createUser({ email: email.toUpperCase(), password }))
-        .then(html => done.fail(JSON.stringify(html)))
-        .catch((err) => {
-          expect(err.statusCode).toBe(500);
-          expect(err.error).toEqual({
-            message: 'Email address already in use',
-            reason: 'Email address already in use',
-          });
-          done();
+    try {
+      await generateUser({ email: email.toLowerCase(), password });
+      try {
+        const html = await request.post(createUser({ email: email.toUpperCase(), password }));
+        done.fail(JSON.stringify(html));
+      } catch (err) {
+        expect(err.statusCode).toBe(500);
+        expect(err.error).toEqual({
+          message: 'Email address already in use',
+          reason: 'Email address already in use',
         });
-    })
-      .catch(err => done.fail(err));
+        done();
+      }
+    } catch (err) {
+      done.fail(err);
+    }
   });
 
-  test('create user failed email in use lowercase', (done) => {
+  test('create user failed email in use lowercase', async (done) => {
     const email = `${randomstring.generate()}@foo.com`;
     const password = randomstring.generate();
-    return generateUser({ email: email.toUpperCase(), password }).then(() => {
-      request.post(createUser({ email: email.toLowerCase(), password }))
-        .then(html => done.fail(JSON.stringify(html)))
-        .catch((err) => {
-          expect(err.statusCode).toBe(500);
-          expect(err.error).toEqual({
-            message: 'Email address already in use',
-            reason: 'Email address already in use',
-          });
-          done();
+    try {
+      await generateUser({ email: email.toUpperCase(), password });
+      try {
+        const html = await request.post(createUser({ email: email.toLowerCase(), password }));
+        done.fail(JSON.stringify(html));
+      } catch (err) {
+        expect(err.statusCode).toBe(500);
+        expect(err.error).toEqual({
+          message: 'Email address already in use',
+          reason: 'Email address already in use',
         });
-    })
-      .catch(err => done.fail(err));
-  });
-
-  test('create user failed no data', (done) => {
-    request.post(createUser({}))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        checkAgainstNotEmpty(err, 500, 'email');
         done();
-      });
+      }
+    } catch (err) {
+      done.fail(err);
+    }
   });
 
-  test('create user failed empty email', (done) => {
-    request.post(createUser({
-      email: '',
-      password: 'whatever',
-    }))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        checkAgainstNotEmpty(err, 500, 'email');
-        done();
-      });
+  test('create user failed no data', async (done) => {
+    try {
+      const html = await request.post(createUser({}));
+      done.fail(JSON.stringify(html));
+    } catch (err) {
+      checkAgainstNotEmpty(err, 500, 'email');
+      done();
+    }
   });
 
-  test('create user failed spaced email', (done) => {
-    request.post(createUser({
-      email: ' ',
-      password: 'whatever',
-    }))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        checkAgainstNotEmpty(err, 500, 'email');
-        done();
-      });
-  });
-  test('create user failed empty password', (done) => {
-    request.post(createUser({
-      email: `${randomstring.generate()}@foo.com`,
-      password: '',
-    }))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        checkAgainstNotEmpty(err, 500, 'password');
-        done();
-      });
+  test('create user failed empty email', async (done) => {
+    try {
+      const html = await request.post(createUser({
+        email: '',
+        password: 'whatever',
+      }));
+      done.fail(JSON.stringify(html));
+    } catch (err) {
+      checkAgainstNotEmpty(err, 500, 'email');
+      done();
+    }
   });
 
-  test('create user failed no password', (done) => {
-    request.post(createUser({
-      email: `${randomstring.generate()}@foo.com`,
-    }))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        checkAgainstNotEmpty(err, 500, 'password');
-        done();
-      });
+  test('create user failed spaced email', async (done) => {
+    try {
+      const html = await request.post(createUser({
+        email: ' ',
+        password: 'whatever',
+      }));
+      done.fail(JSON.stringify(html));
+    } catch (err) {
+      checkAgainstNotEmpty(err, 500, 'email');
+      done();
+    }
   });
 
-  test('create user failed space password', (done) => {
-    request.post(createUser({
-      email: `${randomstring.generate()}@foo.com`,
-      password: ' ',
-    }))
-      .then(html => done.fail(html))
-      .catch((err) => {
-        checkAgainstNotEmpty(err, 500, 'password');
-        done();
-      });
-  });
-
-  test('authenticate failed wrong password', (done) => {
-    const email = `${randomstring.generate()}@foo.com`;
-    const password = randomstring.generate();
-    return generateUser({ email, password }).then(() => {
-      request.post(authenticate({
-        email,
-        password: 'wrongpassword',
-      }))
-        .then(html => done.fail(html))
-        .catch((err) => {
-          expect(err.statusCode).toBe(401);
-          expect(err.error).toEqual({
-            message: 'Wrong user or password!',
-            reason: 'Wrong user or password!',
-          });
-          done();
-        });
-    })
-      .catch(err => done.fail(err));
-  });
-
-  test('authenticate failed empty password', (done) => {
-    const email = `${randomstring.generate()}@foo.com`;
-    const password = randomstring.generate();
-    return generateUser({ email, password }).then(() => {
-      request.post(authenticate({
-        email,
+  test('create user failed empty password', async (done) => {
+    try {
+      const html = await request.post(createUser({
+        email: `${randomstring.generate()}@foo.com`,
         password: '',
-      }))
-        .then(html => done.fail(html))
-        .catch((err) => {
-          checkAgainstNotEmpty(err, 401, 'password');
-          done();
-        });
-    })
-      .catch(err => done.fail(err));
+      }));
+      done.fail(JSON.stringify(html));
+    } catch (err) {
+      checkAgainstNotEmpty(err, 500, 'password');
+      done();
+    }
   });
 
-  test('authenticate failed no password', (done) => {
-    const email = `${randomstring.generate()}@foo.com`;
-    const password = randomstring.generate();
-    return generateUser({ email, password }).then(() => {
-      request.post(authenticate({
-        email,
-      }))
-        .then(html => done.fail(html))
-        .catch((err) => {
-          checkAgainstNotEmpty(err, 401, 'password');
-          done();
-        });
-    })
-      .catch(err => done.fail(err));
+  test('create user failed no password', async (done) => {
+    try {
+      const html = await request.post(createUser({
+        email: `${randomstring.generate()}@foo.com`,
+      }));
+      done.fail(JSON.stringify(html));
+    } catch (err) {
+      checkAgainstNotEmpty(err, 500, 'password');
+      done();
+    }
   });
 
-  test('authenticate failed no data', (done) => {
+  test('create user failed space password', async (done) => {
+    try {
+      const html = await request.post(createUser({
+        email: `${randomstring.generate()}@foo.com`,
+        password: ' ',
+      }));
+      done.fail(JSON.stringify(html));
+    } catch (err) {
+      checkAgainstNotEmpty(err, 500, 'password');
+      done();
+    }
+  });
+
+  test('authenticate failed wrong password', async (done) => {
     const email = `${randomstring.generate()}@foo.com`;
     const password = randomstring.generate();
-    return generateUser({ email, password }).then(() => {
-      request.post(authenticate({}))
-        .then(html => done.fail(html))
-        .catch((err) => {
-          checkAgainstNotEmpty(err, 401, 'email');
-          done();
+    try {
+      await generateUser({ email, password });
+      try {
+        const html = await request.post(authenticate({
+          email,
+          password: `${password}+wrongpassword`,
+        }));
+        done.fail(JSON.stringify(html));
+      } catch (err) {
+        expect(err.statusCode).toBe(401);
+        expect(err.error).toEqual({
+          message: 'Wrong user or password!',
+          reason: 'Wrong user or password!',
         });
-    })
-      .catch(err => done.fail(err));
+        done();
+      }
+    } catch (err) {
+      done.fail(err);
+    }
+  });
+
+  test('authenticate failed empty password', async (done) => {
+    const email = `${randomstring.generate()}@foo.com`;
+    const password = randomstring.generate();
+    try {
+      await generateUser({ email, password });
+      try {
+        const html = await request.post(authenticate({
+          email,
+          password: '',
+        }));
+        done.fail(JSON.stringify(html));
+      } catch (err) {
+        checkAgainstNotEmpty(err, 401, 'password');
+        done();
+      }
+    } catch (err) {
+      done.fail(err);
+    }
+  });
+
+  test('authenticate failed no password', async (done) => {
+    const email = `${randomstring.generate()}@foo.com`;
+    const password = randomstring.generate();
+    try {
+      await generateUser({ email, password });
+      try {
+        const html = await request.post(authenticate({
+          email,
+        }));
+        done.fail(JSON.stringify(html));
+      } catch (err) {
+        checkAgainstNotEmpty(err, 401, 'password');
+        done();
+      }
+    } catch (err) {
+      done.fail(err);
+    }
+  });
+
+  test('authenticate failed no data', async (done) => {
+    const email = `${randomstring.generate()}@foo.com`;
+    const password = randomstring.generate();
+    try {
+      await generateUser({ email, password });
+      try {
+        const html = await request.post(authenticate({}));
+        done.fail(JSON.stringify(html));
+      } catch (err) {
+        checkAgainstNotEmpty(err, 401, 'email');
+        done();
+      }
+    } catch (err) {
+      done.fail(err);
+    }
   });
 } else {
   test('fake', () => {

@@ -48,21 +48,31 @@ const loadResponseData = userid => Promise.all([
   }));
 });
 
+const createTagHierarchy = (userid, tree) => {
+  return {
+    type: 'hierarchy',
+    userid,
+    tree,
+  };
+};
+
+const createTagHierarchyDefault = (userid, parentForNew = 'root') =>
+  tagDao.listAllTags(userid)
+    .then(allTags => createTagHierarchy(userid, init(allTags, parentForNew)));
+
 const load = (userid, parentForNew = 'root') => tagDao.getHierarchyByUser(userid)
   .then((rec) => {
     if (rec) {
       return rec;
     }
-    return tagDao.listAllTags(userid).then(allTags => ({
-      tree: init(allTags, parentForNew),
-      userid,
-      type: 'hierarchy',
-    }));
+    return createTagHierarchyDefault(userid, parentForNew);
   });
 
 export default {
   loadResponseData,
   load,
+  createTagHierarchy,
+  createTagHierarchyDefault,
   hasTag,
 };
 

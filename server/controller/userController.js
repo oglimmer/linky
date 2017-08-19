@@ -7,6 +7,7 @@ import BcryptUtil from '../util/BcryptUtil';
 import JwtUtil from '../util/JwtUtil';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
+import { createUser } from '../logic/User';
 
 import properties from '../util/linkyproperties';
 
@@ -33,8 +34,8 @@ class CreateUserProcessor extends BaseProcessor {
         ResponseUtil.sendErrorResponse500('Email address already in use', this.res);
       } else {
         const hash = yield BcryptUtil.hash(this.data.password);
-        const dbObject = { type: 'user', email: this.data.email, hash, createdDate: new Date() };
-        const { id } = yield userDao.insert(dbObject);
+        const dbObject = { email: this.data.email, hash };
+        const id = yield createUser(dbObject);
         this.res.send({ id });
         winston.loggers.get('application').debug('Create user id=%s to db: %j', id, dbObject);
       }

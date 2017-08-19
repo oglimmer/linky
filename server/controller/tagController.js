@@ -77,11 +77,10 @@ class PersistTagHierarchyProcessor extends BaseProcessor {
       const rec = yield tagDao.getHierarchyByUser(this.data.userid);
       let recToWrite;
       if (!rec) {
-        recToWrite = {
-          tree: this.data.tree.map(e => ({ name: e.name, parent: e.parent, index: e.index })),
-          userid: this.data.userid,
-          type: 'hierarchy',
-        };
+        recToWrite = TagHierarchyLogic.createTagHierarchy(
+          this.data.userid,
+          this.data.tree.map(e => ({ name: e.name, parent: e.parent, index: e.index })),
+        );
       } else {
         recToWrite = Object.assign({}, rec, {
           tree: this.data.tree.map(e => ({ name: e.name, parent: e.parent, index: e.index })),

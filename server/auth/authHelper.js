@@ -7,6 +7,7 @@ import crypto from 'crypto';
 import userDao from '../dao/userDao';
 import visitorDao from '../dao/visitorDao';
 import JwtUtil from '../util/JwtUtil';
+import { createUser } from '../logic/User';
 
 import properties from '../util/linkyproperties';
 
@@ -44,13 +45,11 @@ const insertUserIntoDBIfNeeded = (type, remoteUserJson, localUserObj) => {
     /* eslint-enable no-underscore-dangle */
   }
   winston.loggers.get('application').debug('authHelper::Insert new user into DB: %j', remoteUserJson);
-  return userDao.insert({
-    type: 'user',
+  return createUser({
     source: type,
     sourceId: remoteUserJson.id,
     sourceData: remoteUserJson,
-    createdDate: new Date(),
-  }).then(newObj => newObj.id);
+  });
 };
 
 const loadUserFromDB = (type, id) => userDao.getBySourceId(type + id);

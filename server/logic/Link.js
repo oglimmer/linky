@@ -176,26 +176,40 @@ export const getNextIndex = (tagHierarchy, parent = 'root') => {
 };
 /* eslint-enable no-nested-ternary */
 
-export function updateTagHierarchy(userid, tags, parent = 'root') {
-  return TagHierarchyLogic.load(userid, parent).then((tagHierarchyRec) => {
-    if (parent !== 'root' && tagHierarchyRec.tree.findIndex(e => e.name === parent) === -1) {
+const updateTagHierarchyFailable = async (userId, tags, parent) => {
+  const tagHierarchyRec = await TagHierarchyLogic.load(userId, parent);
+  if (parent !== 'root' && tagHierarchyRec.tree.findIndex(e => e.name === parent) === -1) {
+    tagHierarchyRec.tree.push({
+      name: parent,
+      parent: 'root',
+      index: getNextIndex(tagHierarchyRec.tree),
+    });
+  }
+  tags.forEach((tag) => {
+    if (!tagHierarchyRec.tree.find(e => e.name === tag)) {
       tagHierarchyRec.tree.push({
-        name: parent,
-        parent: 'root',
-        index: getNextIndex(tagHierarchyRec.tree),
+        name: tag,
+        parent,
+        index: getNextIndex(tagHierarchyRec.tree, parent),
       });
     }
-    tags.forEach((tag) => {
-      if (!tagHierarchyRec.tree.find(e => e.name === tag)) {
-        tagHierarchyRec.tree.push({
-          name: tag,
-          parent,
-          index: getNextIndex(tagHierarchyRec.tree, parent),
-        });
-      }
-    });
-    return tagDao.insert(tagHierarchyRec);
   });
+  await tagDao.insert(tagHierarchyRec);
+};
+
+export async function updateTagHierarchy(userid, tags, parent = 'root') {
+  while (true) {
+    try {
+      /* eslint-disable no-await-in-loop */
+      await updateTagHierarchyFailable(userid, tags, parent);
+      /* eslint-enable no-await-in-loop */
+      break;
+    } catch (err) {
+      if (err.message !== 'Document update conflict.') {
+        throw err;
+      }
+    }
+  }
 }
 
 export const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, notes, userid }) =>
