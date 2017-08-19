@@ -48,13 +48,11 @@ const loadResponseData = userid => Promise.all([
   }));
 });
 
-const createTagHierarchy = (userid, tree) => {
-  return {
-    type: 'hierarchy',
-    userid,
-    tree,
-  };
-};
+const createTagHierarchy = (userid, tree) => ({
+  type: 'hierarchy',
+  userid,
+  tree,
+});
 
 const createTagHierarchyDefault = (userid, parentForNew = 'root') =>
   tagDao.listAllTags(userid)
