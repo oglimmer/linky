@@ -79,6 +79,9 @@ class UpdateLinkProcessor extends BaseProcessor {
   * process() {
     try {
       const rec = yield linkDao.getById(this.data.linkid);
+      if (rec.userid !== this.data.userid) {
+        throw new Error('Forbidden');
+      }
       const recToWrite = Object.assign({}, rec, {
         tags: this.data.tags,
         linkUrl: this.data.linkUrl,
@@ -216,8 +219,8 @@ class DeleteProcessor extends BaseProcessor {
 
   * process() {
     try {
-      linkDao.deleteLatest(this.data.linkid, this.data.userid);
-      this.res.send();
+      yield linkDao.deleteLatest(this.data.linkid, this.data.userid);
+      this.res.send({ result: 'ok' });
       // if this was an `archive` delete its archive object and the file cache
       const archiveRec = yield archiveDao.getByUserIdAndArchiveLinkId(
         this.data.userid, this.data.linkid);

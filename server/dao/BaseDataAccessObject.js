@@ -78,17 +78,14 @@ class BaseDataAccessObject {
     return this.dbrefs.destroy(id, rev);
   }
 
-  deleteLatest(id, userid) {
+  async deleteLatest(id, userid) {
+    const obj = await this.getById(id);
+    if (userid !== obj.userid) {
+      winston.loggers.get('application').debug(`DB entry has user=${obj.userid} but change was initiated by=${userid}`);
+      throw Error('Wrong user!');
+    }
     /* eslint-disable no-underscore-dangle */
-    return this.getById(id)
-      .then((obj) => {
-        if (userid !== obj.userid) {
-          winston.loggers.get('application').debug(`DB entry has user=${obj.userid} but change was initiated by=${userid}`);
-          throw Error('Wrong user!');
-        }
-        return obj;
-      })
-      .then(obj => this.delete(id, obj._rev));
+    this.delete(id, obj._rev);
     /* eslint-disable no-underscore-dangle */
   }
 }
