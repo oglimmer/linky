@@ -169,7 +169,7 @@ if (!debugMode || debugMode !== 'rest') {
 
   const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
 
-  app.use((req, res) => {
+  app.use(async (req, res) => {
     const store = finalCreateStore(combinedReducers);
 
     winston.loggers.get('application').debug(`Processing match at url = ${req.url}`);
@@ -178,43 +178,42 @@ if (!debugMode || debugMode !== 'rest') {
       emptyCache();
     }
 
-    fetchComponentData(store.dispatch, req, res)
-      .then(() => {
-        const context = {};
-        const reactHtml = ReactDOMServer.renderToString(
-          <StaticRouter location={req.url} context={context}>
-            <Provider store={store}>
-              <div>
-                <AlertAdapter />
-                <Routing store={store} />
-              </div>
-            </Provider>
-          </StaticRouter>,
-        );
+    try {
+      await fetchComponentData(store.dispatch, req, res);
+      const context = {};
+      const reactHtml = ReactDOMServer.renderToString(
+        <StaticRouter location={req.url} context={context}>
+          <Provider store={store}>
+            <div>
+              <AlertAdapter />
+              <Routing store={store} />
+            </div>
+          </Provider>
+        </StaticRouter>,
+      );
 
-        if (context.url) {
-          res.writeHead(301, {
-            Location: context.url,
-          });
-          res.end();
-        } else {
-          const initialState = `window.$REDUX_STATE = ${JSON.stringify(store.getState())}`;
-          const initialStateHash = hashSha256Base64(initialState);
-          const setContentSecurityPolicy = contentSecurityPolicy.getCSP(Object.assign({},
-            globalCSPConfig, {
-              'script-src': [contentSecurityPolicy.SRC_SELF, `'sha256-${initialStateHash}'`],
-            },
-          ));
-          setContentSecurityPolicy(req, res, () => {});
-          res.render('index.ejs', { reactHtml, initialState });
-        }
-      })
-      .catch((err) => {
-        if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
-          winston.loggers.get('application').error(err);
-          res.status(500).send('Server error');
-        }
-      });
+      if (context.url) {
+        res.writeHead(301, {
+          Location: context.url,
+        });
+        res.end();
+      } else {
+        const initialState = `window.$REDUX_STATE = ${JSON.stringify(store.getState())}`;
+        const initialStateHash = hashSha256Base64(initialState);
+        const setContentSecurityPolicy = contentSecurityPolicy.getCSP(Object.assign({},
+          globalCSPConfig, {
+            'script-src': [contentSecurityPolicy.SRC_SELF, `'sha256-${initialStateHash}'`],
+          },
+        ));
+        setContentSecurityPolicy(req, res, () => {});
+        res.render('index.ejs', { reactHtml, initialState });
+      }
+    } catch (err) {
+      if (!Object.prototype.hasOwnProperty.call(err, 'message') || err.message !== 'forward') {
+        winston.loggers.get('application').error(err);
+        res.status(500).send('Server error');
+      }
+    }
   });
 }
 
