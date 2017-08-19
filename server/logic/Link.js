@@ -13,6 +13,8 @@ import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS, LOCKED, DUEDATE,
 import tagDao from '../dao/tagDao';
 import TagHierarchyLogic from '../logic/TagHierarchy';
 
+import properties from '../util/linkyproperties';
+
 // TAGS
 export const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
 export const dateRegex = new RegExp('^[\\d]{4}-[\\d]{2}-[\\d]{2}$');
@@ -50,7 +52,7 @@ const ensureRssTag = (tagsArr, rssUrl) => {
 
 const ensureArchiveTag = (tagsArr, linkUrl) => {
   const findFctn = t => t === ARCHIVE;
-  if (linkUrl.startsWith('https://archive.linky1.com/')) {
+  if (linkUrl.startsWith(`https://${properties.server.archive.domain}/`)) {
     if (tagsArr && !tagsArr.find(findFctn)) {
       tagsArr.push(ARCHIVE);
     }
@@ -209,7 +211,7 @@ export const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, not
   });
 
 export const validateAndEnhanceTags = (tags, rssUrl, linkUrl) =>
-  ensureArchiveTag( // add archive if url starts with https://archive.linky1.com
+  ensureArchiveTag( // add archive if url starts with https://${properties.server.archive.domain}
     ensureWithduedateTag( // add duedate if date given
       ensureRssTag( // add rss if rss-url given
         ensureAllTag( // ensure all
