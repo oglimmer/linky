@@ -23,11 +23,11 @@ fi
 
 cd linky
 
+export LINKY_PROPERTIES=/home/build/linky.properties
 yarn install
 
 yarn run build
 
-export LINKY_PROPERTIES=/home/build/linky.properties
 export BIND=0.0.0.0
 
 yarn start
