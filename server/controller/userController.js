@@ -29,6 +29,9 @@ class CreateUserProcessor extends BaseProcessor {
 
   * process() {
     try {
+      if (properties.build.login.userpass !== true) {
+        throw new Error('Forbidden');
+      }
       const user = yield userDao.getByEmail(this.data.email);
       if (user !== null) {
         ResponseUtil.sendErrorResponse500('Email address already in use', this.res);
