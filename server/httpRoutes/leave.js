@@ -23,7 +23,7 @@ const leave = (req, res) => {
           throw Error('Failed to verify user on referenced link');
         }
         let targetUrl = loadedLinkObj.linkUrl;
-        if (targetUrl.startsWith(`https://${properties.server.archive.domain}/`)) {
+        if (targetUrl.startsWith(`${properties.server.archive.domain}/`)) {
           const tempClaim = { archiveUserHash: hashSha256Hex(loadedLinkObj.userid) };
           const tempAuthToken = yield JwtUtil.sign(tempClaim, '1h');
           targetUrl += `?tmpAuthToken=${tempAuthToken}`;

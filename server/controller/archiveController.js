@@ -77,7 +77,7 @@ class CreateArchiveProcessor extends BaseProcessor {
 
   createLinkRec(userHash, archiveRecId, linkRec) {
     const newRecord = createObject({
-      linkUrl: `https://${properties.server.archive.domain}/archive/${userHash}/${archiveRecId}`,
+      linkUrl: `${properties.server.archive.domain}/archive/${userHash}/${archiveRecId}`,
       userid: this.data.userid,
       notes: `Archived ${linkRec.linkUrl} on ${new Date()}`,
       tags: [ALL, ARCHIVE],

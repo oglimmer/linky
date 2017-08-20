@@ -52,7 +52,7 @@ const ensureRssTag = (tagsArr, rssUrl) => {
 
 const ensureArchiveTag = (tagsArr, linkUrl) => {
   const findFctn = t => t === ARCHIVE;
-  if (linkUrl.startsWith(`https://${properties.server.archive.domain}/`)) {
+  if (linkUrl.startsWith(`${properties.server.archive.domain}/`)) {
     if (tagsArr && !tagsArr.find(findFctn)) {
       tagsArr.push(ARCHIVE);
     }
@@ -225,7 +225,7 @@ export const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, not
   });
 
 export const validateAndEnhanceTags = (tags, rssUrl, linkUrl) =>
-  ensureArchiveTag( // add archive if url starts with https://${properties.server.archive.domain}
+  ensureArchiveTag( // add archive if url starts with ${properties.server.archive.domain}
     ensureWithduedateTag( // add duedate if date given
       ensureRssTag( // add rss if rss-url given
         ensureAllTag( // ensure all
