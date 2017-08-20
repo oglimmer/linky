@@ -10,6 +10,12 @@ const StringReplacePlugin = require('string-replace-webpack-plugin');
 
 const serverPropsLoader = require('../server/util/serverPropsLoader');
 const BuildInfo = require('../src/util/BuildInfo');
+const { linkyPropertiesDefined } = require('../server/util/linkyproperties');
+
+if (!linkyPropertiesDefined) {
+  console.log('environment variable LINKY_PROPERTIES not set! Abort.');
+  process.exit(1);
+}
 
 serverPropsLoader(BuildInfo);
 

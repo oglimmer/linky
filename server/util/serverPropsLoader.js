@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const execSync = require('child_process').execSync;
 
+const properties = require('./linkyproperties');
+
 let CONTACT = '';
 if (fs.existsSync('/etc/linky-contact.txt')) {
   CONTACT = `${fs.readFileSync('/etc/linky-contact.txt')}`;
@@ -27,6 +29,8 @@ if (fs.existsSync(branchFile)) {
 
 const BUILDDATE = new Date().toString();
 
+const USERPASSLOGIN = properties.build.login.userpass;
+const OAUTHLOGIN = properties.build.login.oauth;
 
 /* eslint-disable no-param-reassign */
 
@@ -35,4 +39,6 @@ module.exports = (data) => {
   data.COMMITHASH = COMMITHASH;
   data.BRANCHNAME = BRANCHNAME;
   data.BUILDDATE = BUILDDATE;
+  data.USERPASSLOGIN = USERPASSLOGIN;
+  data.OAUTHLOGIN = OAUTHLOGIN;
 };

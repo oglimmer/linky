@@ -17,12 +17,26 @@ This project features:
 * CouchDB backend via nano
 * browserHistory
 * react-hot-loader
+* and a lot more ...
 
 # initial setup
 
-## basic setup
+## database setup
 
-Install couchdb and import the views (see https://www.npmjs.com/package/couchviews and build/couchdb/)
+Linky runs as a nodejs server, but also needs a `couchdb` as the data backend.
+
+Install couchdb and import all views (see https://www.npmjs.com/package/couchviews) from build/couchdb/.
+It is recommended to import all views build/couchdb/linky into a couchdb linky and build/couchdb/linky-archive into
+linky_archive.
+
+```
+# assuming your couchdb is running, you have npm installed and PWD is the root of linky
+curl -X PUT http://couchdb:5984/linky
+curl -X PUT http://couchdb:5984/linky_archive
+npm -g install couchviews
+couchviews push http://couchdb:5984/linky build/couchdb/linky
+couchviews push http://couchdb:5984/linky_archive build/couchdb/linky-archive
+```
 
 ## setup for search
 
@@ -45,31 +59,37 @@ _fti = {couch_httpd_proxy, handle_proxy_req, <<"http://localhost:5985">>}
 This starts a webserver at :8080 for the REST services, all static files and the on-the-fly
 generated bundle.js
 
-- yarn run dev
+`yarn run dev`
 
 => open http://localhost:8080
 
 When using nodemon instead of dev you start the server with a nodemon watcher underneath.
 
-- yarn run nodemon
+`yarn run nodemon`
 
 You can check the whole project via eslint and run all unit tests with
 
-- yarn run test
+`yarn test`
 
 When the couchdb is up, you can run integration tests via
 
-- yarn run integrationtest
+`yarn integrationtest`
 
 # Playing with the REST service
 
-See build/test for test.sh. The follwing commands are supported:
+See build/test for test.sh. The following commands are supported:
 
 - createuser
 - authenticate
-- createlink
+- createlink [tag]
 - getlinks
 - deletelink "ID"
+- html [url]
+- hierarchy
+- export
+- me
+
+On a freshly set up system just start with createuser => authenticate => createlink => getlinks.
 
 # Executing the integration tests in a docker environment
 
@@ -81,15 +101,23 @@ Go to build/docker and use ./run.sh
 
 # prod setup
 
-**The jwt private key is hardcoded as "foobar"!!**
+Copy the config from `server/util/linky_default.properties`.
+
+**At least change the jwt private key!!!**
 
 To build the client side bundle.js:
 
-- yarn run build
+```
+export LINKY_PROPERTIES="your modified version of server/util/linky_default.properties"
+yarn build
+```
 
 To start the server at :8080 without dynamic bundle.js generation:
 
-- yarn start
+```
+export LINKY_PROPERTIES="your modified version of server/util/linky_default.properties"
+yarn start
+```
 
 # Parameters
 
@@ -120,6 +148,7 @@ Defines the interface where the http server bindes to. Default localhost.
 ## LINKY_PROPERTIES
 
 A file path to a json formatted property file. Is this parameter undefined the server uses ./server/util/linky_default.properties.
+You need to set this variable for `build` and `start`.
 
 ## LINKY_SERVER
 
@@ -133,6 +162,7 @@ Special parameter only used in integration tests. Defines the protocol, server a
   - /authback
   - /leave
   - /rest/*
+  - /archive/*
 - STATIC_FILES
   - /static/*
 - everthing else delivers the server-side pre-rendered html page from NODE
@@ -140,3 +170,9 @@ Special parameter only used in integration tests. Defines the protocol, server a
   - /links/:tag
   - /contact
   - /tags
+
+## Archive
+
+* All archived links are delivered by node (instead of just being a static file) to check that they belong to the current user.
+* Archived files may be deleted, as they are retrieved from couchdb on request if not available on the filesystem
+* It is strongly recommended to use a different domain for the archive, otherwise an archived page could steal your authentication token (cookie). The domain can be configured in server/util/linky_default.properties. 
