@@ -183,7 +183,7 @@ class GetRssUpdatesProcessor extends BaseProcessor {
       if (!rec || !rec.rssUrl) {
         this.res.send('ERROR. No rssUrl for this link.');
       } else {
-        if (rec.linkUrl !== this.data.userid) {
+        if (rec.userid !== this.data.userid) {
           throw new Error('Forbidden');
         }
         const feedHttpResponse = yield request.get({
