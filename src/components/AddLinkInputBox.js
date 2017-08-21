@@ -109,7 +109,7 @@ const calcHasArchivedTag = (state) => {
   return !!linkObj.tags.find(t => t === ARCHIVE);
 };
 
-const mapStateToPropsAddLinkInputBox = state => ({
+const mapStateToProps = state => ({
   linkId: state.addUrl.id,
   isAddEnabled: state.menuBar.addEnabled,
   tags: state.addUrl.tags.split(' ').map(e => ({ id: e, name: e })),
@@ -144,4 +144,4 @@ const mapDispatchToProps = dispatch => ({
   },
 });
 
-export default connect(mapStateToPropsAddLinkInputBox, mapDispatchToProps)(AddLinkInputBox);
+export default connect(mapStateToProps, mapDispatchToProps)(AddLinkInputBox);

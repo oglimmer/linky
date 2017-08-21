@@ -16,6 +16,10 @@ export const addUrlForm = {
   notes: '',
 };
 
+export const searchBarForm = {
+  searchTerm: '',
+};
+
 export const importExportForm = {
   bookmarks: '',
   tagPrefix: '',

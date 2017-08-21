@@ -6,7 +6,7 @@ import { routerReducer } from 'react-router-redux';
 import { SET_AUTH_TOKEN, CLEAR_AUTH_TOKEN, TOGGLE_VISIBILITY, RESET,
   SET_IN_SEARCH_MODE } from './actionTypes';
 
-import { initialStateAuth, loginForm, addUrlForm, initialMenuBar, importExportForm }
+import { initialStateAuth, loginForm, addUrlForm, initialMenuBar, importExportForm, searchBarForm }
   from './DataModels';
 
 import mainData from './reducers/mainData';
@@ -53,6 +53,7 @@ export default combineReducers({
   menuBar,
   login: combineForms(loginForm, 'login'),
   addUrl: combineForms(addUrlForm, 'addUrl'),
+  searchBar: combineForms(searchBarForm, 'searchBar'),
   importExport: combineForms(importExportForm, 'importExport'),
   router: routerReducer,
 });

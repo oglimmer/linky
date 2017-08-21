@@ -2,76 +2,59 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { Control, Form, actions } from 'react-redux-form';
 
 import { setInSearchMode } from '../redux/actions';
 import { sendSearch, fetchLinks } from '../redux/actions/links';
 
-class InputNavItem extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { value: '' };
-
-    this.handleChange = this.handleChange.bind(this);
-  }
-
-  handleChange(event) {
-    this.setState({ value: event.target.value });
-  }
-
-  render() {
-    return (
-      <li role="presentation">
-        <form
-          className="navbar-form"
-          role="search"
-          onSubmit={(event) => {
-            event.preventDefault();
-            this.props.onClick(this.state.value);
-          }}
-        >
-          <div className="input-group">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search"
-              name="srch-term"
-              id="srch-term"
-              value={this.state.value}
-              onChange={this.handleChange}
-            />
-            <div className="input-group-btn">
-              <button
-                className="btn btn-default"
-                type="button"
-                onClick={() => this.props.onClick(this.state.value)}
-              >
-                <i className="glyphicon glyphicon-search" />
-              </button>
-              { this.state.value ?
-                <button
-                  className="btn btn-default"
-                  type="button"
-                  onClick={() => {
-                    this.props.onClear();
-                    this.setState({ value: '' });
-                  }}
-                >
-                  <i className="glyphicon glyphicon-ban-circle" />
-                </button> : '' }
-            </div>
-          </div>
-        </form>
-      </li>
-    );
-  }
-}
+const InputNavItem = ({ onSearch, onClear, searchTerm }) => (
+  <li role="presentation">
+    <Form
+      className="navbar-form"
+      role="search"
+      model="searchBar"
+      onSubmit={(formData) => { onSearch(formData.searchTerm); }}
+    >
+      <div className="input-group">
+        <Control
+          type="text"
+          className="form-control"
+          placeholder="Search"
+          model=".searchTerm"
+        />
+        <div className="input-group-btn">
+          <button
+            className="btn btn-default"
+            type="button"
+            onClick={() => onSearch(searchTerm)}
+          >
+            <i className="glyphicon glyphicon-search" />
+          </button>
+          { searchTerm ?
+            <button
+              className="btn btn-default"
+              type="button"
+              onClick={() => { onClear(); }}
+            >
+              <i className="glyphicon glyphicon-ban-circle" />
+            </button> : '' }
+        </div>
+      </div>
+    </Form>
+  </li>
+);
 InputNavItem.propTypes = {
-  onClick: PropTypes.func.isRequired,
+  onSearch: PropTypes.func.isRequired,
   onClear: PropTypes.func.isRequired,
+  searchTerm: PropTypes.string.isRequired,
 };
 
+const mapStateToProps = state => ({
+  searchTerm: state.searchBar.searchTerm,
+});
+
 const mapDispatchToProps = dispatch => ({
-  onClick: (searchString) => {
+  onSearch: (searchString) => {
     if (searchString.trim().length > 0) {
       dispatch(sendSearch(searchString));
     } else {
@@ -82,7 +65,8 @@ const mapDispatchToProps = dispatch => ({
   onClear: () => {
     dispatch(setInSearchMode(false));
     dispatch(fetchLinks());
+    dispatch(actions.reset('searchBar.searchTerm'));
   },
 });
 
-export default connect(null, mapDispatchToProps)(InputNavItem);
+export default connect(mapStateToProps, mapDispatchToProps)(InputNavItem);

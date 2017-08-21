@@ -29,8 +29,19 @@ const getSortingInfo = (sortingByColumn, obj) => {
   return null;
 };
 
+const matches = (link, searchBarTerm) => {
+  if (!searchBarTerm) {
+    return true;
+  }
+  return link.linkUrl.toLowerCase().indexOf(searchBarTerm) > -1
+    || (link.rssUrl && link.rssUrl.toLowerCase().indexOf(searchBarTerm) > -1)
+    || (link.notes && link.notes.toLowerCase().indexOf(searchBarTerm) > -1)
+    || (link.pageTitle && link.pageTitle.toLowerCase().indexOf(searchBarTerm) > -1)
+    || link.tags.find(t => t.indexOf(searchBarTerm) > -1);
+};
+
 const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, sortingByColumnOrder,
-  onClickLink, feedUpdatesList }) =>
+  onClickLink, feedUpdatesList, searchBarTerm }) =>
   (<ListGroup>
     <ListGroupItem>
       Sort by:{' '}
@@ -46,7 +57,7 @@ const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, sortingByColumnOr
       <ViewOption name="tags" label="Tags" />
       <ViewOption name="rssUrl" label="RSS" />
     </ListGroupItem>
-    { linkList.sort((a, b) => {
+    { linkList.filter(l => matches(l, searchBarTerm)).sort((a, b) => {
       if (sortingByColumn === 'mostUsed') {
         return sortingByColumnOrder * (b.callCounter - a.callCounter);
       } else if (sortingByColumn === 'lastUsed') {
@@ -80,6 +91,7 @@ UILinkList.propTypes = {
   onClickLink: PropTypes.func.isRequired,
   sortingByColumn: PropTypes.string.isRequired,
   sortingByColumnOrder: PropTypes.number.isRequired,
+  searchBarTerm: PropTypes.string.isRequired,
 };
 
 
@@ -88,6 +100,7 @@ const mapStateToProps = state => ({
   feedUpdatesList: state.mainData.feedUpdatesList,
   sortingByColumn: state.mainData.sortingByColumn,
   sortingByColumnOrder: state.mainData.sortingByColumnOrder,
+  searchBarTerm: state.searchBar.searchTerm,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -98,7 +111,4 @@ const mapDispatchToProps = dispatch => ({
   onClickLink: id => dispatch(clickLink(id)),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(UILinkList);
+export default connect(mapStateToProps, mapDispatchToProps)(UILinkList);
