@@ -21,7 +21,7 @@ class PortalPage extends React.Component {
       <div>
         <ToggleAddLinkMenuButton />
         <AddLinkInputBox />
-        { !this.props.searchResult ? <TagList /> : <hr /> }
+        <TagList />
         <UILinkList />
       </div>
     );
@@ -30,14 +30,6 @@ class PortalPage extends React.Component {
 PortalPage.propTypes = {
   match: PropTypes.shape().isRequired,
   dispatch: PropTypes.func.isRequired,
-  searchResult: PropTypes.bool.isRequired,
-};
-PortalPage.defaultProps = {
-  searchResult: false,
 };
 
-const mapStateToProps = state => ({
-  searchResult: state.menuBar.searchResult,
-});
-
-export default connect(mapStateToProps)(PortalPage);
+export default connect()(PortalPage);

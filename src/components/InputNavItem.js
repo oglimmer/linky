@@ -4,7 +4,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Control, Form, actions } from 'react-redux-form';
 
-import { setInSearchMode } from '../redux/actions';
 import { sendSearch, fetchLinks } from '../redux/actions/links';
 
 const InputNavItem = ({ onSearch, onClear, searchTerm }) => (
@@ -58,13 +57,11 @@ const mapDispatchToProps = dispatch => ({
     if (searchString.trim().length > 0) {
       dispatch(sendSearch(searchString));
     } else {
-      dispatch(setInSearchMode(false));
       dispatch(fetchLinks());
       dispatch(actions.reset('searchBar.serverSide'));
     }
   },
   onClear: () => {
-    dispatch(setInSearchMode(false));
     dispatch(fetchLinks());
     dispatch(actions.reset('searchBar.searchTerm'));
     dispatch(actions.reset('searchBar.serverSide'));

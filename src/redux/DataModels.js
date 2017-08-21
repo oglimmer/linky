@@ -52,7 +52,6 @@ export const initialStateTagData = {
 
 export const initialMenuBar = {
   addEnabled: false,
-  searchResult: false,
 };
 
 export const initialStateAuth = {

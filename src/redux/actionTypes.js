@@ -3,7 +3,6 @@
 
 export const RESET = 'RESET';
 export const TOGGLE_VISIBILITY = 'TOGGLE_VISIBILITY';
-export const SET_IN_SEARCH_MODE = 'SET_IN_SEARCH_MODE';
 export const SET_AUTH_TOKEN = 'SET_AUTH_TOKEN';
 export const CLEAR_AUTH_TOKEN = 'CLEAR_AUTH_TOKEN';
 

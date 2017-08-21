@@ -12,7 +12,6 @@ import { CLICK_LINK, CHANGE_SORTING_LINKS, SELECT_TAG, ADD_LINK, UPDATE_LINK,
 
 import { fetchTagHierarchy, manipulateTagCounter } from './tagHierarchy';
 import { setErrorMessage, setTempMessage, setInfoMessage } from './feedback';
-import { setInSearchMode } from '../actions';
 
 const RSS_UPDATE_FREQUENCY = 1000 * 60 * 5;
 
@@ -297,7 +296,6 @@ export function sendSearch(searchString) {
   return (dispatch, getState) =>
     fetch.get(`/rest/search/links?q=${encodeURIComponent(searchString)}`, getState().auth.token)
       .then((json) => {
-        dispatch(setInSearchMode(true));
         dispatch(setLinks(json));
         dispatch(actions.change('searchBar.serverSide', true));
         console.log(`Search took ${new Date().getTime() - currentTime.getTime()} millis`);
