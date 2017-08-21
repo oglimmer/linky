@@ -144,15 +144,18 @@ export function fetchRssUpdates(forceUpdate = false) {
 
 
 export function fetchLinks(tag) {
-  return (dispatch, getState) => fetch.get(`/rest/links/${tag}`, getState().auth.token)
-    .then(linkList => dispatch(setLinks(linkList)))
-    .catch((error) => {
-      if (error.message.indexOf('Invalid auth token') !== -1) {
-        dispatch(setErrorMessage('Session token expired. Reload this page!'));
-      } else {
-        dispatch(setErrorMessage(error));
-      }
-    });
+  return (dispatch, getState) => {
+    const selectedTag = tag || getState().mainData.selectedTag;
+    return fetch.get(`/rest/links/${selectedTag}`, getState().auth.token)
+      .then(linkList => dispatch(setLinks(linkList)))
+      .catch((error) => {
+        if (error.message.indexOf('Invalid auth token') !== -1) {
+          dispatch(setErrorMessage('Session token expired. Reload this page!'));
+        } else {
+          dispatch(setErrorMessage(error));
+        }
+      });
+  };
 }
 
 

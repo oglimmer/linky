@@ -76,12 +76,12 @@ const mapDispatchToProps = dispatch => ({
       dispatch(sendSearch(searchString));
     } else {
       dispatch(setInSearchMode(false));
-      dispatch(fetchLinks('portal'));
+      dispatch(fetchLinks());
     }
   },
   onClear: () => {
     dispatch(setInSearchMode(false));
-    dispatch(fetchLinks('portal'));
+    dispatch(fetchLinks());
   },
 });
 
