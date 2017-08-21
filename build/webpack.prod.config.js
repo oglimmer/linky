@@ -34,7 +34,6 @@ module.exports = {
     './dynamic-resources/css/styles.css',
     './dynamic-resources/css/tree.css',
     'ionicons/dist/css/ionicons.min.css',
-    './dynamic-resources/favicon.ico',
     'babel-polyfill',
     './src/index.js',
     './static-resources/default.png',

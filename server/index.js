@@ -106,7 +106,7 @@ app.use(responseTime((req, res, time) => {
   if (req.method === 'HEAD') {
     return;
   }
-  winston.loggers.get('application').debug('Request %s for %s took %d millis', req.method, req.url, Math.round(time));
+  winston.loggers.get('application').debug('Request %s for %s took %d millis', req.method, req.originalUrl, Math.round(time));
 }));
 
 app.use(expressWinston.logger({
@@ -132,7 +132,6 @@ if (!debugMode || debugMode !== 'web') {
     app.use(restPath, proxy(`${proxyBind}:${proxyPort}`, {
       // express-http-proxy cuts off the prefix of the url matching restPath
       proxyReqPathResolver: req => `${restPath}${req.url}`,
-      userResDecorator: (proxyRes, proxyResData, userReq) => { userReq.url = `${restPath}${userReq.url}`; return proxyResData; },
     }));
   });
   /* eslint-enable no-param-reassign */

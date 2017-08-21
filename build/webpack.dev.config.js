@@ -17,7 +17,6 @@ module.exports = {
     './dynamic-resources/css/styles.css',
     './dynamic-resources/css/tree.css',
     'ionicons/dist/css/ionicons.min.css',
-    './dynamic-resources/favicon.ico',
     'react-hot-loader/patch',
     'webpack-hot-middleware/client',
     'babel-polyfill',
