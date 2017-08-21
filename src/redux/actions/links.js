@@ -299,6 +299,7 @@ export function sendSearch(searchString) {
       .then((json) => {
         dispatch(setInSearchMode(true));
         dispatch(setLinks(json));
+        dispatch(actions.change('searchBar.serverSide', true));
         console.log(`Search took ${new Date().getTime() - currentTime.getTime()} millis`);
       })
       .catch(ex => dispatch(setErrorMessage(ex)));

@@ -29,8 +29,8 @@ const getSortingInfo = (sortingByColumn, obj) => {
   return null;
 };
 
-const matches = (link, searchBarTerm) => {
-  if (!searchBarTerm) {
+const matches = (link, searchBarTerm, serverSide) => {
+  if (serverSide || !searchBarTerm) {
     return true;
   }
   return link.linkUrl.toLowerCase().indexOf(searchBarTerm) > -1
@@ -41,7 +41,7 @@ const matches = (link, searchBarTerm) => {
 };
 
 const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, sortingByColumnOrder,
-  onClickLink, feedUpdatesList, searchBarTerm }) =>
+  onClickLink, feedUpdatesList, searchBarTerm, serverSide }) =>
   (<ListGroup>
     <ListGroupItem>
       Sort by:{' '}
@@ -57,7 +57,7 @@ const UILinkList = ({ linkList, onUpdateLink, sortingByColumn, sortingByColumnOr
       <ViewOption name="tags" label="Tags" />
       <ViewOption name="rssUrl" label="RSS" />
     </ListGroupItem>
-    { linkList.filter(l => matches(l, searchBarTerm)).sort((a, b) => {
+    { linkList.filter(l => matches(l, searchBarTerm, serverSide)).sort((a, b) => {
       if (sortingByColumn === 'mostUsed') {
         return sortingByColumnOrder * (b.callCounter - a.callCounter);
       } else if (sortingByColumn === 'lastUsed') {
@@ -92,6 +92,7 @@ UILinkList.propTypes = {
   sortingByColumn: PropTypes.string.isRequired,
   sortingByColumnOrder: PropTypes.number.isRequired,
   searchBarTerm: PropTypes.string.isRequired,
+  serverSide: PropTypes.bool.isRequired,
 };
 
 
@@ -101,6 +102,7 @@ const mapStateToProps = state => ({
   sortingByColumn: state.mainData.sortingByColumn,
   sortingByColumnOrder: state.mainData.sortingByColumnOrder,
   searchBarTerm: state.searchBar.searchTerm,
+  serverSide: state.searchBar.serverSide,
 });
 
 const mapDispatchToProps = dispatch => ({

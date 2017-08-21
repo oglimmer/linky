@@ -60,12 +60,14 @@ const mapDispatchToProps = dispatch => ({
     } else {
       dispatch(setInSearchMode(false));
       dispatch(fetchLinks());
+      dispatch(actions.reset('searchBar.serverSide'));
     }
   },
   onClear: () => {
     dispatch(setInSearchMode(false));
     dispatch(fetchLinks());
     dispatch(actions.reset('searchBar.searchTerm'));
+    dispatch(actions.reset('searchBar.serverSide'));
   },
 });
 

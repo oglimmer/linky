@@ -18,6 +18,7 @@ export const addUrlForm = {
 
 export const searchBarForm = {
   searchTerm: '',
+  serverSide: false,
 };
 
 export const importExportForm = {
