@@ -3,7 +3,8 @@ import 'isomorphic-fetch';
 
 let baseUrl = '';
 if (typeof window === 'undefined') {
-  const port = process.env.PORT || '8080';
+  // see /server/util/serverConfig.js
+  const port = process.env.INTERNAL_REST_API_PORT;
   baseUrl = `http://localhost:${port}`;
 }
 

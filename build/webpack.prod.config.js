@@ -38,6 +38,7 @@ module.exports = {
     './src/index.js',
     './static-resources/default.png',
     './static-resources/sub.png',
+    './static-resources/favicon.ico',
   ],
 
   output: {

@@ -29,6 +29,8 @@ import rfs from 'rotating-file-stream';
 
 // must be the first relative import
 import './util/LogInit';
+import { compConfigRest, compConfigDistResources, compConfigEjsPath, compConfigDynamicContent,
+  compConfigStaticResources, compConfigDynamicBundleGeneration, bind, port } from './util/serverConfig';
 
 import { webpack, webpackDevMiddleware, webpackHotMiddleware, emptyCache, proxy } from './debug-mode';
 
@@ -113,61 +115,73 @@ app.use(expressWinston.logger({
   winstonInstance: winston.loggers.get('http'),
 }));
 
-const debugMode = process.env.DEBUG_MODE;
-
-// load-balancer health check
+/* ***********************************
+      load-balancer health check
+*********************************** */
 app.head('*', (req, res) => {
   res.status(200).end();
 });
 
-if (!debugMode || debugMode !== 'web') {
+/* ***********************************
+           REST API
+*********************************** */
+if (compConfigRest === 'enable') {
   winston.loggers.get('application').info('Serving REST endpoints');
   httpRoutes(app);
-} else {
+}
+if (compConfigRest === 'proxy') {
   const proxyPort = process.env.PROXY_PORT || '8081';
   const proxyBind = process.env.PROXY_BIND || '127.0.0.1';
   winston.loggers.get('application').info(`Using proxy ${proxyBind}:${proxyPort} to REST endpoints`);
-  /* eslint-disable no-param-reassign */
   ['/rest', '/leave', '/auth', '/authback', '/archive'].forEach((restPath) => {
     app.use(restPath, proxy(`${proxyBind}:${proxyPort}`, {
       // express-http-proxy cuts off the prefix of the url matching restPath
       proxyReqPathResolver: req => `${restPath}${req.url}`,
     }));
   });
-  /* eslint-enable no-param-reassign */
 }
 
-if (process.env.NODE_ENV === 'production') {
+/* ***********************************
+   static (dynamic files are pre-generated) files for PROD
+*********************************** */
+if (compConfigDistResources === 'enable') {
   const staticFiles = path.join(__dirname, '../dist');
   winston.loggers.get('application').info(`Serving static files from ${staticFiles}`);
   app.use(express.static(staticFiles, { maxAge: '1d' }));
 }
 
-if (!debugMode || debugMode !== 'rest') {
-  // Set view path
-  // set up ejs for templating. You can use whatever
-  const ejsPath = process.env.NODE_ENV === 'production' ? '../dist/static' : '../dynamic-resources';
-  const pathViews = path.join(__dirname, ejsPath);
-  winston.loggers.get('application').info(`Serving ejs files from ${pathViews}`);
+/* ***********************************
+   static & dynamic files for DEV
+*********************************** */
+if (compConfigStaticResources === 'enable') {
+  const staticFiles = path.join(__dirname, '../static-resources');
+  winston.loggers.get('application').info(`Serving static files from ${staticFiles}`);
+  app.use('/static', express.static(staticFiles, { maxAge: '1d' }));
+}
+if (compConfigDynamicBundleGeneration === 'enable') {
+  /* eslint-disable global-require */
+  const config = require('../build/webpack.dev.config');
+  /* eslint-enable global-require */
+  const compiler = webpack(config);
+  app.use(webpackDevMiddleware(compiler, {
+    publicPath: config.output.publicPath, stats: { colors: true } }));
+  app.use(webpackHotMiddleware(compiler));
+  winston.loggers.get('application').info('Server running with dynamic bundle.js generation');
+}
+
+/* ***********************************
+            dynamic content
+*********************************** */
+if (compConfigDynamicContent === 'enable') {
+  /* ***********************************
+              ejs
+  *********************************** */
+  const pathViews = path.join(__dirname, compConfigEjsPath);
+  winston.loggers.get('application').info(`Page generation using ejs files from ${pathViews}`);
   app.set('views', pathViews);
   app.set('view engine', 'ejs');
 
-  if (process.env.NODE_ENV === 'development') {
-    const staticFiles = path.join(__dirname, '../static-resources');
-    winston.loggers.get('application').info(`Serving static files from ${staticFiles}`);
-    app.use('/static', express.static(staticFiles, { maxAge: '1d' }));
-    /* eslint-disable global-require */
-    const config = require('../build/webpack.dev.config');
-    /* eslint-enable global-require */
-    const compiler = webpack(config);
-    app.use(webpackDevMiddleware(compiler, {
-      publicPath: config.output.publicPath, stats: { colors: true } }));
-    app.use(webpackHotMiddleware(compiler));
-    winston.loggers.get('application').info('Server running with dynamic bundle.js generation');
-  }
-
   const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
-
   app.use(async (req, res) => {
     const store = finalCreateStore(combinedReducers);
 
@@ -243,8 +257,6 @@ process.on('uncaughtException', (evt) => {
   winston.loggers.get('application').error('uncaughtException: ', evt);
 });
 
-const port = process.env.PORT || '8080';
-const bind = process.env.BIND || '127.0.0.1';
 app.listen(port, bind, (err) => {
   if (err) {
     winston.loggers.get('application').error(err);
