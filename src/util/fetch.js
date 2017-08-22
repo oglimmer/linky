@@ -5,7 +5,8 @@ let baseUrl = '';
 if (typeof window === 'undefined') {
   // see /server/util/serverConfig.js
   const port = process.env.INTERNAL_REST_API_PORT;
-  baseUrl = `http://localhost:${port}`;
+  const host = process.env.INTERNAL_REST_API_HOST;
+  baseUrl = `http://${host}:${port}`;
 }
 
 export default {

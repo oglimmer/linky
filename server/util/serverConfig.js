@@ -9,10 +9,18 @@ let dynamicBundleGeneration = 'none'; // enable|none
 let portConfig = process.env.PORT || '8080';
 // see /src/util/fetch.js
 let restApiPortConfig = process.env.REST_API_PORT || process.env.PORT || '8080';
+const restApiHostConfig = process.env.REST_API_HOST || 'localhost';
 
-if (process.env.RUNCFG) {
-  console.log(`Using RUNCFG = ${process.env.RUNCFG}`);
+if (!process.env.RUNCFG) {
+  if (process.env.NODE_ENV === 'development') {
+    process.env.RUNCFG = 'DEV';
+  } else if (process.env.NODE_ENV === 'production') {
+    process.env.RUNCFG = 'PROD';
+  } else {
+    throw new Error('Neither RUNCFG nor NODE_ENV set. Abort.');
+  }
 }
+console.log(`Using RUNCFG = ${process.env.RUNCFG}`);
 if (process.env.RUNCFG === 'DEV-WEB') {
   rest = 'proxy';
   ejsPathConfig = 'static';
@@ -65,6 +73,7 @@ if (process.env.DYNAMIC_BUNDLE_GENERATION) {
 }
 
 process.env.INTERNAL_REST_API_PORT = restApiPortConfig;
+process.env.INTERNAL_REST_API_HOST = restApiHostConfig;
 
 let ejsPath = '$unset$';
 if (ejsPathConfig === 'dist') {
@@ -87,6 +96,7 @@ if (ejsPathConfig === 'dist') {
 export const bind = process.env.BIND || '127.0.0.1';
 export const port = portConfig;
 export const restApiPort = restApiPortConfig;
+export const restApiHost = restApiHostConfig;
 export const compConfigRest = rest;
 export const compConfigDistResources = distResources;
 export const compConfigEjsPath = ejsPath;
