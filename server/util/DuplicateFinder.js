@@ -7,32 +7,24 @@ import linkDao from '../dao/linkDao';
 
 
 /* eslint-disable no-underscore-dangle */
-export const findDuplicatesSingleAddEditLink = (userid, newLinkRec) =>
-  linkDao.listByUseridAndUrl(userid, purifyLink(newLinkRec.linkUrl))
-    .then(existingLinksWithSameUrl =>
-      existingLinksWithSameUrl.filter(row => row._id !== newLinkRec._id))
-    .then((existingLinksWithSameUrl) => {
-      if (existingLinksWithSameUrl.length > 0) {
-        if (!hasTag(newLinkRec.tags, DUPLICATE)) {
-          newLinkRec.tags.push(DUPLICATE);
-        }
-        const collateral = existingLinksWithSameUrl
-          .filter(row => !hasTag(row.tags, DUPLICATE))
-          .map((row) => {
-            row.tags.push(DUPLICATE);
-            return row;
-          });
-        if (collateral.length > 0) {
-          return linkDao.bulk({ docs: collateral })
-            .then(() => collateral.map((row) => {
-              const rowToUpdate = row;
-              rowToUpdate.id = row._id;
-              return rowToUpdate;
-            }));
-        }
-      }
-      return [];
-    });
+export const findDuplicatesSingleAddEditLink = async (userid, newLinkRec) => {
+  const baseExistingLinksWithSameUrl =
+    await linkDao.listByUseridAndUrl(userid, purifyLink(newLinkRec.linkUrl));
+  const existingLinksWithSameUrl =
+    await baseExistingLinksWithSameUrl.filter(row => row._id !== newLinkRec._id);
+  if (existingLinksWithSameUrl.length > 0) {
+    if (!hasTag(newLinkRec.tags, DUPLICATE)) {
+      newLinkRec.tags.push(DUPLICATE);
+    }
+    const collateral = existingLinksWithSameUrl.filter(row => !hasTag(row.tags, DUPLICATE));
+    if (collateral.length > 0) {
+      collateral.forEach((row) => { row.tags.push(DUPLICATE); });
+      await linkDao.bulk({ docs: collateral });
+      return collateral.map(row => Object.assign({}, row, { id: row._id }));
+    }
+  }
+  return [];
+};
 /* eslint-disable no-underscore-dangle */
 
 class DuplicateFinderBase {
@@ -63,29 +55,25 @@ export class CheckLinkDuplicateFinder extends DuplicateFinderBase {
   }
 
   allLinksInSystem() {
-    return Promise.all(Array.from(this.allLinks.entries()).map(([userid, map]) => {
+    const promises = Array.from(this.allLinks.entries()).map(async ([userid, map]) => {
       const linkList = Array.from(map.entries())
         .filter(([, value]) => value > 1)
         .map(([key]) => key);
-      return linkDao.listByUserid(userid)
-        .then(rows => rows
-          .map(row => row.value)
-          .filter(rec => linkList.find(link => link === purifyLink(rec.linkUrl)))
-          .filter(rec => !hasTag(rec.tags, DUPLICATE))
-          .map((rec) => {
-            console.log(`${new Date()}: adding duplicate for ${userid} to ${rec.linkUrl}`);
-            rec.tags.push(DUPLICATE);
-            return rec;
-          }),
-        )
-        .then((docs) => {
-          if (docs.length > 0) {
-            this.changedUserId.add(userid);
-            return linkDao.bulk({ docs });
-          }
-          return Promise.resolve();
+      const rows = await linkDao.listByUserid(userid);
+      const docs = rows
+        .map(row => row.value)
+        .filter(rec => linkList.find(link => link === purifyLink(rec.linkUrl)))
+        .filter(rec => !hasTag(rec.tags, DUPLICATE));
+      if (docs.length > 0) {
+        docs.forEach((rec) => {
+          console.log(`${new Date()}: adding duplicate for ${userid} to ${rec.linkUrl}`);
+          rec.tags.push(DUPLICATE);
         });
-    }));
+        this.changedUserId.add(userid);
+        await linkDao.bulk({ docs });
+      }
+    });
+    return Promise.all(promises);
   }
 }
 
@@ -96,42 +84,40 @@ export class ImportDuplicateFinder extends DuplicateFinderBase {
     this.allTags = allTags;
   }
 
-  onImport(docs) {
+  async onImport(docs) {
     // this.allLinks : contains all imported pureUrls/#
     // docs contains all link-objects from import
     assert(this.allLinks.size < 2);
     if (this.allLinks.size === 1) {
       const userid = this.allLinks.keys().next().value;
-      return linkDao.listByUserid(userid)
-        .then((rows) => {
-          // all current links in rows
-          const allExistingLinks = rows.map(row => row.value);
-          allExistingLinks.forEach((row) => {
-            this.counterLink(row);
-          });
-          // all duplicates in new and existing links are in this.allLinks
-          const map = this.allLinks.values().next().value;
-          const docsToSave = [];
-          Array.from(map.entries())
-            .filter(([, value]) => value > 1)
-            .map(([key]) => key)
-            .forEach((duplicatedUrl) => {
-              docs.filter(rec => purifyLink(rec.linkUrl) === duplicatedUrl)
-                .filter(rec => !hasTag(rec.tags, DUPLICATE))
-                .forEach((rec) => {
-                  rec.tags.push(DUPLICATE);
-                  this.allTags.add(DUPLICATE);
-                });
-              allExistingLinks.filter(rec => purifyLink(rec.linkUrl) === duplicatedUrl)
-                .filter(rec => !hasTag(rec.tags, DUPLICATE))
-                .forEach((rec) => {
-                  rec.tags.push(DUPLICATE);
-                  this.allTags.add(DUPLICATE);
-                  docsToSave.push(rec);
-                });
+      const rows = await linkDao.listByUserid(userid);
+      // all current links in rows
+      const allExistingLinks = rows.map(row => row.value);
+      allExistingLinks.forEach((row) => {
+        this.counterLink(row);
+      });
+      // all duplicates in new and existing links are in this.allLinks
+      const map = this.allLinks.values().next().value;
+      const docsToSave = [];
+      Array.from(map.entries())
+        .filter(([, value]) => value > 1)
+        .map(([key]) => key)
+        .forEach((duplicatedUrl) => {
+          docs.filter(rec => purifyLink(rec.linkUrl) === duplicatedUrl)
+            .filter(rec => !hasTag(rec.tags, DUPLICATE))
+            .forEach((rec) => {
+              rec.tags.push(DUPLICATE);
+              this.allTags.add(DUPLICATE);
             });
-          return linkDao.bulk({ docs: docsToSave }).then(() => docs);
+          allExistingLinks.filter(rec => purifyLink(rec.linkUrl) === duplicatedUrl)
+            .filter(rec => !hasTag(rec.tags, DUPLICATE))
+            .forEach((rec) => {
+              rec.tags.push(DUPLICATE);
+              this.allTags.add(DUPLICATE);
+              docsToSave.push(rec);
+            });
         });
+      await linkDao.bulk({ docs: docsToSave });
     }
     return docs;
   }
