@@ -1,5 +1,5 @@
 
-import { findDuplicatesSingleAddEditLink, CheckLinkDuplicateFinder } from './DuplicateFinder';
+import { findDuplicatesSingleAddEditLink, CheckLinkDuplicateFinder, ImportDuplicateFinder } from './DuplicateFinder';
 
 import linkDao from '../dao/linkDao';
 
@@ -280,4 +280,96 @@ test('CheckLinkDuplicateFinder - duplicate with different protocol', async () =>
       }],
     },
   ]);
+});
+
+test('ImportDuplicateFinder - no dup', async () => {
+  const updatedDocs = [];
+  /* MOCKING */
+  linkDao.listByUserid = () => Promise.resolve([{
+    value: {
+      linkUrl: 'https://linky1.com',
+      tags: ['foo', 'all'],
+    },
+  }, {
+    value: {
+      linkUrl: 'https://www.linky1.com',
+      tags: ['foo2', 'all'],
+    },
+  }, {
+    value: {
+      linkUrl: 'https://linky1-fake.com',
+      tags: ['bar', 'all'],
+    },
+  }]);
+  linkDao.bulk = (docs) => {
+    updatedDocs.push(docs);
+    return Promise.resolve();
+  };
+  /* TESTING */
+  const allTags = new Set();
+  const idf = new ImportDuplicateFinder(allTags);
+  await idf.onImport([{
+    linkUrl: 'https://linky1.com',
+    userid: 'user1',
+  }, {
+    linkUrl: 'https://www.linky1.com',
+    userid: 'user1',
+  }, {
+    linkUrl: 'https://linky1-fake.com',
+    userid: 'user1',
+  }]);
+  expect(allTags).toEqual(new Set());
+  expect(updatedDocs).toEqual([]);
+});
+
+test('ImportDuplicateFinder - 1 duplicate', async () => {
+  const updatedDocs = [];
+  /* MOCKING */
+  linkDao.listByUserid = () => Promise.resolve([{
+    value: {
+      linkUrl: 'https://linky1.com',
+      userid: 'user1',
+      tags: ['foo', 'all'],
+    },
+  }, {
+    value: {
+      linkUrl: 'https://www.linky1.com',
+      userid: 'user1',
+      tags: ['foo2', 'all'],
+    },
+  }, {
+    value: {
+      linkUrl: 'https://linky1-fake.com',
+      userid: 'user1',
+      tags: ['bar', 'all'],
+    },
+  }]);
+  linkDao.bulk = (docs) => {
+    updatedDocs.push(docs);
+    return Promise.resolve();
+  };
+  /* TESTING */
+  const allTags = new Set();
+  const idf = new ImportDuplicateFinder(allTags);
+  const importLinks = [{
+    linkUrl: 'https://linky1.com',
+    userid: 'user1',
+    tags: ['bar', 'all'],
+  }];
+  await idf.onImport(importLinks);
+  expect(allTags).toEqual(new Set(['duplicate']));
+  expect(updatedDocs).toEqual([{
+    docs: [
+      {
+        linkUrl: 'https://linky1.com',
+        tags: ['foo', 'all', 'duplicate'],
+        userid: 'user1',
+      },
+    ],
+  }]);
+  expect(importLinks).toEqual([{
+    linkUrl: 'https://linky1.com',
+    userid: 'user1',
+    tags: ['bar', 'all', 'duplicate'],
+  }]);
 });

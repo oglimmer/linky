@@ -1,6 +1,5 @@
 
 import assert from 'assert';
-import bluebird from 'bluebird';
 
 import winston from 'winston';
 
@@ -64,17 +63,15 @@ class Verification {
 // replace this by npm restify-jwt
 export default {
 
-  checkAuthorization: function checkAuthorization(req, res, next) {
-    bluebird.coroutine(function* main() {
-      const v = new Verification({ req, res, next });
-      try {
-        const authToken = yield v.getAuthToken();
-        const user = yield v.getUserForAuthToken(authToken);
-        v.succeed(user);
-      } catch (err) {
-        // winston.loggers.get('application').error('Failed to checkAuthorization: ', err);
-        v.fail(err);
-      }
-    })();
+  checkAuthorization: async (req, res, next) => {
+    const v = new Verification({ req, res, next });
+    try {
+      const authToken = await v.getAuthToken();
+      const user = await v.getUserForAuthToken(authToken);
+      v.succeed(user);
+    } catch (err) {
+      // winston.loggers.get('application').error('Failed to checkAuthorization: ', err);
+      v.fail(err);
+    }
   },
 };

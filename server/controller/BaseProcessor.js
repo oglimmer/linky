@@ -1,5 +1,4 @@
 import assert from 'assert';
-import bluebird from 'bluebird';
 import winston from 'winston';
 
 import ResponseUtil from '../../src/util/ResponseUtil';
@@ -63,15 +62,15 @@ class BaseProcessor {
   }
 
   /** must be overwritten */
-  /* *process(); */
+  /* process(); */
 
-  /* private */ doProcessPart2() {
+  /* private */ async doProcessPart2() {
     this.collectRouteParameter();
     if (this.securePath) {
       this.collectSecureParameter();
     }
     if (this.isValid()) {
-      bluebird.coroutine(this.process).bind(this)();
+      await this.process();
     }
     // this could be used as the return for the .then() and we want to avoid:
     // `Warning: a promise was created in a handler but was not returned from import`

@@ -59,7 +59,7 @@ class SearchProcessor extends BaseProcessor {
     this.data = { q };
   }
 
-  * process() {
+  async process() {
     try {
       const userInput = this.data.q;
       let luceneQuery = '';
@@ -74,7 +74,7 @@ class SearchProcessor extends BaseProcessor {
       }
       const query = encodeURIComponent(luceneQuery);
       const url = `${couchdbServer}/_fti/local/linky/_design/lucene/by_all?include_docs=true&q=${query}%20%2Buserid%3A${this.data.userid}`;
-      const searchResult = yield request.get({
+      const searchResult = await request.get({
         url,
         json: true,
       });

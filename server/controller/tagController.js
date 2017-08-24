@@ -13,9 +13,9 @@ class GetTagHierarchyProcessor extends BaseProcessor {
     super(req, res, next, true);
   }
 
-  * process() {
+  async process() {
     try {
-      const responseData = yield TagHierarchyLogic.loadResponseData(this.data.userid);
+      const responseData = await TagHierarchyLogic.loadResponseData(this.data.userid);
       this.res.send(responseData);
     } catch (err) {
       winston.loggers.get('application').error(err);
@@ -71,10 +71,10 @@ class PersistTagHierarchyProcessor extends BaseProcessor {
     });
   }
 
-  * process() {
+  async process() {
     try {
       this.validateData();
-      const rec = yield tagDao.getHierarchyByUser(this.data.userid);
+      const rec = await tagDao.getHierarchyByUser(this.data.userid);
       let recToWrite;
       if (!rec) {
         recToWrite = TagHierarchyLogic.createTagHierarchy(
@@ -86,7 +86,7 @@ class PersistTagHierarchyProcessor extends BaseProcessor {
           tree: this.data.tree.map(e => ({ name: e.name, parent: e.parent, index: e.index })),
         });
       }
-      const { id } = yield tagDao.insert(recToWrite);
+      const { id } = await tagDao.insert(recToWrite);
       this.res.send({ result: 'ok' });
       winston.loggers.get('application').debug('Persisted TagHierarchy id=%s to db: %j', id, this.data);
     } catch (err) {
@@ -123,9 +123,9 @@ class RemoveTagProcessor extends BaseProcessor {
     }
   }
 
-  * process() {
+  async process() {
     try {
-      const tagHierarchyRec = yield tagDao.getHierarchyByUser(this.data.userid);
+      const tagHierarchyRec = await tagDao.getHierarchyByUser(this.data.userid);
       this.validateData(tagHierarchyRec);
       if (tagHierarchyRec) {
         const recToWrite = Object.assign({}, tagHierarchyRec, {
@@ -133,7 +133,7 @@ class RemoveTagProcessor extends BaseProcessor {
         });
         tagDao.insert(recToWrite);
       }
-      const rows = yield linkDao.listByUseridAndTag(this.data.userid, this.data.name);
+      const rows = await linkDao.listByUseridAndTag(this.data.userid, this.data.name);
       const docsToWrite = rows.map((row) => {
         const recLink = row.value;
         recLink.tags = recLink.tags.filter(e => e !== this.data.name);

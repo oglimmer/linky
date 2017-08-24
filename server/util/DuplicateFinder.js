@@ -54,7 +54,7 @@ export class CheckLinkDuplicateFinder extends DuplicateFinderBase {
     this.changedUserId = changedUserId;
   }
 
-  allLinksInSystem() {
+  async allLinksInSystem() {
     const promises = Array.from(this.allLinks.entries()).map(async ([userid, map]) => {
       const linkList = Array.from(map.entries())
         .filter(([, value]) => value > 1)
@@ -73,7 +73,7 @@ export class CheckLinkDuplicateFinder extends DuplicateFinderBase {
         await linkDao.bulk({ docs });
       }
     });
-    return Promise.all(promises);
+    await Promise.all(promises);
   }
 }
 
@@ -85,8 +85,9 @@ export class ImportDuplicateFinder extends DuplicateFinderBase {
   }
 
   async onImport(docs) {
-    // this.allLinks : contains all imported pureUrls/#
-    // docs contains all link-objects from import
+    // docs contains all link-objects to be imported
+    docs.forEach((doc) => { this.counterLink(doc); });
+    // now this.allLinks contains all imported pureUrls/#
     assert(this.allLinks.size < 2);
     if (this.allLinks.size === 1) {
       const userid = this.allLinks.keys().next().value;
@@ -117,8 +118,9 @@ export class ImportDuplicateFinder extends DuplicateFinderBase {
               docsToSave.push(rec);
             });
         });
-      await linkDao.bulk({ docs: docsToSave });
+      if (docsToSave.length > 0) {
+        await linkDao.bulk({ docs: docsToSave });
+      }
     }
-    return docs;
   }
 }

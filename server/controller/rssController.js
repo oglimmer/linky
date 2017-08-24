@@ -177,27 +177,27 @@ class GetRssUpdatesProcessor extends BaseProcessor {
     return encoding ? iconv.decode(response.body, encoding) : response.body.toString();
   }
 
-  * process() {
+  async process() {
     try {
-      const rec = yield linkDao.getById(this.data.linkId);
+      const rec = await linkDao.getById(this.data.linkId);
       if (!rec || !rec.rssUrl) {
         this.res.send('ERROR. No rssUrl for this link.');
       } else {
         if (rec.userid !== this.data.userid) {
           throw new Error('Forbidden');
         }
-        const feedHttpResponse = yield request.get({
+        const feedHttpResponse = await request.get({
           uri: rec.rssUrl,
           encoding: null,
           resolveWithFullResponse: true,
         });
-        const content = yield parseStringPromise(
+        const content = await parseStringPromise(
           GetRssUpdatesProcessor.getContent(feedHttpResponse));
         const currentFeedData = getKeyContent(content);
         if (typeof currentFeedData === 'string') {
           ResponseUtil.sendErrorResponse500(currentFeedData, this.res);
         } else {
-          let feedUpdatesRec = yield feedUpdatesDao.getByLinkId(this.data.linkId);
+          let feedUpdatesRec = await feedUpdatesDao.getByLinkId(this.data.linkId);
           if (!feedUpdatesRec) {
             feedUpdatesRec = {
               type: 'feedUpdates',
@@ -233,12 +233,12 @@ class GetRssUpdatesProcessor extends BaseProcessor {
 
 export default {
 
-  getRssUpdatesCollection: function getRssUpdatesCollection(req, res, next) {
+  getRssUpdatesCollection: (req, res, next) => {
     const glp = new GetRssUpdatesProcessor(req, res, next, false);
     glp.doProcess();
   },
 
-  getRssUpdatesDetails: function getRssUpdatesDetails(req, res, next) {
+  getRssUpdatesDetails: (req, res, next) => {
     const glp = new GetRssUpdatesProcessor(req, res, next, true);
     glp.doProcess();
   },

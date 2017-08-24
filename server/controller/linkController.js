@@ -32,11 +32,11 @@ class CreateLinkProcessor extends BaseProcessor {
   }
   /* eslint-enable class-methods-use-this */
 
-  * process() {
+  async process() {
     try {
-      const newLinkRec = yield createRecord(this.data, this.data.userid);
-      const collateral = yield findDuplicatesSingleAddEditLink(this.data.userid, newLinkRec);
-      const { id } = yield presistRecord(newLinkRec);
+      const newLinkRec = await createRecord(this.data, this.data.userid);
+      const collateral = await findDuplicatesSingleAddEditLink(this.data.userid, newLinkRec);
+      const { id } = await presistRecord(newLinkRec);
       newLinkRec.id = id;
       this.res.send({ primary: newLinkRec, collateral });
       updateTagHierarchy(this.data.userid, newLinkRec.tags);
@@ -76,9 +76,9 @@ class UpdateLinkProcessor extends BaseProcessor {
   }
   /* eslint-enable class-methods-use-this */
 
-  * process() {
+  async process() {
     try {
-      const rec = yield linkDao.getById(this.data.linkid);
+      const rec = await linkDao.getById(this.data.linkid);
       if (rec.userid !== this.data.userid) {
         throw new Error('Forbidden');
       }
@@ -89,8 +89,8 @@ class UpdateLinkProcessor extends BaseProcessor {
         pageTitle: this.data.pageTitle,
         notes: this.data.notes,
       });
-      const collateral = yield findDuplicatesSingleAddEditLink(this.data.userid, recToWrite);
-      yield linkDao.insert(recToWrite);
+      const collateral = await findDuplicatesSingleAddEditLink(this.data.userid, recToWrite);
+      await linkDao.insert(recToWrite);
       /* eslint-disable no-underscore-dangle */
       recToWrite.id = recToWrite._id;
       /* eslint-enable no-underscore-dangle */
@@ -132,11 +132,11 @@ class BatchUpdateLinkChangeTagProcessor extends BaseProcessor {
     }
   }
 
-  * process() {
+  async process() {
     try {
       this.validate();
       // update links
-      const rawRows = yield linkDao.listByUseridAndTag(this.data.userid, this.data.oldTagName);
+      const rawRows = await linkDao.listByUseridAndTag(this.data.userid, this.data.oldTagName);
       const docs = rawRows.map((row) => {
         const rec = row.value;
         rec.tags.splice(rec.tags.findIndex(e => e === this.data.oldTagName), 1);
@@ -145,9 +145,9 @@ class BatchUpdateLinkChangeTagProcessor extends BaseProcessor {
         }
         return rec;
       });
-      yield linkDao.bulk({ docs });
+      await linkDao.bulk({ docs });
       // update tag hierarchy
-      const tagHierarchyRec = yield tagDao.getHierarchyByUser(this.data.userid);
+      const tagHierarchyRec = await tagDao.getHierarchyByUser(this.data.userid);
       const tagHierarchy = tagHierarchyRec.tree;
       const indexTarget = tagHierarchy.findIndex(e => e.name === this.data.newTagName);
       const indexOld = tagHierarchy.findIndex(e => e.name === this.data.oldTagName);
@@ -166,7 +166,7 @@ class BatchUpdateLinkChangeTagProcessor extends BaseProcessor {
       });
       tagDao.insert(tagHierarchyRec);
       // get count for new target tag
-      const newRows = yield linkDao.listByUseridAndTag(this.data.userid, this.data.newTagName);
+      const newRows = await linkDao.listByUseridAndTag(this.data.userid, this.data.newTagName);
       this.res.send({ count: newRows.length });
       winston.loggers.get('application').debug('Updated %i links from %s to %s', docs.length, this.data.oldTagName, this.data.newTagName);
     } catch (err) {
@@ -188,9 +188,9 @@ class GetLinkProcessor extends BaseProcessor {
     this.data = { tags };
   }
 
-  * process() {
+  async process() {
     try {
-      const rows = yield linkDao.listByUseridAndTag(this.data.userid, this.data.tags);
+      const rows = await linkDao.listByUseridAndTag(this.data.userid, this.data.tags);
       const responseArr = rows.map((row) => {
         const { _id, _rev, ...mappedRow } = row.value;
         mappedRow.id = _id;
@@ -217,12 +217,12 @@ class DeleteProcessor extends BaseProcessor {
   }
   /* eslint-enable class-methods-use-this */
 
-  * process() {
+  async process() {
     try {
-      yield linkDao.deleteLatest(this.data.linkid, this.data.userid);
+      await linkDao.deleteLatest(this.data.linkid, this.data.userid);
       this.res.send({ result: 'ok' });
       // if this was an `archive` delete its archive object and the file cache
-      const archiveRec = yield archiveDao.getByUserIdAndArchiveLinkId(
+      const archiveRec = await archiveDao.getByUserIdAndArchiveLinkId(
         this.data.userid, this.data.linkid);
       if (archiveRec) {
         /* eslint-disable no-underscore-dangle */
@@ -244,27 +244,27 @@ class DeleteProcessor extends BaseProcessor {
 
 export default {
 
-  createLink: function createLink(req, res, next) {
+  createLink: (req, res, next) => {
     const crp = new CreateLinkProcessor(req, res, next);
     crp.doProcess();
   },
 
-  updateLink: function updateLink(req, res, next) {
+  updateLink: (req, res, next) => {
     const crp = new UpdateLinkProcessor(req, res, next);
     crp.doProcess();
   },
 
-  batchModifyLinksForTag: function batchModifyLinksForTag(req, res, next) {
+  batchModifyLinksForTag: (req, res, next) => {
     const crp = new BatchUpdateLinkChangeTagProcessor(req, res, next);
     crp.doProcess();
   },
 
-  getLinkCollection: function getLinkCollection(req, res, next) {
+  getLinkCollection: (req, res, next) => {
     const glp = new GetLinkProcessor(req, res, next);
     glp.doProcess();
   },
 
-  deleteLink: function deleteLink(req, res, next) {
+  deleteLink: (req, res, next) => {
     const dp = new DeleteProcessor(req, res, next);
     dp.doProcess();
   },

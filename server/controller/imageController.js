@@ -19,11 +19,11 @@ class GetFaviconProcessor extends BaseProcessor {
     this.data = { linkid };
   }
 
-  * process() {
+  async process() {
     try {
       const file = `${properties.server.favicon.cachePath}/${this.data.linkid}`;
       try {
-        yield fs.stat(file);
+        await fs.stat(file);
         const contentType = fs.readFileSync(`${file}.contentType`);
         this.res.append('content-type', contentType);
         this.res.append('Cache-Control', 'max-age=31536000');
@@ -35,7 +35,7 @@ class GetFaviconProcessor extends BaseProcessor {
           this.res.end(err);
         });
       } catch (noCacheFile) {
-        const rec = yield linkDao.getById(this.data.linkid);
+        const rec = await linkDao.getById(this.data.linkid);
         const outputStream = fs.createWriteStream(file);
         request({
           method: 'GET',
@@ -70,7 +70,7 @@ class GetFaviconProcessor extends BaseProcessor {
 
 export default {
 
-  getFavicon: function getFavicon(req, res, next) {
+  getFavicon: (req, res, next) => {
     const glp = new GetFaviconProcessor(req, res, next);
     glp.doProcess();
   },

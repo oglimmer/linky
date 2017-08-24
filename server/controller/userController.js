@@ -27,18 +27,18 @@ class CreateUserProcessor extends BaseProcessor {
     this.data = { email, password };
   }
 
-  * process() {
+  async process() {
     try {
       if (properties.build.login.userpass !== true) {
         throw new Error('Forbidden');
       }
-      const user = yield userDao.getByEmail(this.data.email);
+      const user = await userDao.getByEmail(this.data.email);
       if (user !== null) {
         ResponseUtil.sendErrorResponse500('Email address already in use', this.res);
       } else {
-        const hash = yield BcryptUtil.hash(this.data.password);
+        const hash = await BcryptUtil.hash(this.data.password);
         const dbObject = { email: this.data.email, hash };
-        const id = yield createUser(dbObject);
+        const id = await createUser(dbObject);
         this.res.send({ id });
         winston.loggers.get('application').debug('Create user id=%s to db: %j', id, dbObject);
       }
@@ -70,15 +70,15 @@ class AuthenticateProcessor extends BaseProcessor {
   }
   /* eslint-enable class-methods-use-this */
 
-  * process() {
+  async process() {
     try {
-      const user = yield userDao.getByEmail(this.data.email);
+      const user = await userDao.getByEmail(this.data.email);
       if (user == null) {
         ResponseUtil.sendErrorResponse(401, 'Wrong user or password!', this.res);
         this.res.end();
       } else {
         const { _id, hash } = user;
-        const result = yield BcryptUtil.compare(this.data.password, hash);
+        const result = await BcryptUtil.compare(this.data.password, hash);
         if (result) {
           const claim = {
             userid: _id,
@@ -107,9 +107,9 @@ class GetUserProcessor extends BaseProcessor {
     super(req, res, next, true);
   }
 
-  * process() {
+  async process() {
     try {
-      const user = yield userDao.getById(this.data.userid);
+      const user = await userDao.getById(this.data.userid);
       if (!user) {
         ResponseUtil.sendErrorResponse500('Unknown id', this.res);
       } else {

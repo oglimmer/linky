@@ -56,8 +56,8 @@ class ImportProcessor extends BaseProcessor {
     }
   }
 
-  * loadAsyncWaitId() {
-    const asyncWaitRec = yield asyncWaitDao.getAsyncWaitByByUserAndObject(this.data.userid, 'import');
+  async loadAsyncWaitId() {
+    const asyncWaitRec = await asyncWaitDao.getAsyncWaitByByUserAndObject(this.data.userid, 'import');
     if (asyncWaitRec) {
       /* eslint-disable no-underscore-dangle */
       return {
@@ -66,21 +66,21 @@ class ImportProcessor extends BaseProcessor {
       };
       /* eslint-enable no-underscore-dangle */
     }
-    return yield asyncWaitDao.insert({
+    return asyncWaitDao.insert({
       type: 'asyncwait',
       userid: this.data.userid,
       object: 'import',
     });
   }
 
-  * process() {
-    const asyncWaitId = yield BlueBirdPromise.coroutine(this.loadAsyncWaitId).bind(this)();
+  async process() {
+    const asyncWaitId = await this.loadAsyncWaitId();
     try {
       this.validate();
       const $ = cheerio.load(this.data.bookmarks);
       const allTags = new Set();
       const duplicateFinder = new ImportDuplicateFinder(allTags);
-      BlueBirdPromise.map($('a').toArray(), (a) => {
+      const docs = await BlueBirdPromise.map($('a').toArray(), async (a) => {
         const $a = $(a);
         const title = $a.text();
         const url = $a.attr('href');
@@ -92,31 +92,25 @@ class ImportProcessor extends BaseProcessor {
           }
           return `${this.data.tagPrefix}${cat}`;
         });
-        return createRecord({
+        const rec = await createRecord({
           url,
           rssUrl: null,
           tagsAsArray: categories,
           pageTitle: title,
           notes: null,
-        }, this.data.userid)
-          .then((rec) => {
-            rec.tags.forEach(c => allTags.add(c));
-            const updateObj = {};
-            if (!equalRelevant(rec.linkUrl, url)) {
-              updateObj.notes = `Original url was ${url}`;
-            }
-            const finalRec = Object.assign({}, rec, updateObj);
-            duplicateFinder.counterLink(finalRec);
-            return finalRec;
-          });
-      }, { concurrency: 5 })
-        .then(docs => duplicateFinder.onImport(docs))
-        .then(docs => linkDao.bulk({ docs }))
-        .then(() => updateTagHierarchy(this.data.userid, allTags, this.data.importNode))
-        .then(() => {
-          winston.loggers.get('application').debug('import done.');
-          asyncWaitDao.delete(asyncWaitId.id, asyncWaitId.rev);
-        });
+        }, this.data.userid);
+        rec.tags.forEach(c => allTags.add(c));
+        const updateObj = {};
+        if (!equalRelevant(rec.linkUrl, url)) {
+          updateObj.notes = `Original url was ${url}`;
+        }
+        return Object.assign({}, rec, updateObj);
+      }, { concurrency: 5 });
+      await duplicateFinder.onImport(docs);
+      await linkDao.bulk({ docs });
+      await updateTagHierarchy(this.data.userid, allTags, this.data.importNode);
+      winston.loggers.get('application').debug('import done.');
+      await asyncWaitDao.delete(asyncWaitId.id, asyncWaitId.rev);
       this.res.send('ok');
     } catch (err) {
       winston.loggers.get('application').error(err);
@@ -132,10 +126,10 @@ class ExportProcessor extends BaseProcessor {
     super(req, res, next, true);
   }
 
-  * process() {
+  async process() {
     try {
-      const rows = yield linkDao.listByUserid(this.data.userid);
-      const tagHierarchy = yield tagLogic.load(this.data.userid);
+      const rows = await linkDao.listByUserid(this.data.userid);
+      const tagHierarchy = await tagLogic.load(this.data.userid);
       const data = toNetscape(tagHierarchy.tree, rows.map(l => l.value));
       const html = netscape(data);
       this.res.send({ content: html });
@@ -152,9 +146,9 @@ class ImportReadyProcessor extends BaseProcessor {
     super(req, res, next, true);
   }
 
-  * process() {
+  async process() {
     try {
-      const rec = yield asyncWaitDao.getAsyncWaitByByUserAndObject(this.data.userid, 'import');
+      const rec = await asyncWaitDao.getAsyncWaitByByUserAndObject(this.data.userid, 'import');
       const ready = !rec;
       this.res.send({ importDone: ready });
     } catch (err) {

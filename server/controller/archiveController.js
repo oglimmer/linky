@@ -119,18 +119,18 @@ class CreateArchiveProcessor extends BaseProcessor {
       .then(() => fs.writeFile(path.join(cachePath, 'SCRAPED_MIME_TYPE_MAP'), JSON.stringify(fileNameToContentTypeMap)));
   }
 
-  * process() {
+  async process() {
     try {
-      const originalLinkRec = yield linkDao.getById(this.data.linkid);
+      const originalLinkRec = await linkDao.getById(this.data.linkid);
       if (originalLinkRec.userid !== this.data.userid) {
         throw new Error('Forbidden');
       }
       const userHash = hashSha256Hex(this.data.userid);
-      const archiveRec = yield this.initArchiveRec(userHash, originalLinkRec.linkUrl);
+      const archiveRec = await this.initArchiveRec(userHash, originalLinkRec.linkUrl);
       const cachePath = path.join(properties.server.archive.cachePath, userHash, archiveRec._id);
-      yield CreateArchiveProcessor.scrape(cachePath, originalLinkRec.linkUrl);
-      const archiveLinkRec = yield this.createLinkRec(userHash, archiveRec._id, originalLinkRec);
-      yield CreateArchiveProcessor.updateArchiveRec(archiveRec, archiveLinkRec.id);
+      await CreateArchiveProcessor.scrape(cachePath, originalLinkRec.linkUrl);
+      const archiveLinkRec = await this.createLinkRec(userHash, archiveRec._id, originalLinkRec);
+      await CreateArchiveProcessor.updateArchiveRec(archiveRec, archiveLinkRec.id);
       updateTagHierarchy(this.data.userid, archiveLinkRec.tags);
       zip(cachePath, archiveRec);
       this.res.send({ primary: archiveLinkRec });
