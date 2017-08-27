@@ -1,6 +1,6 @@
 import Immutable from 'immutable';
 
-import conv from './ImmutableConverter';
+import conv from '../../src/util/ImmutableConverter';
 
 it('convert null', () => {
   const a = null;

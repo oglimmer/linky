@@ -4,6 +4,9 @@ import scrape from 'website-scraper';
 import path from 'path';
 import archiver from 'archiver';
 import fs from 'fs-extra';
+import unzip from 'unzipper';
+import { Promise } from 'bluebird';
+import express from 'express';
 
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
@@ -12,6 +15,8 @@ import archiveDao from '../dao/archiveDao';
 import { updateTagHierarchy, createObject } from '../logic/Link';
 import { ALL, ARCHIVE } from '../../src/util/TagRegistry';
 import { hashSha256Hex } from '../util/HashUtil';
+import JwtUtil from '../util/JwtUtil';
+
 
 import properties from '../util/linkyproperties';
 
@@ -50,7 +55,7 @@ class CreateArchiveProcessor extends BaseProcessor {
     this.data = { linkid };
   }
 
-  initArchiveRec(userHash, url) {
+  async initArchiveRec(userHash, url) {
     const archiveRec = {
       userid: this.data.userid,
       userHash,
@@ -59,23 +64,21 @@ class CreateArchiveProcessor extends BaseProcessor {
       url,
       type: 'archive',
     };
-    return archiveDao.insert(archiveRec).then(({ id, rev }) => {
-      archiveRec._id = id;
-      archiveRec._rev = rev;
-      return archiveRec;
-    });
+    const { id, rev } = await archiveDao.insert(archiveRec);
+    archiveRec._id = id;
+    archiveRec._rev = rev;
+    return archiveRec;
   }
 
-  static updateArchiveRec(archiveRec, archiveLinkRecId) {
+  static async updateArchiveRec(archiveRec, archiveLinkRecId) {
     /* eslint-disable no-param-reassign */
     archiveRec.archiveLinkid = archiveLinkRecId;
-    return archiveDao.insert(archiveRec).then(({ rev }) => {
-      archiveRec._rev = rev;
-    });
+    const { rev } = await archiveDao.insert(archiveRec);
+    archiveRec._rev = rev;
     /* eslint-enable no-param-reassign */
   }
 
-  createLinkRec(userHash, archiveRecId, linkRec) {
+  async createLinkRec(userHash, archiveRecId, linkRec) {
     const newRecord = createObject({
       linkUrl: `${properties.server.archive.domain}/archive/${userHash}/${archiveRecId}`,
       userid: this.data.userid,
@@ -84,18 +87,17 @@ class CreateArchiveProcessor extends BaseProcessor {
       pageTitle: `[ARCHIVE] ${linkRec.pageTitle}`,
       faviconUrl: linkRec.faviconUrl,
     });
-    return linkDao.insert(newRecord).then(({ id }) => {
-      newRecord.id = id;
-      return newRecord;
-    });
+    const { id } = await linkDao.insert(newRecord);
+    newRecord.id = id;
+    return newRecord;
   }
 
-  static scrape(cachePath, url) {
+  static async scrape(cachePath, url) {
     // we need to store all content-types into the file `SCRAPED_MIME_TYPE_MAP`.
     // see server/httpRoutes/archive.js at "FILE `SCRAPED_MIME_TYPE_MAP`"
     const urlToContentTypeMap = new Map();
     const fileNameToContentTypeMap = new Map();
-    return scrape({
+    await scrape({
       urls: [url],
       directory: cachePath,
       httpResponseHandler: (response) => {
@@ -115,8 +117,8 @@ class CreateArchiveProcessor extends BaseProcessor {
           'User-Agent': properties.server.archive.userAgent,
         },
       },
-    })
-      .then(() => fs.writeFile(path.join(cachePath, 'SCRAPED_MIME_TYPE_MAP'), JSON.stringify(fileNameToContentTypeMap)));
+    });
+    fs.writeFile(path.join(cachePath, 'SCRAPED_MIME_TYPE_MAP'), JSON.stringify(fileNameToContentTypeMap));
   }
 
   async process() {
@@ -143,11 +145,114 @@ class CreateArchiveProcessor extends BaseProcessor {
   }
 }
 
+class ReadArchiveController {
+  constructor(req, res, next) {
+    this.req = req;
+    this.res = res;
+    this.next = next;
+  }
+
+  createParameterFromUrl() {
+    let extId = this.req.url.substr(1); // remove starting /
+    this.userhash = extId.substr(0, extId.indexOf('/')); // char seq between two slashes
+    extId = extId.substr(extId.indexOf('/') + 1); // cut userid
+    if (extId.indexOf('?') > -1) {
+      extId = extId.substr(0, extId.indexOf('?'));
+    }
+    let endPos = extId.indexOf('/');
+    if (endPos === -1) {
+      this.filename = 'index.html';
+      endPos = extId.length;
+    } else {
+      this.filename = extId.substr(endPos + 1);
+    }
+    this.archiveid = extId.substr(0, endPos);
+    this.archivePath = path.join(
+      properties.server.archive.cachePath, this.userhash, this.archiveid);
+  }
+
+  handleContentTypeForSpecialUrls() {
+    if (this.req.url.endsWith('.php')) {
+      const mimeFile = path.join(properties.server.archive.cachePath, this.userhash, this.archiveid, 'SCRAPED_MIME_TYPE_MAP');
+      const map = new Map(JSON.parse(fs.readFileSync(mimeFile, { encoding: 'utf-8' })));
+      const contentType = map.get(this.filename);
+      if (contentType) {
+        this.req.SAVED_CONTENTTYPE = contentType;
+      }
+    }
+  }
+
+  async restoreArchiveFromDB() {
+    try {
+      await Promise.all([
+        archiveDao.getById(this.archiveid),
+        fs.ensureDir(this.archivePath),
+      ]);
+      winston.loggers.get('application').debug('unzipping %s ...', this.archiveid);
+      const targetStream = unzip.Extract({ path: this.archivePath });
+      targetStream.on('close', () => {
+        this.handleContentTypeForSpecialUrls();
+        this.next();
+      });
+      archiveDao.attachmentGet(this.archiveid, 'archive').pipe(targetStream);
+    } catch (err) {
+      winston.loggers.get('application').warn('Unable to find %s - %s', this.archiveid, err);
+      this.next();
+    }
+  }
+
+  async serveFiles() {
+    try {
+      await fs.stat(this.archivePath);
+      this.handleContentTypeForSpecialUrls();
+      this.next();
+    } catch (err) {
+      this.restoreArchiveFromDB();
+    }
+  }
+
+  async ensureFilesOnCacheAndSecurity() {
+    if (this.req.query.tmpAuthToken) {
+      this.res.cookie('tmpAuthToken', this.req.query.tmpAuthToken);
+      // security: don't keep the token in the url
+      this.res.redirect(this.req.originalUrl.substr(0, this.req.originalUrl.indexOf('?')));
+    } else {
+      try {
+        const claim = await JwtUtil.verify(this.req.cookies.tmpAuthToken);
+        this.createParameterFromUrl();
+        if (this.userhash !== claim.archiveUserHash) {
+          throw new Error();
+        }
+        this.serveFiles();
+      } catch (err) {
+        this.res.status(403).send('403 - Forbidden');
+      }
+    }
+  }
+}
+
 export default {
 
   createArchive: (req, res, next) => {
     const glp = new CreateArchiveProcessor(req, res, next);
     glp.doProcess();
   },
+
+  ensureFilesOnCacheAndSecurity: (req, res, next) => {
+    const rac = new ReadArchiveController(req, res, next);
+    rac.ensureFilesOnCacheAndSecurity();
+  },
+
+  // FILE `SCRAPED_MIME_TYPE_MAP`
+  // .php files contain virtually anything (like html, js or css). so the content-type
+  // cannot be derived from the file extension. therefore we use the file
+  // `SCRAPED_MIME_TYPE_MAP` which was saved during web scrape time
+  serveStatic: express.static(path.join(properties.server.archive.cachePath), {
+    setHeaders: (res) => {
+      if (res.req.SAVED_CONTENTTYPE) {
+        res.setHeader('content-type', res.req.SAVED_CONTENTTYPE);
+      }
+    },
+  }),
 
 };

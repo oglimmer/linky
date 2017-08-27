@@ -1,5 +1,5 @@
 
-import BcryptUtil from './BcryptUtil';
+import BcryptUtil from '../../server/util/BcryptUtil';
 
 test('hash and compare test', async () => {
   const passwordToTest = 'foobar';

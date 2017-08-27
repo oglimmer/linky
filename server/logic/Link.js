@@ -198,6 +198,7 @@ const updateTagHierarchyFailable = async (userId, tags, parent) => {
 };
 
 export async function updateTagHierarchy(userid, tags, parent = 'root') {
+  /* eslint-disable no-constant-condition */
   while (true) {
     try {
       /* eslint-disable no-await-in-loop */
@@ -210,6 +211,7 @@ export async function updateTagHierarchy(userid, tags, parent = 'root') {
       }
     }
   }
+  /* eslint-enable no-constant-condition */
 }
 
 export const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, notes, userid }) =>
@@ -237,33 +239,35 @@ export const validateAndEnhanceTags = (tags, rssUrl, linkUrl) =>
     ), linkUrl,
   );
 
-export const createRecord = (rec, userid) => {
+export const createRecord = async (rec, userid) => {
   const { url, rssUrl, tagsAsString, tagsAsArray, pageTitle, notes } = rec;
   const fixedUrl = fixUrl(url);
   const fixedRssUrl = fixUrl(rssUrl);
   const fixedTags = Object.prototype.hasOwnProperty.call(rec, 'tagsAsString') ? getTags(tagsAsString) : getTagsFromArray(tagsAsArray);
   const tags = validateAndEnhanceTags(fixedTags, fixedRssUrl, fixedUrl);
   const locked = !!tags.find(t => t === LOCKED);
-  return resolveUrl(fixedUrl, pageTitle, locked)
-    .then(({ linkUrl, title }) => favicon(linkUrl)
-      .then(faviconUrl => createObject({
-        tags,
-        linkUrl,
-        faviconUrl,
-        rssUrl: fixedRssUrl,
-        pageTitle: title,
-        notes,
-        userid,
-      })),
-    )
-    .catch(() => createObject({
+  try {
+    const { linkUrl, title } = await resolveUrl(fixedUrl, pageTitle, locked);
+    const faviconUrl = await favicon(linkUrl);
+    return createObject({
+      tags,
+      linkUrl,
+      faviconUrl,
+      rssUrl: fixedRssUrl,
+      pageTitle: title,
+      notes,
+      userid,
+    });
+  } catch (err) {
+    return createObject({
       tags,
       linkUrl: fixedUrl,
       rssUrl: fixedRssUrl,
       pageTitle: fixedUrl,
       notes,
       userid,
-    }));
+    });
+  }
 };
 
 export const presistRecord = rec => linkDao.insert(rec);

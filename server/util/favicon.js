@@ -5,11 +5,13 @@ import request from 'request-promise';
 
 const promisedFavicon = Promise.promisify(favicon);
 
-export default url => promisedFavicon(url, { timeout: 15000 }).then((faviconUrl) => {
-  if (!faviconUrl) {
-    return null;
-  }
-  return request.get(faviconUrl, { resolveWithFullResponse: true }).then((response) => {
+export default async (url) => {
+  try {
+    const faviconUrl = await promisedFavicon(url, { timeout: 15000 });
+    if (!faviconUrl) {
+      return null;
+    }
+    const response = await request.get(faviconUrl, { resolveWithFullResponse: true });
     const contentType = response.headers['content-type'];
     if (!contentType || !contentType.startsWith('image/')) {
       return null;
@@ -18,6 +20,8 @@ export default url => promisedFavicon(url, { timeout: 15000 }).then((faviconUrl)
     if (faviconBlob) {
       return faviconUrl;
     }
-    return null;
-  }).catch(() => null);
-}).catch(() => null);
+  } catch (err) {
+    // just ignore
+  }
+  return null;
+};

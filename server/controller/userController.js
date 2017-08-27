@@ -83,12 +83,11 @@ class AuthenticateProcessor extends BaseProcessor {
           const claim = {
             userid: _id,
           };
-          JwtUtil.sign(claim).then((token) => {
-            winston.loggers.get('application').debug('User id=%s authenticated', _id);
-            this.res.cookie('authToken', token, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
-            this.res.send({ token });
-            this.res.end();
-          });
+          const token = await JwtUtil.sign(claim);
+          winston.loggers.get('application').debug('User id=%s authenticated', _id);
+          this.res.cookie('authToken', token, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
+          this.res.send({ token });
+          this.res.end();
         } else {
           ResponseUtil.sendErrorResponse(401, 'Wrong user or password!', this.res);
           this.res.end();
@@ -125,6 +124,26 @@ class GetUserProcessor extends BaseProcessor {
   }
 }
 
+class LogoutProcessor extends BaseProcessor {
+  constructor(req, res, next) {
+    super(req, res, next, true);
+  }
+
+  async process() {
+    const { vistorToken } = this.req.cookies;
+    const vistorRec = await visitorDao.getByVisitorId(vistorToken);
+    if (vistorRec) {
+      /* eslint-disable no-underscore-dangle */
+      visitorDao.delete(vistorRec._id, vistorRec._rev);
+      /* eslint-enable no-underscore-dangle */
+    }
+    this.res.clearCookie('vistorToken');
+    this.res.clearCookie('authToken');
+    this.res.send('ok');
+    this.res.end();
+  }
+}
+
 export default {
 
   authenticate: (req, res, next) => {
@@ -137,20 +156,9 @@ export default {
     cup.doProcess();
   },
 
-  logout: (req, res) => {
-    const { vistorToken } = req.cookies;
-    visitorDao.getByVisitorId(vistorToken)
-      .then((vistorRec) => {
-        if (vistorRec) {
-          /* eslint-disable no-underscore-dangle */
-          visitorDao.delete(vistorRec._id, vistorRec._rev);
-          /* eslint-enable no-underscore-dangle */
-        }
-      });
-    res.clearCookie('vistorToken');
-    res.clearCookie('authToken');
-    res.send('ok');
-    res.end();
+  logout: (req, res, next) => {
+    const cup = new LogoutProcessor(req, res, next);
+    cup.doProcess();
   },
 
   getUser: (req, res, next) => {

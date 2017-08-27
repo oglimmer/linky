@@ -18,10 +18,13 @@ const click = (target) => {
   document.location.href = `/auth/${target}`;
 };
 
-const loginDemo = (dispatch, history) => {
-  dispatch(checkAuth('demo@linky1.com', 'demo')).then(() => {
+const loginDemo = async (dispatch, history) => {
+  try {
+    await dispatch(checkAuth('demo@linky1.com', 'demo'));
     history.replace('/links/portal');
-  }, () => {});
+  } catch (err) {
+    // ignore
+  }
 };
 
 /* eslint-disable eqeqeq */
@@ -78,10 +81,13 @@ const Login = ({ dispatch, history }) => (
           <div className="panel-body">
             <Form
               model="login"
-              onSubmit={(formData) => {
-                dispatch(checkAuth(formData.email, formData.password)).then(() => {
+              onSubmit={async (formData) => {
+                try {
+                  await dispatch(checkAuth(formData.email, formData.password));
                   history.replace('/links/portal');
-                }, () => {});
+                } catch (err) {
+                  // ignore
+                }
               }}
             >
               <FormGroup controlId="loginEmail">

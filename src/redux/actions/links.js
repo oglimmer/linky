@@ -2,6 +2,7 @@
 import { actions } from 'react-redux-form';
 import { push } from 'react-router-redux';
 import assert from 'assert';
+import BlueBirdPromise from 'bluebird';
 
 import fetch from '../../util/fetch';
 import { diff } from '../../util/ArrayUtil';
@@ -86,74 +87,67 @@ export function resetAddLinkFields() {
 
 
 export function fetchRssUpdatesDetails(id) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     if (getState().mainData.selectedLinkForDetails === id) {
       dispatch(setRssDetailsId(null));
-      return null;
+      return;
     }
-    return fetch.get(`/rest/links/${id}/rssDetails`, getState().auth.token)
-      .then((json) => {
-        dispatch(setRssUpdates(id, json.result));
-        dispatch(setRssUpdatesDetails(id, json.display));
-        dispatch(setRssDetailsId(id));
-      })
-      .catch(ex => dispatch(setErrorMessage(ex)));
+    try {
+      const json = await fetch.get(`/rest/links/${id}/rssDetails`, getState().auth.token);
+      dispatch(setRssUpdates(id, json.result));
+      dispatch(setRssUpdatesDetails(id, json.display));
+      dispatch(setRssDetailsId(id));
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
   };
 }
 
 const lastUpdates = {};
 export function fetchRssUpdates(forceUpdate = false) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const { linkList } = getState().mainData;
-    const ps = [];
-    let totalNewUpdates = 0;
-    linkList.filter(e => e.rssUrl).forEach((linkElement) => {
-      const lastFetch = lastUpdates[linkElement.id];
-      if (forceUpdate || !lastFetch || lastFetch < Date.now() - RSS_UPDATE_FREQUENCY) {
-        lastUpdates[linkElement.id] = Date.now();
-        ps.push(new Promise((resolve, reject) => {
-          fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token)
-            .then((json) => {
-              totalNewUpdates += json.result;
-              dispatch(setRssUpdates(linkElement.id, json.result));
-              resolve();
-            })
-            .catch((ex) => {
-              dispatch(setErrorMessage(ex));
-              reject(ex);
-            });
-        }));
-      }
-    });
-    Promise.all(ps).then(() => {
-      if (totalNewUpdates > 0) {
-        if (Notification.permission !== 'granted') {
-          Notification.requestPermission();
-        } else {
-          /* eslint-disable no-new */
-          new Notification(`${totalNewUpdates} unread RSS feeds found!`, {
-            icon: 'https://linky1.com/favicon.ico',
-          });
-          /* eslint-enable no-new */
+    const totals = await BlueBirdPromise.map(linkList.filter(e => e.rssUrl),
+      async (linkElement) => {
+        const lastFetch = lastUpdates[linkElement.id];
+        if (forceUpdate || !lastFetch || lastFetch < Date.now() - RSS_UPDATE_FREQUENCY) {
+          lastUpdates[linkElement.id] = Date.now();
+          const json = await fetch.get(`/rest/links/${linkElement.id}/rss`, getState().auth.token);
+          dispatch(setRssUpdates(linkElement.id, json.result));
+          return json.result;
         }
+        return 0;
+      }, { concurrency: 5 },
+    );
+    const totalNewUpdates = totals.reduce((sum, value) => sum + value, 0);
+    if (totalNewUpdates > 0) {
+      if (Notification.permission !== 'granted') {
+        Notification.requestPermission();
+      } else {
+        /* eslint-disable no-new */
+        new Notification(`${totalNewUpdates} unread RSS feeds found!`, {
+          icon: 'https://linky1.com/favicon.ico',
+        });
+        /* eslint-enable no-new */
       }
-    });
+    }
   };
 }
 
 
 export function fetchLinks(tag) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const selectedTag = tag || getState().mainData.selectedTag;
-    return fetch.get(`/rest/links/${selectedTag}`, getState().auth.token)
-      .then(linkList => dispatch(setLinks(linkList)))
-      .catch((error) => {
-        if (error.message.indexOf('Invalid auth token') !== -1) {
-          dispatch(setErrorMessage('Session token expired. Reload this page!'));
-        } else {
-          dispatch(setErrorMessage(error));
-        }
-      });
+    try {
+      const linkList = await fetch.get(`/rest/links/${selectedTag}`, getState().auth.token);
+      dispatch(setLinks(linkList));
+    } catch (err) {
+      if (err.message.indexOf('Invalid auth token') !== -1) {
+        dispatch(setErrorMessage('Session token expired. Reload this page!'));
+      } else {
+        dispatch(setErrorMessage(err));
+      }
+    }
   };
 }
 
@@ -215,32 +209,40 @@ const updateAfterPersistLink = (responseUpdates, linkList, selectedTag, dispatch
 };
 
 export function persistLink(linkId, url, tags, rssUrl, pageTitle, notes) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     dispatch(setTempMessage('sending data to server ...'));
     const { linkList, selectedTag } = getState().mainData;
-    return (linkId ?
-      fetch.put(`/rest/links/${linkId}`, { url, tags, rssUrl, pageTitle, notes }, getState().auth.token) :
-      fetch.post('/rest/links', { url, tags, rssUrl, pageTitle, notes }, getState().auth.token))
-      .then(response => response.json())
-      .then((responseUpdates) => {
-        updateAfterPersistLink(responseUpdates, linkList, selectedTag, dispatch);
-      })
-      .catch(error => dispatch(setErrorMessage(error)));
+    try {
+      const response = await (linkId ?
+        fetch.put(`/rest/links/${linkId}`, {
+          url,
+          tags,
+          rssUrl,
+          pageTitle,
+          notes,
+        }, getState().auth.token) :
+        fetch.post('/rest/links', { url, tags, rssUrl, pageTitle, notes }, getState().auth.token));
+      const responseUpdates = await response.json();
+      updateAfterPersistLink(responseUpdates, linkList, selectedTag, dispatch);
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
   };
 }
 
 export function delLink(id) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     dispatch(setTempMessage('sending data to server ...'));
     const linkToDelete = getState().mainData.linkList.find(e => e.id === id);
     assert(linkToDelete && linkToDelete.id && linkToDelete.tags);
-    return fetch.delete(`/rest/links/${id}`, getState().auth.token)
-      .then(() => {
-        dispatch(delLinkPost(id));
-        linkToDelete.tags.forEach(tagName => dispatch(manipulateTagCounter(tagName, -1)));
-        dispatch(setInfoMessage(`${linkToDelete.linkUrl} successfully deleted.`));
-      })
-      .catch(error => dispatch(setErrorMessage(error)));
+    try {
+      await fetch.delete(`/rest/links/${id}`, getState().auth.token);
+      dispatch(delLinkPost(id));
+      linkToDelete.tags.forEach(tagName => dispatch(manipulateTagCounter(tagName, -1)));
+      dispatch(setInfoMessage(`${linkToDelete.linkUrl} successfully deleted.`));
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
   };
 }
 
@@ -270,10 +272,10 @@ export function initialLoadLinks(tag) {
 }
 
 export function completeChangeTag(tag) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     if (getState().mainData.selectedTag !== tag) {
-      return dispatch(initialLoadLinks(tag))
-        .then(() => dispatch(fetchRssUpdates()));
+      await dispatch(initialLoadLinks(tag));
+      dispatch(fetchRssUpdates());
     }
     return Promise.resolve();
   };
@@ -293,25 +295,28 @@ export function startRssUpdates() {
 
 export function sendSearch(searchString) {
   const currentTime = new Date();
-  return (dispatch, getState) =>
-    fetch.get(`/rest/search/links?q=${encodeURIComponent(searchString)}`, getState().auth.token)
-      .then((json) => {
-        dispatch(setLinks(json));
-        dispatch(actions.change('searchBar.serverSide', true));
-        console.log(`Search took ${new Date().getTime() - currentTime.getTime()} millis`);
-      })
-      .catch(ex => dispatch(setErrorMessage(ex)));
+  return async (dispatch, getState) => {
+    try {
+      const json = await fetch.get(`/rest/search/links?q=${encodeURIComponent(searchString)}`, getState().auth.token);
+      dispatch(setLinks(json));
+      dispatch(actions.change('searchBar.serverSide', true));
+      console.log(`Search took ${new Date().getTime() - currentTime.getTime()} millis`);
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
+  };
 }
 
 export function createArchive(id) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     dispatch(setTempMessage('sending data to server ...'));
     const { linkList, selectedTag } = getState().mainData;
-    return fetch.post(`/rest/archive/${id}`, {}, getState().auth.token)
-      .then(response => response.json())
-      .then((responseUpdates) => {
-        updateAfterPersistLink(responseUpdates, linkList, selectedTag, dispatch, 'Archive successfully created.');
-      })
-      .catch(ex => dispatch(setErrorMessage(ex)));
+    try {
+      const response = await fetch.post(`/rest/archive/${id}`, {}, getState().auth.token);
+      const responseUpdates = await response.json();
+      updateAfterPersistLink(responseUpdates, linkList, selectedTag, dispatch, 'Archive successfully created.');
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
   };
 }

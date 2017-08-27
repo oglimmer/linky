@@ -2,14 +2,14 @@
 import BaseDataAccessObject from './BaseDataAccessObject';
 
 class AsyncWaitDao extends BaseDataAccessObject {
-  getAllAsyncWaits() {
-    return this.listByView('asyncWait', 'allAsyncwaits')
-      .then(data => data.map(e => e.value));
+  async getAllAsyncWaits() {
+    const data = await this.listByView('asyncWait', 'allAsyncwaits');
+    return data.map(e => e.value);
   }
 
-  getAsyncWaitByByUser(userid) {
-    return this.listByView('asyncWait', 'byUserId', userid)
-      .then(data => data.map(e => e.value));
+  async getAsyncWaitByByUser(userid) {
+    const data = await this.listByView('asyncWait', 'byUserId', userid);
+    return data.map(e => e.value);
   }
 
   getAsyncWaitByByUserAndObject(userid, object) {

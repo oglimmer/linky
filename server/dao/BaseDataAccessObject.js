@@ -54,20 +54,22 @@ class BaseDataAccessObject {
     return this.dbrefs.fetch(obj);
   }
 
-  listByViewMultiParams(ddoc, viewName, start, end, params) {
+  async listByViewMultiParams(ddoc, viewName, start, end, params) {
     const allParams = Object.assign({
       startkey: start,
       endkey: end,
     }, params);
-    return this.dbrefs.view(ddoc, viewName, allParams).then(body => body.rows);
+    const body = await this.dbrefs.view(ddoc, viewName, allParams);
+    return body.rows;
   }
 
-  listByView(ddoc, viewName, key) {
+  async listByView(ddoc, viewName, key) {
     const allParams = { };
     if (key) {
       allParams.keys = [key];
     }
-    return this.dbrefs.view(ddoc, viewName, allParams).then(body => body.rows);
+    const body = await this.dbrefs.view(ddoc, viewName, allParams);
+    return body.rows;
   }
 
   getById(id) {

@@ -30,9 +30,14 @@ function updateCountInHierarchy(tagName, count) {
 }
 
 export function fetchTagHierarchy() {
-  return (dispatch, getState) => fetch.get('/rest/tags/hierarchy', getState().auth.token)
-    .then(tagHierarchy => dispatch(setTagHierarchy(tagHierarchy)))
-    .catch(error => dispatch(setErrorMessage(error)));
+  return async (dispatch, getState) => {
+    try {
+      const tagHierarchy = await fetch.get('/rest/tags/hierarchy', getState().auth.token);
+      dispatch(setTagHierarchy(tagHierarchy));
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
+  };
 }
 
 
@@ -66,29 +71,34 @@ const equalArray = (a1, a2) => {
 };
 
 export function saveTagHierarchy(tree, alwaysSendToServer = false) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const oldTree = getState().tagHierarchyData.tagHierarchy;
     if (alwaysSendToServer || !equalArray(oldTree, tree)) {
       dispatch(setTempMessage('sending data to server ...'));
-      return fetch.put('/rest/tags/hierarchy', { tree }, getState().auth.token)
-        .then(response => response.json())
-        .then(() => {
-          dispatch(setTagHierarchy(tree));
-          dispatch(setInfoMessage('Tag hierarchy successfully saved.'));
-        })
-        .catch(error => dispatch(setErrorMessage(error)));
+      try {
+        await fetch.put('/rest/tags/hierarchy', { tree }, getState().auth.token);
+        dispatch(setTagHierarchy(tree));
+        dispatch(setInfoMessage('Tag hierarchy successfully saved.'));
+      } catch (err) {
+        dispatch(setErrorMessage(err));
+      }
     }
     return Promise.resolve();
   };
 }
 
 function persistRemoveTag(tagName) {
-  return (dispatch, getState) => fetch.delete(`/rest/tags/${tagName}`, getState().auth.token)
-    .catch(error => console.log(error));
+  return async (dispatch, getState) => {
+    try {
+      await fetch.delete(`/rest/tags/${tagName}`, getState().auth.token);
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
+  };
 }
 
 export function removeTagHierarchyNode() {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const { selectedNode } = getState().tagHierarchyData;
     const promises = [];
     let tagName;
@@ -104,11 +114,10 @@ export function removeTagHierarchyNode() {
         promises.push(dispatch(selectTag('portal')));
       }
     }
-    return Promise.all(promises).then(() => {
-      if (tagName) {
-        dispatch(setInfoMessage(`Tag ${tagName} successfully deleted.`));
-      }
-    });
+    await Promise.all(promises);
+    if (tagName) {
+      dispatch(setInfoMessage(`Tag ${tagName} successfully deleted.`));
+    }
   };
 }
 
@@ -120,23 +129,31 @@ export function addTagHierarchyNode() {
   const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
   const tagName = split[0];
   if (tagName) {
-    return (dispatch, getState) => {
+    return async (dispatch, getState) => {
       dispatch(setTempMessage('sending data to server ...'));
-      return Promise.resolve(dispatch({ type: ADD_TAG_HIERARCHY, name: tagName }))
-        .then(() => dispatch(saveTagHierarchy(getState().tagHierarchyData.tagHierarchy, true)))
-        .then(() => dispatch(setInfoMessage(`Tag ${tagName} successfully added.`)));
+      await Promise.resolve(dispatch({ type: ADD_TAG_HIERARCHY, name: tagName }));
+      await saveTagHierarchy(getState().tagHierarchyData.tagHierarchy, true);
+      dispatch(setInfoMessage(`Tag ${tagName} successfully added.`));
     };
   }
   return () => {
-    // nop
+    // noop
   };
 }
 
 function saveChangedLinklist(oldTagName, newTagName) {
-  return (dispatch, getState) => fetch.patch('/rest/links/tags', { oldTagName, newTagName }, getState().auth.token)
-    .then(response => response.json())
-    .then(jsonResponse => dispatch(updateCountInHierarchy(newTagName, jsonResponse.count)))
-    .catch(error => console.log(error));
+  return async (dispatch, getState) => {
+    try {
+      const response = await fetch.patch('/rest/links/tags', {
+        oldTagName,
+        newTagName,
+      }, getState().auth.token);
+      const jsonResponse = await response.json();
+      dispatch(updateCountInHierarchy(newTagName, jsonResponse.count));
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
+  };
 }
 
 // rename or merge
@@ -148,15 +165,15 @@ export function renameTagHierarchyNode(nodeName) {
   const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
   const newTagName = split[0];
   if (newTagName) {
-    return (dispatch) => {
+    return async (dispatch) => {
       dispatch(setTempMessage('sending data to server ...'));
-      return Promise.resolve(dispatch(selectTag(null)))
-        .then(() => Promise.all([
-          dispatch(renameTagInLinks(nodeName, newTagName)),
-          Promise.resolve(dispatch(renameTagHierarchy(nodeName, newTagName))),
-          dispatch(saveChangedLinklist(nodeName, newTagName)),
-        ]))
-        .then(() => dispatch(setInfoMessage(`Tag successfully renamed to ${newTagName}.`)));
+      await Promise.resolve(dispatch(selectTag(null)));
+      await Promise.all([
+        dispatch(renameTagInLinks(nodeName, newTagName)),
+        Promise.resolve(dispatch(renameTagHierarchy(nodeName, newTagName))),
+        dispatch(saveChangedLinklist(nodeName, newTagName)),
+      ]);
+      dispatch(setInfoMessage(`Tag successfully renamed to ${newTagName}.`));
     };
   }
   return () => {

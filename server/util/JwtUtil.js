@@ -14,16 +14,14 @@ class JwtUtil {
     return jwt.decode(claim);
   }
 
-  static verifyOpenId(authToken, openIdConfigUrl) {
-    return request.get({ url: openIdConfigUrl, json: true })
-      .then(openIdConfig => request.get({ url: openIdConfig.jwks_uri, json: true }))
-      .then(response => jose.JWK.asKeyStore(response))
-      .then((keyStore) => {
-        const decodedToken = jwt.decode(authToken, { complete: true });
-        return keyStore.get(decodedToken.header.kid);
-      })
-      .then(key => jose.JWS.createVerify(key).verify(authToken))
-      .then(claim => JSON.parse(claim.payload.toString()));
+  static async verifyOpenId(authToken, openIdConfigUrl) {
+    const openIdConfig = await request.get({ url: openIdConfigUrl, json: true });
+    const response = await request.get({ url: openIdConfig.jwks_uri, json: true });
+    const keyStore = await jose.JWK.asKeyStore(response);
+    const decodedToken = await jwt.decode(authToken, { complete: true });
+    const key = keyStore.get(decodedToken.header.kid);
+    const claim = await jose.JWS.createVerify(key).verify(authToken);
+    return JSON.parse(claim.payload.toString());
   }
 
   static verify(authToken) {

@@ -26,86 +26,97 @@ export function toggleVisibilityMenuBar(forceShow) {
 }
 
 export function logout() {
-  return dispatch => fetch.postCredentials('/rest/logout')
-    .then(() => dispatch(clearAuthToken()));
+  return async (dispatch) => {
+    await fetch.postCredentials('/rest/logout');
+    dispatch(clearAuthToken());
+  };
 }
 
 export function checkAuth(email, password) {
-  return (dispatch) => {
-    dispatch(setErrorMessage(''));
-    return fetch.postCredentials('/rest/authenticate', {
-      email,
-      password,
-    })
-      .then(response => response.json().then((json) => {
-        if (response.status !== 200) {
-          throw json.message;
-        }
-        dispatch(setAuthToken(json.token));
-        return dispatch(initialLoadLinks('portal'));
-      }))
-      .then(() => dispatch(fetchRssUpdates(true)))
-      .catch((ex) => {
-        dispatch(setErrorMessage(ex));
-        throw ex;
+  return async (dispatch) => {
+    try {
+      dispatch(setErrorMessage(''));
+      const response = await fetch.postCredentials('/rest/authenticate', {
+        email,
+        password,
       });
+      const json = await response.json();
+      if (response.status !== 200) {
+        throw json.message;
+      }
+      dispatch(setAuthToken(json.token));
+      await dispatch(initialLoadLinks('portal'));
+      dispatch(fetchRssUpdates(true));
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+      throw err;
+    }
   };
 }
 
 const CHECK_IMPORT_DONE_FREQUENCY = 2500;
 
-const checkImportDone = (dispatch, getState) => {
-  fetch.get('/rest/import/ready', getState().auth.token)
-    .then((json) => {
-      if (json.importDone) {
-        dispatch(actions.change('importExport.buttonsDisable', false));
-        dispatch(actions.change('importExport.bookmarks', ''));
-        dispatch(setInfoMessage('Import completed.'));
-        dispatch(fetchTagHierarchy());
-      } else {
-        setTimeout(() => { checkImportDone(dispatch, getState); }, CHECK_IMPORT_DONE_FREQUENCY);
-      }
-    });
+const checkImportDone = async (dispatch, getState) => {
+  const json = await fetch.get('/rest/import/ready', getState().auth.token);
+  if (json.importDone) {
+    dispatch(actions.change('importExport.buttonsDisable', false));
+    dispatch(actions.change('importExport.bookmarks', ''));
+    dispatch(setInfoMessage('Import completed.'));
+    dispatch(fetchTagHierarchy());
+  } else {
+    setTimeout(() => { checkImportDone(dispatch, getState); }, CHECK_IMPORT_DONE_FREQUENCY);
+  }
 };
 
 export function initAsyncWaits() {
-  return (dispatch, getState) => fetch.get('/rest/import/ready', getState().auth.token)
-    .then((json) => {
-      if (!json.importDone) {
-        dispatch(setInfoMessage('Import in progress...'));
-        dispatch(actions.change('importExport.buttonsDisable', true));
-      }
-    });
+  return async (dispatch, getState) => {
+    const json = await fetch.get('/rest/import/ready', getState().auth.token);
+    if (!json.importDone) {
+      dispatch(setInfoMessage('Import in progress...'));
+      dispatch(actions.change('importExport.buttonsDisable', true));
+    }
+  };
 }
 
 export function importBookmarks(bookmarks, tagPrefix, importNode) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     dispatch(setInfoMessage('Import started. This will take up to several minutes.'));
     dispatch(actions.change('importExport.buttonsDisable', true));
     setTimeout(() => { checkImportDone(dispatch, getState); }, CHECK_IMPORT_DONE_FREQUENCY);
-    return fetch.patch('/rest/links/import', { bookmarks, tagPrefix, importNode }, getState().auth.token)
-      .catch(error => dispatch(setErrorMessage(error)));
+    try {
+      await fetch.patch('/rest/links/import', {
+        bookmarks,
+        tagPrefix,
+        importNode,
+      }, getState().auth.token);
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
   };
 }
 
 export function exportBookmarks() {
-  return (dispatch, getState) => {
-    dispatch(setTempMessage('sending data to server ...'));
-    dispatch(actions.change('importExport.buttonsDisable', true));
-    return fetch.get('/rest/export/links', getState().auth.token)
-      .then(json => dispatch(actions.change('importExport.bookmarks', json.content)))
-      .then(() => {
-        dispatch(setInfoMessage('All data exported. Copy content from `NETSCAPE-Bookmark-file-1` into a file and import it into a browser of your choice.'));
-        dispatch(actions.change('importExport.buttonsDisable', false));
-      })
-      .catch(error => dispatch(setErrorMessage(error)));
+  return async (dispatch, getState) => {
+    try {
+      dispatch(setTempMessage('sending data to server ...'));
+      dispatch(actions.change('importExport.buttonsDisable', true));
+      const json = await fetch.get('/rest/export/links', getState().auth.token);
+      await dispatch(actions.change('importExport.bookmarks', json.content));
+      dispatch(setInfoMessage('All data exported. Copy content from `NETSCAPE-Bookmark-file-1` into a file and import it into a browser of your choice.'));
+      dispatch(actions.change('importExport.buttonsDisable', false));
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
   };
 }
 
 export function getMeUserInformation() {
-  return (dispatch, getState) => fetch.get('/rest/users/me', getState().auth.token)
-    .then((json) => {
+  return async (dispatch, getState) => {
+    try {
+      const json = await fetch.get('/rest/users/me', getState().auth.token);
       dispatch(setErrorMessage(`This is what we have stored about you: ${JSON.stringify(json)}`));
-    })
-    .catch(error => dispatch(setErrorMessage(error)));
+    } catch (err) {
+      dispatch(setErrorMessage(err));
+    }
+  };
 }

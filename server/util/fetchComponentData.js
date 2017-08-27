@@ -8,30 +8,28 @@ import jwt from './JwtUtil';
 import routes from '../../src/routes/routes';
 import authHelper from '../auth/authHelper';
 
-const visitorToken = (req, res) => {
+const visitorToken = async (req, res) => {
   if (req.cookies.vistorToken) {
     const { vistorToken } = req.cookies;
     winston.loggers.get('application').debug(`FetchComponentData::vistorToken = ${vistorToken}`);
-    return visitorDao.getByVisitorId(vistorToken)
-      .then((vistorRec) => {
-        if (vistorRec) {
-          const { authType, hint, refreshToken } = vistorRec;
-          // some providers ask for user permission again unless you use the refresh token
-          if (refreshToken) {
-            const promise = authHelper.processRefresh(req, res, refreshToken, authType);
-            if (promise) {
-              return promise;
-            }
-          }
-          const hintParam = hint ? `hint=${hint}` : '';
-          const targetUrl = `/auth/${authType}?${hintParam}`;
-          winston.loggers.get('application').debug(`FetchComponentData::Forwarding to ${targetUrl}`);
-          res.redirect(targetUrl);
-          throw new Error('forward');
+    const vistorRec = await visitorDao.getByVisitorId(vistorToken);
+    if (vistorRec) {
+      const { authType, hint, refreshToken } = vistorRec;
+      // some providers ask for user permission again unless you use the refresh token
+      if (refreshToken) {
+        const promise = authHelper.processRefresh(req, res, refreshToken, authType);
+        if (promise) {
+          return promise;
         }
-        res.clearCookie('vistorToken');
-        return null;
-      });
+      }
+      const hintParam = hint ? `hint=${hint}` : '';
+      const targetUrl = `/auth/${authType}?${hintParam}`;
+      winston.loggers.get('application').debug(`FetchComponentData::Forwarding to ${targetUrl}`);
+      res.redirect(targetUrl);
+      throw new Error('forward');
+    }
+    res.clearCookie('vistorToken');
+    return null;
   }
   return Promise.resolve();
 };
@@ -48,21 +46,22 @@ const initialLoadFromRoute = (authToken, dispatch, url) => {
   return dataLoadFnt;
 };
 
-const processAuthToken = (authToken, dispatch, req, res) => {
+const processAuthToken = async (authToken, dispatch, req, res) => {
   winston.loggers.get('application').debug(`FetchComponentData::AUTH_TOKEN=${authToken}`);
-  return jwt.verify(authToken)
-    .then(() => dispatch(setAuthToken(authToken)))
-    .then(() => initialLoadFromRoute(authToken, dispatch, req.url))
-    .then(() => dispatch(initAsyncWaits()))
-    .catch((e) => {
-      if (e.name !== 'TokenExpiredError' && e.name !== 'JsonWebTokenError') {
-        winston.loggers.get('application').error(e);
-        res.status(500).send('Server error');
-        return null;
-      }
-      res.clearCookie('authToken');
-      return visitorToken(req, res);
-    });
+  try {
+    await jwt.verify(authToken);
+    await dispatch(setAuthToken(authToken));
+    await initialLoadFromRoute(authToken, dispatch, req.url);
+    return dispatch(initAsyncWaits());
+  } catch (err) {
+    if (err.name !== 'TokenExpiredError' && err.name !== 'JsonWebTokenError') {
+      winston.loggers.get('application').error(err);
+      res.status(500).send('Server error');
+      return null;
+    }
+    res.clearCookie('authToken');
+    return visitorToken(req, res);
+  }
 };
 
 export default (dispatch, req, res) => {

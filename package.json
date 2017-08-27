@@ -109,6 +109,6 @@
     "start": "NODE_ENV=production node -r babel-register -r babel-polyfill server/",
     "build": "rm -rf dist && webpack -p --progress --colors --config build/webpack.prod.config.js",
     "test": "eslint server src link-check-server && jest",
-    "integrationtest": "NODE_ENV=integrationtest jest"
+    "integrationtest": "NODE_ENV=integrationtest jest tests/integration-tests"
   }
 }

@@ -1,4 +1,4 @@
-import { diff } from './ArrayUtil';
+import { diff } from '../../src/util/ArrayUtil';
 
 it('diff to empty result', () => {
   const a = ['a', 'b', 'c', 'd'];

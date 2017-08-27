@@ -2,8 +2,9 @@
 import BaseDataAccessObject from './BaseDataAccessObject';
 
 export class LinkDao extends BaseDataAccessObject {
-  listAll() {
-    return this.dbrefs.view('links', 'byUserid').then(body => body.rows.map(e => e.value));
+  async listAll() {
+    const body = await this.dbrefs.view('links', 'byUserid');
+    return body.rows.map(e => e.value);
   }
 
   listByUserid(userid) {
@@ -14,9 +15,9 @@ export class LinkDao extends BaseDataAccessObject {
     return this.listByViewMultiParams('links', 'byUseridAndTag', [userid, tag], [userid, tag], {});
   }
 
-  listByUseridAndUrl(userid, url) {
-    return this.listByViewMultiParams('links', 'byUseridAndMiniUrl', [userid, url], [userid, url], {})
-      .then(rows => rows.map(e => e.value));
+  async listByUseridAndUrl(userid, url) {
+    const body = await this.listByViewMultiParams('links', 'byUseridAndMiniUrl', [userid, url], [userid, url], {});
+    return body.map(e => e.value);
   }
 }
 

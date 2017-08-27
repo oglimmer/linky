@@ -11,20 +11,18 @@ if (typeof window === 'undefined') {
 
 export default {
 
-  get: function get(url, authToken) {
-    return fetch(baseUrl + url, {
+  get: async (url, authToken) => {
+    const response = await fetch(baseUrl + url, {
       method: 'GET',
       headers: {
         authorization: `Bearer ${authToken}`,
       },
-    })
-      .then(response => response.json())
-      .then((json) => {
-        if (json.message) {
-          throw new Error(json.message);
-        }
-        return json;
-      });
+    });
+    const json = await response.json();
+    if (json.message) {
+      throw new Error(json.message);
+    }
+    return json;
   },
 
   postCredentials: function postCredentials(url, body) {

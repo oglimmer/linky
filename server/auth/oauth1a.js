@@ -20,7 +20,7 @@ const createOAuth = type => OAuth({
   hash_function: (baseString, key) => crypto.createHmac('sha1', key).update(baseString).digest('base64'),
 });
 
-const init = (req, res) => {
+const init = async (req, res) => {
   const type = req.params.type;
   const oauth = createOAuth(type);
   const redirectUri = `${(redirectTarget)}/${type}`;
@@ -32,17 +32,16 @@ const init = (req, res) => {
     },
   };
   const headers = oauth.toHeader(oauth.authorize(reqData));
-  request.get({
+  const bodyUrlEncoded = await request.get({
     url: reqData.url,
     headers,
-  }).then((bodyUrlEncoded) => {
-    const query = querystring.parse(bodyUrlEncoded);
-    const oauthToken = query.oauth_token;
-    const cipher = crypto.createCipher('aes192', properties.server.jwt.secret);
-    const encrypted = (cipher.update(oauthToken, 'utf8', 'hex') + cipher.final('hex'));
-    res.cookie('stateClaim', encrypted, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
-    res.redirect(`${properties.server.auth[type].authUri}?oauth_token=${oauthToken}`);
   });
+  const query = querystring.parse(bodyUrlEncoded);
+  const oauthToken = query.oauth_token;
+  const cipher = crypto.createCipher('aes192', properties.server.jwt.secret);
+  const encrypted = (cipher.update(oauthToken, 'utf8', 'hex') + cipher.final('hex'));
+  res.cookie('stateClaim', encrypted, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
+  res.redirect(`${properties.server.auth[type].authUri}?oauth_token=${oauthToken}`);
 };
 
 const verifyToken = (req, res, oauthToken) => {
@@ -55,7 +54,7 @@ const verifyToken = (req, res, oauthToken) => {
   }
 };
 
-const back = (req, res) => {
+const back = async (req, res) => {
   const { denied } = req.query;
   if (denied) {
     winston.loggers.get('application').debug('error: %j', req.query);
@@ -75,28 +74,26 @@ const back = (req, res) => {
     };
     const headers = oauth.toHeader(oauth.authorize(reqData));
     const form = { oauth_verifier: oauthVerifier };
-    request.post({
-      url: reqData.url,
-      headers,
-      form,
-    })
-      .then((bodyUrlEncoded) => {
-        const query = querystring.parse(bodyUrlEncoded);
-        // const oauthToken = query.oauth_token;
-        // const oauthTokenSecret = query.oauth_token_secret;
-        const userId = query.user_id;
-        const screenName = query.screen_name;
-        return {
-          id: userId,
-          screenName,
-        };
-      })
-      .then(remoteUserJson => authHelper.forward(req, res, type, remoteUserJson))
-      .catch((error) => {
-        winston.loggers.get('application').error('Failed to oauth2Back');
-        winston.loggers.get('application').error(error);
-        res.status(500).end();
+    try {
+      const bodyUrlEncoded = await request.post({
+        url: reqData.url,
+        headers,
+        form,
       });
+      const query = querystring.parse(bodyUrlEncoded);
+      // const oauthToken = query.oauth_token;
+      // const oauthTokenSecret = query.oauth_token_secret;
+      const userId = query.user_id;
+      const screenName = query.screen_name;
+      await authHelper.forward(req, res, type, {
+        id: userId,
+        screenName,
+      });
+    } catch (err) {
+      winston.loggers.get('application').error('Failed to oauth2Back');
+      winston.loggers.get('application').error(err);
+      res.status(500).end();
+    }
   }
 };
 

@@ -35,10 +35,11 @@ export const init = (allTags, parent = 'root') => {
   return tagHierarchy;
 };
 
-const loadResponseData = userid => Promise.all([
-  tagDao.listAllTags(userid),
-  tagDao.getHierarchyByUser(userid),
-]).then(([allTags, rec]) => {
+const loadResponseData = async (userid) => {
+  const [allTags, rec] = await Promise.all([
+    tagDao.listAllTags(userid),
+    tagDao.getHierarchyByUser(userid),
+  ]);
   const data = rec ? rec.tree : init(allTags);
   return data.map(node => ({
     name: node.name,
@@ -46,7 +47,7 @@ const loadResponseData = userid => Promise.all([
     index: node.index,
     count: getCountForNode(allTags, node.name),
   }));
-});
+};
 
 const createTagHierarchy = (userid, tree) => ({
   type: 'hierarchy',
@@ -54,23 +55,23 @@ const createTagHierarchy = (userid, tree) => ({
   tree,
 });
 
-const createTagHierarchyDefault = (userid, parentForNew = 'root') =>
-  tagDao.listAllTags(userid)
-    .then(allTags => createTagHierarchy(userid, init(allTags, parentForNew)));
+const createTagHierarchyDefault = async (userid, parentForNew = 'root') => {
+  const allTags = await tagDao.listAllTags(userid);
+  return createTagHierarchy(userid, init(allTags, parentForNew));
+};
 
-const load = (userid, parentForNew = 'root') => tagDao.getHierarchyByUser(userid)
-  .then((rec) => {
-    if (rec) {
-      return rec;
-    }
-    return createTagHierarchyDefault(userid, parentForNew);
-  });
+const load = async (userid, parentForNew = 'root') => {
+  const rec = await tagDao.getHierarchyByUser(userid);
+  if (rec) {
+    return rec;
+  }
+  return createTagHierarchyDefault(userid, parentForNew);
+};
 
 export default {
   loadResponseData,
   load,
   createTagHierarchy,
   createTagHierarchyDefault,
-  hasTag,
 };
 

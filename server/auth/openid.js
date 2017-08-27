@@ -10,7 +10,7 @@ import JwtUtil from '../util/JwtUtil';
 
 const redirectTarget = properties.server.auth.redirectUri;
 
-const init = (req, res) => {
+const init = async (req, res) => {
   const { type } = req.params;
   assert(type, 'Failed to get type from path');
   const { hint } = req.query;
@@ -20,19 +20,19 @@ const init = (req, res) => {
   const redirectUri = `redirect_uri=${encodeURIComponent(`${redirectTarget}/${type}`)}`;
   const loginHint = hint ? `login_hint=${encodeURIComponent(hint)}` : '';
   const randomToken = randomstring.generate();
-  request.get({ url: properties.server.auth[type].openIdConfigUri, json: true })
-    .then(openIdConfig => JwtUtil.sign({ randomToken }, '15m')
-      .then((claim) => {
-        const state = `state=${encodeURIComponent(claim)}`;
-        const url = `${openIdConfig.authorization_endpoint}?${responseType}&${clientId}&${scope}&${redirectUri}&${state}&${loginHint}`;
-        winston.loggers.get('application').debug(`redirect to ${url}`);
-        res.cookie('stateClaim', claim, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
-        res.redirect(url);
-      }),
-    );
+  const openIdConfig = await request.get({
+    url: properties.server.auth[type].openIdConfigUri,
+    json: true,
+  });
+  const claim = await JwtUtil.sign({ randomToken }, '15m');
+  const state = `state=${encodeURIComponent(claim)}`;
+  const url = `${openIdConfig.authorization_endpoint}?${responseType}&${clientId}&${scope}&${redirectUri}&${state}&${loginHint}`;
+  winston.loggers.get('application').debug(`redirect to ${url}`);
+  res.cookie('stateClaim', claim, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
+  res.redirect(url);
 };
 
-const getIdToken = (code, type) => {
+const getIdToken = async (code, type) => {
   const form = {
     code,
     client_id: properties.server.auth[type].clientId,
@@ -40,31 +40,33 @@ const getIdToken = (code, type) => {
     grant_type: 'authorization_code',
     redirect_uri: `${redirectTarget}/${type}`,
   };
-  return request.get({ url: properties.server.auth[type].openIdConfigUri })
-    .then(response => JSON.parse(response))
-    .then(openIdConfig => request.post({
-      url: openIdConfig.token_endpoint,
-      json: true,
-      form,
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'linky1.com',
-      },
-    }));
+  const openIdConfig = await request.get({
+    url: properties.server.auth[type].openIdConfigUri,
+    json: true,
+  });
+  return request.post({
+    url: openIdConfig.token_endpoint,
+    json: true,
+    form,
+    headers: {
+      Accept: 'application/json',
+      'User-Agent': 'linky1.com',
+    },
+  });
 };
 
-const decodeIdToken = (type, tokenResponse) =>
-  JwtUtil.verifyOpenId(tokenResponse.id_token, properties.server.auth[type].openIdConfigUri)
-    .then((claim) => {
-      const copyOfClaim = claim;
-      copyOfClaim.id = copyOfClaim.sub;
-      return {
-        user: copyOfClaim,
-        tokenResponse,
-      };
-    });
+const decodeIdToken = async (type, tokenResponse) => {
+  const claim = await JwtUtil.verifyOpenId(
+    tokenResponse.id_token, properties.server.auth[type].openIdConfigUri);
+  const copyOfClaim = claim;
+  copyOfClaim.id = copyOfClaim.sub;
+  return {
+    user: copyOfClaim,
+    tokenResponse,
+  };
+};
 
-const back = (req, res) => {
+const back = async (req, res) => {
   if (req.query.error || !req.query.code) {
     winston.loggers.get('application').debug('error: %j', req.query);
     res.redirect('/');
@@ -73,15 +75,16 @@ const back = (req, res) => {
     assert(type, 'Failed to get type from path');
     const { state, code } = req.query;
     assert(state, 'Failed to get state from path');
-    authHelper.verifyState(req, res, state)
-      .then(() => getIdToken(code, type))
-      .then(tokenResponse => decodeIdToken(type, tokenResponse))
-      .then(data => authHelper.forward(req, res, type, data.user, data.tokenResponse))
-      .catch((error) => {
-        winston.loggers.get('application').error('Failed to oauth2Back');
-        winston.loggers.get('application').error(error);
-        res.status(500).end();
-      });
+    try {
+      await authHelper.verifyState(req, res, state);
+      const tokenResponse = await getIdToken(code, type);
+      const data = await decodeIdToken(type, tokenResponse);
+      await authHelper.forward(req, res, type, data.user, data.tokenResponse);
+    } catch (err) {
+      winston.loggers.get('application').error('Failed to oauth2Back');
+      winston.loggers.get('application').error(err);
+      res.status(500).end();
+    }
   }
 };
 

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 export default (server) => {
-  function walk(pathToWalk) {
+  const walk = (pathToWalk) => {
     fs.readdirSync(pathToWalk).forEach((file) => {
       const newPath = `${pathToWalk}/${file}`;
       const stat = fs.statSync(newPath);
@@ -19,7 +19,7 @@ export default (server) => {
         walk(newPath);
       }
     });
-  }
+  };
 
   // const routes_path = config.root + '/app/route';
   const rootPath = path.normalize(path.join(__dirname, '..'));
