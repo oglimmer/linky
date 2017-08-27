@@ -101,7 +101,7 @@ const mapStateToProps = state => ({
   feedUpdatesList: state.mainData.feedUpdatesList,
   sortingByColumn: state.mainData.sortingByColumn,
   sortingByColumnOrder: state.mainData.sortingByColumnOrder,
-  searchBarTerm: state.searchBar.searchTerm,
+  searchBarTerm: state.searchBar.searchTerm.toLowerCase(),
   serverSide: state.searchBar.serverSide,
 });
 

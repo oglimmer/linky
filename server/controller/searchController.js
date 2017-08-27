@@ -61,7 +61,7 @@ class SearchProcessor extends BaseProcessor {
 
   async process() {
     try {
-      const userInput = this.data.q;
+      const userInput = this.data.q.toLowerCase();
       let luceneQuery = '';
       fields.forEach((f) => {
         if (userInput.startsWith(`${f}:`)) {
