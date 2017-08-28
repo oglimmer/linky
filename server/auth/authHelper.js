@@ -99,10 +99,7 @@ const getRemoteUserJson = async (type, authTokenResponse) => {
       'User-Agent': 'linky1.com',
     },
   });
-  return ({
-    authTokenResponse,
-    user: addIdIfMissing(bodyUser, type),
-  });
+  return addIdIfMissing(bodyUser, type);
 };
 
 const processRefresh = async (req, res, refreshToken, type) => {
@@ -131,8 +128,8 @@ const processRefresh = async (req, res, refreshToken, type) => {
       form,
       headers,
     });
-    const data = await getRemoteUserJson(type, authTokenResponse);
-    await forward(req, res, type, data.user, data.authTokenResponse);
+    const user = await getRemoteUserJson(type, authTokenResponse);
+    await forward(req, res, type, user, authTokenResponse);
     throw new Error('forward');
   } else if (properties.server.auth[type].oauth === 'openid') {
     // Tested only for Yahoo!

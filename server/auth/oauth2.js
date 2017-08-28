@@ -63,8 +63,8 @@ const back = async (req, res) => {
     try {
       await authHelper.verifyState(req, res, state);
       const authTokenResponse = await getAuthToken(code, type);
-      const data = await authHelper.getRemoteUserJson(type, authTokenResponse);
-      await authHelper.forward(req, res, type, data.user, data.authTokenResponse);
+      const user = await authHelper.getRemoteUserJson(type, authTokenResponse);
+      await authHelper.forward(req, res, type, user, authTokenResponse);
     } catch (err) {
       winston.loggers.get('application').error('Failed to oauth2Back');
       winston.loggers.get('application').error(err);

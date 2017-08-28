@@ -219,9 +219,12 @@ if (compConfigDynamicContent === 'enable') {
           },
         ));
         setContentSecurityPolicy(req, res, () => {});
-        res.append('Cache-Control', 'no-store, must-revalidate');
-        res.append('Expires', '0');
-        res.removeHeader('etag');
+        if (properties.server.headers && properties.server.headers.dynamicPages) {
+          Object.keys(properties.server.headers.dynamicPages).forEach((propKey) => {
+            const [key, value] = properties.server.headers.dynamicPages[propKey].split(':');
+            res.append(key.trim(), value.trim());
+          });
+        }
         res.render('index.ejs', { reactHtml, initialState });
       }
     } catch (err) {

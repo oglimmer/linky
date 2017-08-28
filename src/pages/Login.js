@@ -73,9 +73,6 @@ const Login = ({ dispatch, history }) => (
             <button className="btn btn-block btn-reddit" onClick={() => click('reddit')}>
               <i className="ion-logo-reddit" /> Sign in with Reddit
             </button>
-            <button className="btn btn-block btn-wordpress" onClick={() => click('wordpress')}>
-              <i className="ion-logo-wordpress" /> Sign in with Wordpress
-            </button>
           </div>
         </div> : ''
       }
