@@ -219,6 +219,9 @@ if (compConfigDynamicContent === 'enable') {
           },
         ));
         setContentSecurityPolicy(req, res, () => {});
+        res.append('Cache-Control', 'no-store, must-revalidate');
+        res.append('Expires', '0');
+        res.removeHeader('etag');
         res.render('index.ejs', { reactHtml, initialState });
       }
     } catch (err) {

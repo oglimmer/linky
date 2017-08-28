@@ -129,14 +129,20 @@ class LogoutProcessor extends BaseProcessor {
     super(req, res, next, true);
   }
 
-  async process() {
-    const { vistorToken } = this.req.cookies;
-    const vistorRec = await visitorDao.getByVisitorId(vistorToken);
-    if (vistorRec) {
+  async deleteVistior() {
+    try {
+      const { vistorToken } = this.req.cookies;
+      const vistorRec = await visitorDao.getByVisitorId(vistorToken);
       /* eslint-disable no-underscore-dangle */
       visitorDao.delete(vistorRec._id, vistorRec._rev);
       /* eslint-enable no-underscore-dangle */
+    } catch (err) {
+      // no visitor token to delete
     }
+  }
+
+  async process() {
+    this.deleteVistior();
     this.res.clearCookie('vistorToken');
     this.res.clearCookie('authToken');
     this.res.send('ok');
