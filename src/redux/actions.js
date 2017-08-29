@@ -120,3 +120,24 @@ export function getMeUserInformation() {
     }
   };
 }
+
+export function deleteAccount() {
+  /* eslint-disable no-alert */
+  const confirm = prompt('Type `DELETE MY ACCOUNT` to delete your account');
+  /* eslint-enable no-alert */
+  if (confirm === 'DELETE MY ACCOUNT') {
+    return async (dispatch, getState) => {
+      try {
+        fetch.delete('/rest/users/me', getState().auth.token);
+        dispatch(logout());
+        dispatch(setInfoMessage('Your data is deleted. Have a nice day.'));
+      } catch (err) {
+        dispatch(setErrorMessage(err));
+      }
+    };
+  }
+  return () => {
+    // nop
+  };
+}
+

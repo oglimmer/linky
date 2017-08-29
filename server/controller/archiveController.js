@@ -2,6 +2,7 @@
 import winston from 'winston';
 import scrape from 'website-scraper';
 import path from 'path';
+import urlLib from 'url';
 import archiver from 'archiver';
 import fs from 'fs-extra';
 import unzip from 'unzipper';
@@ -79,8 +80,9 @@ class CreateArchiveProcessor extends BaseProcessor {
   }
 
   async createLinkRec(userHash, archiveRecId, linkRec) {
+    const filename = CreateArchiveProcessor.getFilename(linkRec.linkUrl, '');
     const newRecord = createObject({
-      linkUrl: `${properties.server.archive.domain}/archive/${userHash}/${archiveRecId}`,
+      linkUrl: `${properties.server.archive.domain}/archive/${userHash}/${archiveRecId}/${filename}`,
       userid: this.data.userid,
       notes: `Archived ${linkRec.linkUrl} on ${new Date()}`,
       tags: [ALL, ARCHIVE],
@@ -93,6 +95,7 @@ class CreateArchiveProcessor extends BaseProcessor {
   }
 
   static async scrape(cachePath, url) {
+    const filename = CreateArchiveProcessor.getFilename(url);
     // we need to store all content-types into the file `SCRAPED_MIME_TYPE_MAP`.
     // see server/httpRoutes/archive.js at "FILE `SCRAPED_MIME_TYPE_MAP`"
     const urlToContentTypeMap = new Map();
@@ -100,6 +103,8 @@ class CreateArchiveProcessor extends BaseProcessor {
     await scrape({
       urls: [url],
       directory: cachePath,
+      defaultFilename: filename,
+      subdirectories: null,
       httpResponseHandler: (response) => {
         if (response.statusCode === 404) {
           return Promise.reject(new Error('status is 404'));
@@ -118,7 +123,15 @@ class CreateArchiveProcessor extends BaseProcessor {
         },
       },
     });
-    fs.writeFile(path.join(cachePath, 'SCRAPED_MIME_TYPE_MAP'), JSON.stringify(fileNameToContentTypeMap));
+    return fs.writeFile(path.join(cachePath, 'SCRAPED_MIME_TYPE_MAP'), JSON.stringify(fileNameToContentTypeMap));
+  }
+
+  static getFilename(url, defaultName = 'index.html') {
+    const filename = path.basename(urlLib.parse(url).pathname);
+    if (filename && filename.indexOf('.') !== -1) {
+      return filename;
+    }
+    return defaultName;
   }
 
   async process() {

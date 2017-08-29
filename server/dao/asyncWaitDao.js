@@ -8,8 +8,7 @@ class AsyncWaitDao extends BaseDataAccessObject {
   }
 
   async getAsyncWaitByByUser(userid) {
-    const data = await this.listByView('asyncWait', 'byUserId', userid);
-    return data.map(e => e.value);
+    return this.listByView('asyncWait', 'byUserId', userid);
   }
 
   getAsyncWaitByByUserAndObject(userid, object) {

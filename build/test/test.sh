@@ -25,6 +25,7 @@ available commands: (using BASE_URL=$BASE_URL | AUTH_TOKEN is $AUTH_AVAIL)
     hierarchy
     export
     me
+    deleteme
 
 To login via 3rd party provider you can just
 export AUTH_TOKEN='your authToken as shown on the help page' 
@@ -127,6 +128,11 @@ fi
 if [ "$COMMAND" == "me" ]; then
   [ -z "$AUTH_TOKEN" ] && echo "AUTH_TOKEN not set" && exit 1
   curl $PARAM_VERBOSE -s -X GET -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/users/me
+fi
+
+if [ "$COMMAND" == "deleteme" ]; then
+  [ -z "$AUTH_TOKEN" ] && echo "AUTH_TOKEN not set" && exit 1
+  curl $PARAM_VERBOSE -s -X DELETE -H "authorization: Bearer $AUTH_TOKEN" $REST_URL/users/me
 fi
 
 if [ "$COMMAND" == "login" ]; then

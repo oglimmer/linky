@@ -7,4 +7,5 @@ export default (app) => {
   app.post('/rest/logout', authorizationController.checkAuthorization, userController.logout);
   app.post('/rest/users', userController.createUser);
   app.get('/rest/users/me', authorizationController.checkAuthorization, userController.getUser);
+  app.delete('/rest/users/me', authorizationController.checkAuthorization, userController.deleteUser);
 };

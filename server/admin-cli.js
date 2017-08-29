@@ -10,22 +10,11 @@ import linkyDb from './dao/NanoConnection';
 
 const view = Promise.promisify(linkyDb.view);
 const destroy = Promise.promisify(linkyDb.destroy);
-const all = Promise.all.bind(Promise);
 
 /* eslint-disable no-underscore-dangle */
 
 const deleteUserById = async (id, rev) => {
-  const allLists = await all([
-    view('feedUpdates', 'byUserId', { key: id }),
-    view('links', 'byUserid', { key: id }),
-    view('hierarchy', 'byUserId', { key: id }),
-    view('asyncWait', 'byUserId', { key: id }),
-  ]);
-  const flatten = [].concat(...allLists.map(l => l.rows));
-  await Promise.all([
-    destroy(id, rev),
-    ...flatten.map(({ value }) => destroy(value._id, value._rev)),
-  ]);
+  await userDao.deleteCascade(id, rev);
   console.log('delete completed.');
 };
 
@@ -127,9 +116,10 @@ if (command === 'rm-visitors') {
     console.error('Missing parameter');
     process.exit(1);
   }
-  if (typeof param !== 'number') {
+  const ageInDays = parseInt(param, 10);
+  if (typeof ageInDays !== 'number') {
     console.error('parameter must be a number (age in days)');
     process.exit(1);
   }
-  deletevisitors(param);
+  deletevisitors(ageInDays);
 }

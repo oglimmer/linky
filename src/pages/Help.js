@@ -6,10 +6,10 @@ import { connect } from 'react-redux';
 
 import { TAGS } from '../util/TagRegistry';
 
-import { getMeUserInformation } from '../redux/actions';
+import { getMeUserInformation, deleteAccount } from '../redux/actions';
 import BuildInfo from '../util/BuildInfo';
 
-const HelpPage = ({ authToken, onMeUserInformation }) => (
+const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
   <div>
     <h1>Help</h1>
     <h3>Why is there no &#39;create account&#39; button?</h3>
@@ -109,7 +109,7 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
       we can automatically redirect you them and re-login is transparent to you.
     </p>
     <div>
-      <b>authToken</b>: Lifetime: session. <a href="https://jwt.io/">JWT</a> style authorization
+      <b>authToken</b>: Lifetime: session. <a href="https://jwt.io/" target="_blank" rel="noopener noreferrer">JWT</a> style authorization
       token. The payload contains only your user-id within this system, next to iat and exp.
       { authToken ? (
         <div>
@@ -124,7 +124,7 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
           <div>
             As this page is build with reactjs, all communication to/from the server is via a
             REST api anyway, so you can play around with it by grabbing this
-            <a href="https://github.com/oglimmer/linky/blob/master/build/test/test.sh">
+            <a href="https://github.com/oglimmer/linky/blob/master/build/test/test.sh" target="_blank" rel="noopener noreferrer">
               shell script
             </a>.
             Set the shell variable AUTH_TOKEN to your token,
@@ -147,14 +147,31 @@ const HelpPage = ({ authToken, onMeUserInformation }) => (
     </div>
     <h3>Where can I file a bug?</h3>
     <p>
-      As this project is hosted on github.com, please use <a href="https://github.com/oglimmer/linky/issues">
+      As this project is hosted on github.com, please use <a href="https://github.com/oglimmer/linky/issues" target="_blank" rel="noopener noreferrer">
       Issues</a> there. Rather like to talk to me? {BuildInfo.CONTACT}
+    </p>
+    <h3>How can I delete my account?</h3>
+    { authToken ?
+      <p>
+        Press this button and we delete everything we&#39;ve stored about you:
+        <Button onClick={onDeleteAccount}>DELETE MY ACCOUNT</Button>
+      </p>
+      :
+      <p>
+        If you are logged in, you can press a button here and we delete everything we&#39;ve stored
+        about you.
+      </p>
+    }
+    <p>
+      While we do delete all information in your acitve database, we cannot simply delete your
+      information on our offline backups. Those backups have a retention time of 1 month.
     </p>
   </div>
 );
 HelpPage.propTypes = {
   authToken: PropTypes.string,
   onMeUserInformation: PropTypes.func.isRequired,
+  onDeleteAccount: PropTypes.func.isRequired,
 };
 HelpPage.defaultProps = {
   authToken: '',
@@ -166,6 +183,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => ({
   onMeUserInformation: () => dispatch(getMeUserInformation()),
+  onDeleteAccount: () => dispatch(deleteAccount()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HelpPage);

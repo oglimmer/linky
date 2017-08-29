@@ -150,6 +150,31 @@ class LogoutProcessor extends BaseProcessor {
   }
 }
 
+class DeleteProcessor extends BaseProcessor {
+  constructor(req, res, next) {
+    super(req, res, next, true);
+  }
+
+  async process() {
+    try {
+      const user = await userDao.getById(this.data.userid);
+      if (!user) {
+        ResponseUtil.sendErrorResponse500('Unknown id', this.res);
+      } else {
+        winston.loggers.get('application').debug('Delete user id=%s', this.data.userid);
+        /* eslint-disable no-underscore-dangle */
+        userDao.deleteCascading(user._id, user._rev);
+        /* eslint-enable no-underscore-dangle */
+        this.res.send('ok');
+      }
+    } catch (err) {
+      winston.loggers.get('application').error(err);
+      ResponseUtil.sendErrorResponse500(err, this.res);
+    }
+    this.res.end();
+  }
+}
+
 export default {
 
   authenticate: (req, res, next) => {
@@ -169,6 +194,11 @@ export default {
 
   getUser: (req, res, next) => {
     const cup = new GetUserProcessor(req, res, next);
+    cup.doProcess();
+  },
+
+  deleteUser: (req, res, next) => {
+    const cup = new DeleteProcessor(req, res, next);
     cup.doProcess();
   },
 

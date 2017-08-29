@@ -14,6 +14,10 @@ class ArchiveDao extends BaseDataAccessObject {
     return this.listByView('archives', 'byUserIdAndArchiveLinkId', key).then(this.getFirstElement);
   }
 
+  getByUserId(userid) {
+    return this.listByView('archives', 'byUserId', userid);
+  }
+
   attachmentInsert(docname, attname, att, contenttype, params) {
     return this.dbrefs.attachment.insert(docname, attname, att, contenttype, params);
   }
