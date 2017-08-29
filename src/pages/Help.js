@@ -14,20 +14,23 @@ const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
     <h1>Help</h1>
     <h3>Why is there no &#39;create account&#39; button?</h3>
     <p>
-      I didn&#39;t want to create all the create account, forgot passwort, reset passwort
+      I didn&#39;t want to create all the create account, forgot password, reset password
       functionality. So to make my life a bit easier I just integrated all those &#39;login via a
       3rd party webpage&#39; buttons.
     </p>
     <h3>How is search working?</h3>
     <p>
-      * and ? are regular wildcards.
+      Search has a local and a server mode. While typing (until you hit enter) search looks only
+      in the currently visible list of links and all available tags, this is called local mode.
+      After hitting enter the server mode is activated and thus all links are searched.
     </p>
     <p>
-      Start with `tags:`, `url:`, `notes:`, `rss:` or `title:` to search just this field.
-      Otherwise a search will look into all fields.
+      Server mode offers * and ? as regular wildcards. Local mode always searchs with leading
+      and trailing *.
     </p>
     <p>
-      Search is using lucene as the search backend engine and leading wildcards is set to allowed.
+      On server mode start with `tags:`, `url:`, `notes:`, `rss:` or `title:` to search just this
+      field. Otherwise a search will look into all fields.
     </p>
     <h3>How is import/export working?</h3>
     <p>
@@ -119,12 +122,11 @@ const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
           </div>
           <div>
             Click this button to see what we&#39;ve stored about your:{' '}
-            <Button onClick={onMeUserInformation}>I am curious</Button>
+            <Button onClick={onMeUserInformation} className="btn-sm">I am curious</Button>
           </div>
           <div>
             As this page is build with reactjs, all communication to/from the server is via a
-            REST api anyway, so you can play around with it by grabbing this
-            <a href="https://github.com/oglimmer/linky/blob/master/build/test/test.sh" target="_blank" rel="noopener noreferrer">
+            REST api anyway, so you can play around with it by grabbing this <a href="https://github.com/oglimmer/linky/blob/master/build/test/test.sh" target="_blank" rel="noopener noreferrer">
               shell script
             </a>.
             Set the shell variable AUTH_TOKEN to your token,
@@ -154,7 +156,7 @@ const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
     { authToken ?
       <p>
         Press this button and we delete everything we&#39;ve stored about you:
-        <Button onClick={onDeleteAccount}>DELETE MY ACCOUNT</Button>
+        <Button onClick={onDeleteAccount} className="btn-xs">DELETE MY ACCOUNT</Button>
       </p>
       :
       <p>
@@ -163,8 +165,11 @@ const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
       </p>
     }
     <p>
-      While we do delete all information in your acitve database, we cannot simply delete your
-      information on our offline backups. Those backups have a retention time of 1 month.
+      A note about account deletion: (A) While we do delete all information in our active database,
+      we cannot simply delete your information on our offline backups. Those backups have a
+      retention time of 1 month. (B) The data backend of this system is a CouchDB (1.6) and thus
+      data deletion has some limitations, see <a href="https://wiki.apache.org/couchdb/HTTP_Document_API#DELETE" target="_blank" rel="noopener noreferrer">
+      here</a>. Once every 24h the database is compacted.
     </p>
   </div>
 );
