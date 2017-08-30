@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 
 import { Route, Redirect } from 'react-router-dom';
 
+import Layout from '../pages/Layout';
 import Login from '../pages/Login';
 import PortalPage from '../pages/PortalPage';
 import TagPage from '../pages/TagPage';
@@ -24,7 +25,7 @@ const CategorizedRoute = ({ component: Component, authReq, auth, authFailTarget,
     {...rest}
     render={props => (
       (typeof auth === 'function' ? auth() : auth) === authReq ? (
-        <Component {...props} />
+        <Layout><Component {...props} /></Layout>
       ) : (
         <Redirect to={{
           pathname: authFailTarget,
@@ -49,6 +50,10 @@ CategorizedRoute.defaultProps = {
   location: null,
   authReq: true,
 };
+
+const AddLayout = Component => () => (
+  <Layout><Component /></Layout>
+);
 
 const routes = auth => [
   {
@@ -85,14 +90,14 @@ const routes = auth => [
     tagName: Route,
     exact: true,
     path: '/contact',
-    component: Contact,
+    component: AddLayout(Contact),
     loadData: null,
   },
   {
     tagName: Route,
     exact: true,
     path: '/help',
-    component: Help,
+    component: AddLayout(Help),
     loadData: null,
   },
   {

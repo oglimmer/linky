@@ -14,7 +14,11 @@ const TagListHierarchy = ({ tagHierarchy, onClick, selectedTag }) => {
     return null;
   }
   const cachedTagHierarchy = new CachedTagHierarchy(tagHierarchy);
-  let parentTagName = cachedTagHierarchy.getNodeByName(selectedTag).parent;
+  const sectedTagObject = cachedTagHierarchy.getNodeByName(selectedTag);
+  if (!sectedTagObject) {
+    return null;
+  }
+  let parentTagName = sectedTagObject.parent;
   let parents = cachedTagHierarchy.getSiblings(parentTagName);
   let siblings = cachedTagHierarchy.getSiblings(selectedTag);
   let children = cachedTagHierarchy.getChildren(selectedTag);
@@ -102,7 +106,7 @@ TagListHierarchy.defaultProps = {
 // ---------------------------------------------------------------------------------
 
 const mapStateToProps = state => ({
-  tagHierarchy: state.tagHierarchyData.tagHierarchy || { children: Immutable.List() },
+  tagHierarchy: state.tagHierarchyData.tagHierarchy || Immutable.List(),
   selectedTag: state.mainData.selectedTag,
   authToken: state.auth.token,
 });

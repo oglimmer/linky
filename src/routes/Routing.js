@@ -2,13 +2,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import Layout from '../pages/Layout';
 import r from './routes';
 
 const Routing = ({ store }) => (
-  <Layout>
+  <div>
     { r.routesFromStore(store).map(route => (<route.tagName key={Math.random()} {...route} />))}
-  </Layout>
+  </div>
 );
 Routing.propTypes = {
   store: PropTypes.shape().isRequired,
