@@ -4,8 +4,8 @@ import JwtUtil from '../util/JwtUtil';
 import linkDao from '../dao/linkDao';
 import feedUpdatesDao from '../dao/feedUpdatesDao';
 import { hashSha256Hex } from '../util/HashUtil';
+import { getArchiveDomain } from '../Logic/Archive';
 
-import properties from '../util/linkyproperties';
 
 /* eslint-disable no-underscore-dangle */
 
@@ -21,7 +21,7 @@ class SimpleLeaveProcessor {
           throw Error('Failed to verify user on referenced link');
         }
         let targetUrl = loadedLinkObj.linkUrl;
-        if (targetUrl.startsWith(`${properties.server.archive.domain}/`)) {
+        if (targetUrl.startsWith(`${getArchiveDomain()}/archive/`)) {
           const tempClaim = { archiveUserHash: hashSha256Hex(loadedLinkObj.userid) };
           const tempAuthToken = await JwtUtil.sign(tempClaim, '1h');
           targetUrl += `?tmpAuthToken=${tempAuthToken}`;

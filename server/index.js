@@ -44,6 +44,7 @@ import Routing from '../src/routes/Routing';
 
 import serverPropsLoader from './util/serverPropsLoader';
 import BuildInfo from '../src/util/BuildInfo';
+import { ensureNotArchiveDomain } from './logic/Archive';
 
 import properties from './util/linkyproperties';
 import AlertAdapter from '../src/components/AlertAdapter';
@@ -94,10 +95,17 @@ const globalCSPConfig = Object.assign({},
     'plugin-types': '',
   },
 );
-const globalCSP = contentSecurityPolicy.getCSP(globalCSPConfig);
-app.use(globalCSP);
+const notAtArchive = middleware => (req, res, next) => {
+  if (!req.originalUrl.startsWith('/archive/')) {
+    middleware(req, res, next);
+  } else {
+    next();
+  }
+};
+
+app.use(notAtArchive(contentSecurityPolicy.getCSP(globalCSPConfig)));
+app.use(notAtArchive(xXssProtection()));
 app.use(xFrameOptions());
-app.use(xXssProtection());
 app.use(hsts());
 app.use(responseTime());
 app.use(bodyParser.json());
@@ -137,6 +145,12 @@ if (compConfigRest === 'proxy') {
     app.use(restPath, proxy(`${proxyBind}:${proxyPort}`, {
       // express-http-proxy cuts off the prefix of the url matching restPath
       proxyReqPathResolver: req => `${restPath}${req.url}`,
+      proxyReqOptDecorator: (proxyReqOpts, srcReq) => {
+        /* eslint-disable no-param-reassign */
+        proxyReqOpts.headers.host = srcReq.headers.host;
+        /* eslint-enable no-param-reassign */
+        return proxyReqOpts;
+      },
     }));
   });
 }
@@ -183,6 +197,10 @@ if (compConfigDynamicContent === 'enable') {
 
   const finalCreateStore = applyMiddleware(thunkMiddleware)(createStore);
   app.use(async (req, res) => {
+    if (ensureNotArchiveDomain(req.headers.host)) {
+      res.status(403).send(`Forbidden on ${properties.server.archive.domain}`);
+      return;
+    }
     const store = finalCreateStore(combinedReducers);
 
     winston.loggers.get('application').debug(`Processing match at url = ${req.url}`);

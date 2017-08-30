@@ -12,6 +12,7 @@ import { UNTAGGED, ALL, RSS, FORBIDDEN_TAGS, LOCKED, DUEDATE,
 
 import tagDao from '../dao/tagDao';
 import TagHierarchyLogic from '../logic/TagHierarchy';
+import { getArchiveDomain } from '../logic/Archive';
 
 import properties from '../util/linkyproperties';
 
@@ -52,7 +53,7 @@ const ensureRssTag = (tagsArr, rssUrl) => {
 
 const ensureArchiveTag = (tagsArr, linkUrl) => {
   const findFctn = t => t === ARCHIVE;
-  if (linkUrl.startsWith(`${properties.server.archive.domain}/`)) {
+  if (linkUrl.startsWith(`${getArchiveDomain()}/archive/`)) {
     if (tagsArr && !tagsArr.find(findFctn)) {
       tagsArr.push(ARCHIVE);
     }
@@ -112,6 +113,9 @@ const resolveUrl = (url, pageTitle, locked) => new Promise((resolve, reject) => 
     url,
     followAllRedirects: true,
     timeout: 500,
+    headers: {
+      'User-Agent': properties.server.http.userAgent,
+    },
   });
   const timeout = setTimeout(() => {
     httpGetCall.abort();
@@ -227,7 +231,7 @@ export const createObject = ({ tags, linkUrl, faviconUrl, rssUrl, pageTitle, not
   });
 
 export const validateAndEnhanceTags = (tags, rssUrl, linkUrl) =>
-  ensureArchiveTag( // add archive if url starts with ${properties.server.archive.domain}
+  ensureArchiveTag( // add archive if url starts with the archive domain
     ensureWithduedateTag( // add duedate if date given
       ensureRssTag( // add rss if rss-url given
         ensureAllTag( // ensure all

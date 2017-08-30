@@ -10,6 +10,8 @@ import feedUpdatesDao from '../dao/feedUpdatesDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 
+import properties from '../util/linkyproperties';
+
 const parseStringPromise = Promise.promisify(parseString);
 
 // SUPPORTED FEED TYPES:
@@ -190,6 +192,9 @@ class GetRssUpdatesProcessor extends BaseProcessor {
           uri: rec.rssUrl,
           encoding: null,
           resolveWithFullResponse: true,
+          headers: {
+            'User-Agent': properties.server.http.userAgent,
+          },
         });
         const content = await parseStringPromise(
           GetRssUpdatesProcessor.getContent(feedHttpResponse));

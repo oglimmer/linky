@@ -14,6 +14,7 @@ import BaseProcessor from './BaseProcessor';
 import linkDao from '../dao/linkDao';
 import archiveDao from '../dao/archiveDao';
 import { updateTagHierarchy, createObject } from '../logic/Link';
+import { getArchiveDomain, ensureArchiveDomain } from '../logic/Archive';
 import { ALL, ARCHIVE } from '../../src/util/TagRegistry';
 import { hashSha256Hex } from '../util/HashUtil';
 import JwtUtil from '../util/JwtUtil';
@@ -82,7 +83,7 @@ class CreateArchiveProcessor extends BaseProcessor {
   async createLinkRec(userHash, archiveRecId, linkRec) {
     const filename = CreateArchiveProcessor.getFilename(linkRec.linkUrl, '');
     const newRecord = createObject({
-      linkUrl: `${properties.server.archive.domain}/archive/${userHash}/${archiveRecId}/${filename}`,
+      linkUrl: `${getArchiveDomain()}/archive/${userHash}/${archiveRecId}/${filename}`,
       userid: this.data.userid,
       notes: `Archived ${linkRec.linkUrl} on ${new Date()}`,
       tags: [ALL, ARCHIVE],
@@ -119,7 +120,7 @@ class CreateArchiveProcessor extends BaseProcessor {
       },
       request: {
         headers: {
-          'User-Agent': properties.server.archive.userAgent,
+          'User-Agent': properties.server.http.userAgent,
         },
       },
     });
@@ -225,6 +226,10 @@ class ReadArchiveController {
   }
 
   async ensureFilesOnCacheAndSecurity() {
+    if (ensureArchiveDomain(this.req.headers.host)) {
+      this.res.status(403).send(`Forbidden. Must use ${properties.server.archive.domain}`);
+      return;
+    }
     if (this.req.query.tmpAuthToken) {
       this.res.cookie('tmpAuthToken', this.req.query.tmpAuthToken);
       // security: don't keep the token in the url

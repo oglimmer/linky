@@ -272,12 +272,9 @@ export function initialLoadLinks(tag) {
 }
 
 export function completeChangeTag(tag) {
-  return async (dispatch, getState) => {
-    if (getState().mainData.selectedTag !== tag) {
-      await dispatch(initialLoadLinks(tag));
-      dispatch(fetchRssUpdates());
-    }
-    return Promise.resolve();
+  return async (dispatch) => {
+    await dispatch(initialLoadLinks(tag));
+    dispatch(fetchRssUpdates());
   };
 }
 
