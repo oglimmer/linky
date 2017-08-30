@@ -4,7 +4,7 @@ import JwtUtil from '../util/JwtUtil';
 import linkDao from '../dao/linkDao';
 import feedUpdatesDao from '../dao/feedUpdatesDao';
 import { hashSha256Hex } from '../util/HashUtil';
-import { getArchiveDomain } from '../Logic/Archive';
+import { getArchiveDomain } from '../logic/Archive';
 
 
 /* eslint-disable no-underscore-dangle */
