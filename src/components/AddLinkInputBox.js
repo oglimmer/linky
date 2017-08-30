@@ -112,8 +112,6 @@ const calcHasArchivedTag = (state) => {
 const mapStateToProps = state => ({
   linkId: state.addUrl.id,
   isAddEnabled: state.menuBar.addEnabled,
-  tags: state.addUrl.tags.split(' ').map(e => ({ id: e, name: e })),
-  suggestions: state.tagHierarchyData.tagHierarchy.map(e => ({ id: e.name, name: e.name })),
   hasArchivedTag: calcHasArchivedTag(state),
 });
 
