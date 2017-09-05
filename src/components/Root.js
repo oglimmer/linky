@@ -13,6 +13,10 @@ import Routing from '../routes/Routing';
 import history from '../util/history';
 
 class Root extends React.Component {
+  static propTypes = {
+    store: PropTypes.shape().isRequired,
+  };
+
   constructor({ store }) {
     super();
     this.store = store;
@@ -35,8 +39,5 @@ class Root extends React.Component {
     );
   }
 }
-Root.propTypes = {
-  store: PropTypes.shape().isRequired,
-};
 
 export default Root;

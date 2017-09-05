@@ -4,6 +4,10 @@
   color: transparent!important;
 }
 
+.link {
+  width: 300px;
+}
+
 input {
   font-size: 16px;
 }

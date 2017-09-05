@@ -3,7 +3,7 @@ import fetch from '../../util/fetch';
 
 import { MANIPULATE_TAG, RENAME_TAG_HIERARCHY, SET_TAG_HIERARCHY,
   SELECT_NODE, REMOVE_TAG_HIERARCHY, ADD_TAG_HIERARCHY,
-  UPDATE_COUNT_IN_HIERARCHY } from '../actionTypes';
+  UPDATE_COUNT_IN_HIERARCHY, BEGIN_DRAG, END_DRAG } from '../actionTypes';
 
 import { setInfoMessage, setErrorMessage, setTempMessage } from './feedback';
 
@@ -29,6 +29,14 @@ function updateCountInHierarchy(tagName, count) {
   return { type: UPDATE_COUNT_IN_HIERARCHY, tagName, count };
 }
 
+export function beginDrag(tag) {
+  return { type: BEGIN_DRAG, tag };
+}
+
+function endDrag(target) {
+  return { type: END_DRAG, target };
+}
+
 export function fetchTagHierarchy() {
   return async (dispatch, getState) => {
     try {
@@ -50,40 +58,26 @@ export function initialLoadTags() {
   };
 }
 
-/*
- * two arrays are equal if each element on pos x equals in name and parent on pos x on the other
- * (index and count are of interest, as index is represented by the pos and count isn't saved in
- * the tagHierarchy)
- */
-const equalArray = (a1, a2) => {
-  const a1Size = a1.size ? a1.size : a1.length;
-  const a2Size = a2.size ? a2.size : a2.length;
-  if (a1Size !== a2Size) {
-    return false;
-  }
-  return a1.every((elementA1, index) => {
-    const elementA2 = a2.get ? a2.get(index) : a2[index];
-    if (!elementA2) {
-      return false;
-    }
-    return elementA1.name === elementA2.name && elementA1.parent === elementA2.parent;
-  });
-};
-
-export function saveTagHierarchy(tree, alwaysSendToServer = false) {
+export function saveTagHierarchy() {
   return async (dispatch, getState) => {
-    const oldTree = getState().tagHierarchyData.tagHierarchy;
-    if (alwaysSendToServer || !equalArray(oldTree, tree)) {
-      dispatch(setTempMessage('sending data to server ...'));
-      try {
-        await fetch.put('/rest/tags/hierarchy', { tree }, getState().auth.token);
-        dispatch(setTagHierarchy(tree));
-        dispatch(setInfoMessage('Tag hierarchy successfully saved.'));
-      } catch (err) {
-        dispatch(setErrorMessage(err));
-      }
+    const tree = getState().tagHierarchyData.tagHierarchy;
+    dispatch(setTempMessage('sending data to server ...'));
+    try {
+      await fetch.put('/rest/tags/hierarchy', { tree }, getState().auth.token);
+      dispatch(setTagHierarchy(tree));
+      dispatch(setInfoMessage('Tag hierarchy successfully saved.'));
+    } catch (err) {
+      dispatch(setErrorMessage(err));
     }
-    return Promise.resolve();
+  };
+}
+
+export function endDragAndPersist(target) {
+  return async (dispatch) => {
+    await dispatch(endDrag(target));
+    if (target) {
+      await dispatch(saveTagHierarchy());
+    }
   };
 }
 
@@ -129,10 +123,10 @@ export function addTagHierarchyNode() {
   const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
   const tagName = split[0];
   if (tagName) {
-    return async (dispatch, getState) => {
+    return async (dispatch) => {
       dispatch(setTempMessage('sending data to server ...'));
       await Promise.resolve(dispatch({ type: ADD_TAG_HIERARCHY, name: tagName }));
-      await saveTagHierarchy(getState().tagHierarchyData.tagHierarchy, true);
+      await saveTagHierarchy();
       dispatch(setInfoMessage(`Tag ${tagName} successfully added.`));
     };
   }

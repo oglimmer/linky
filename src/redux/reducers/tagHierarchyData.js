@@ -3,7 +3,7 @@ import Immutable from 'immutable';
 
 import { MANIPULATE_TAG, ADD_TAG_HIERARCHY, RENAME_TAG_HIERARCHY,
   SET_TAG_HIERARCHY, SELECT_NODE, REMOVE_TAG_HIERARCHY, RESET,
-  UPDATE_COUNT_IN_HIERARCHY } from './../actionTypes';
+  UPDATE_COUNT_IN_HIERARCHY, BEGIN_DRAG, END_DRAG } from './../actionTypes';
 
 import { initialStateTagData } from './../DataModels';
 
@@ -13,9 +13,9 @@ import { getNodeByName } from '../../util/Hierarchy';
 import { assert } from '../../util/Assert';
 
 /* eslint-disable no-nested-ternary */
-const getNextIndex = (state) => {
+const getNextIndex = (state, parentTagName = 'root') => {
   const sortedRootElements = state.tagHierarchy
-    .filter(e => e.parent === 'root')
+    .filter(e => e.parent === parentTagName)
     .sort((a, b) => (a.index < b.index ? 1 : (a.index === b.index ? 0 : -1)));
   if (sortedRootElements.size > 0) {
     return sortedRootElements.get(0).index + 1;
@@ -76,6 +76,37 @@ const renameTagHierarchyUpdateState = (state, oldName, newName) => {
   return Immutable.List(tagHierarchy);
 };
 
+const updateObjectEndDrag = (state, action) => {
+  if (!action.target) {
+    return {
+      dragInProgress: null,
+    };
+  }
+  const { parentNode, next, prev } = action.target;
+  const tagName = state.dragInProgress;
+  let index;
+  if (!next && !prev) {
+    // add to empty list
+    index = 0;
+  } else if (!next) {
+    // last child in a list
+    index = getNextIndex(state, parentNode.hierarchyLevelName);
+  } else {
+    // any child other than last
+    index = state.tagHierarchy.find(e => e.name === next).index - 0.001;
+  }
+  return {
+    dragInProgress: null,
+    tagHierarchy: state.tagHierarchy.update(
+      state.tagHierarchy.findIndex(ele => ele.name === tagName),
+      val => Object.assign({}, val, {
+        parent: parentNode.hierarchyLevelName,
+        index,
+      }),
+    ),
+  };
+};
+
 export default function tagHierarchyData(state = initialStateTagData, action) {
   switch (action.type) {
     case RESET:
@@ -113,6 +144,12 @@ export default function tagHierarchyData(state = initialStateTagData, action) {
           }),
         ),
       });
+    case BEGIN_DRAG:
+      return Object.assign({}, state, {
+        dragInProgress: action.tag,
+      });
+    case END_DRAG:
+      return Object.assign({}, state, updateObjectEndDrag(state, action));
     default:
       return state;
   }

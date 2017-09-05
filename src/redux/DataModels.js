@@ -48,6 +48,7 @@ export const initialStateMainData = {
 export const initialStateTagData = {
   tagHierarchy: null,
   selectedNode: null,
+  dragInProgress: null,
 };
 
 export const initialMenuBar = {

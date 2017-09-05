@@ -1,19 +1,46 @@
 
 import React from 'react';
-import Tree from 'react-ui-tree';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import Immutable from 'immutable';
 
 import { initialLoadTags, selectNodeInTagHierarchy, addTagHierarchyNode, removeTagHierarchyNode,
-  saveTagHierarchy, renameTagHierarchyNode } from '../redux/actions/tagHierarchy';
+  renameTagHierarchyNode } from '../redux/actions/tagHierarchy';
 
-import { toHierarchy, flatten, CachedTagHierarchy } from '../util/Hierarchy';
+import Tree from '../components/Tree';
+
+import { toHierarchy, CachedTagHierarchy } from '../util/Hierarchy';
 
 import { TAGS, READONLY_TAGS } from '../util/TagRegistry';
 
-class TagPage extends React.Component {
+@connect(state => ({
+  tree: state.tagHierarchyData.tagHierarchy || Immutable.List(),
+  selectedNode: state.tagHierarchyData.selectedNode,
+}), dispatch => ({
+  onClick: nodeName => dispatch(selectNodeInTagHierarchy(nodeName)),
+  initialLoadTags: () => dispatch(initialLoadTags()),
+  onAdd: () => dispatch(addTagHierarchyNode()),
+  onRemove: () => dispatch(removeTagHierarchyNode()),
+  onRename: nodeName => dispatch(renameTagHierarchyNode(nodeName)),
+}))
+export default class TagPage extends React.Component {
+  static propTypes = {
+    initialLoadTags: PropTypes.func.isRequired,
+    onClick: PropTypes.func.isRequired,
+    tree: ImmutablePropTypes.listOf(PropTypes.shape()).isRequired,
+    selectedNode: PropTypes.shape(),
+    onAdd: PropTypes.func,
+    onRemove: PropTypes.func,
+    onRename: PropTypes.func,
+  };
+  static defaultProps = {
+    selectedNode: null,
+    onAdd: null,
+    onRemove: null,
+    onRename: null,
+  };
+
   constructor(props) {
     super(props);
     this.renderNode = this.renderNode.bind(this);
@@ -59,41 +86,8 @@ class TagPage extends React.Component {
           paddingLeft={20}
           tree={tree}
           renderNode={this.renderNode}
-          onChange={this.props.onChange}
         />
       </div>
     );
   }
 }
-TagPage.propTypes = {
-  initialLoadTags: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired,
-  tree: ImmutablePropTypes.listOf(PropTypes.shape()).isRequired,
-  selectedNode: PropTypes.shape(),
-  onAdd: PropTypes.func,
-  onRemove: PropTypes.func,
-  onRename: PropTypes.func,
-  onChange: PropTypes.func.isRequired,
-};
-TagPage.defaultProps = {
-  selectedNode: null,
-  onAdd: null,
-  onRemove: null,
-  onRename: null,
-};
-
-const mapStateToProps = state => ({
-  tree: state.tagHierarchyData.tagHierarchy || Immutable.List(),
-  selectedNode: state.tagHierarchyData.selectedNode,
-});
-
-const mapDispatchToProps = dispatch => ({
-  onClick: nodeName => dispatch(selectNodeInTagHierarchy(nodeName)),
-  initialLoadTags: () => dispatch(initialLoadTags()),
-  onAdd: () => dispatch(addTagHierarchyNode()),
-  onRemove: () => dispatch(removeTagHierarchyNode()),
-  onChange: tree => dispatch(saveTagHierarchy(flatten(tree))),
-  onRename: nodeName => dispatch(renameTagHierarchyNode(nodeName)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(TagPage);

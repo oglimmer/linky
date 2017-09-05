@@ -11,6 +11,17 @@ import { CachedTagHierarchy } from '../util/Hierarchy';
 const divStyle = { marginTop: 9, marginBottom: 9 };
 
 class TagListHierarchy extends React.Component {
+  static propTypes = {
+    tagHierarchy: PropTypes.shape().isRequired,
+    onClick: PropTypes.func.isRequired,
+    onCompleteChangeTag: PropTypes.func.isRequired,
+    selectedTag: PropTypes.string,
+    match: PropTypes.shape().isRequired,
+  };
+  static defaultProps = {
+    selectedTag: null,
+  };
+
   componentDidMount() {
     const tag = this.props.match.params.tag;
     if (this.props.selectedTag !== tag) {
@@ -100,16 +111,6 @@ class TagListHierarchy extends React.Component {
     );
   }
 }
-TagListHierarchy.propTypes = {
-  tagHierarchy: PropTypes.shape().isRequired,
-  onClick: PropTypes.func.isRequired,
-  onCompleteChangeTag: PropTypes.func.isRequired,
-  selectedTag: PropTypes.string,
-  match: PropTypes.shape().isRequired,
-};
-TagListHierarchy.defaultProps = {
-  selectedTag: null,
-};
 
 // ---------------------------------------------------------------------------------
 
