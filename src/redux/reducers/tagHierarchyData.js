@@ -85,6 +85,7 @@ const updateObjectEndDrag = (state, action) => {
   const { parentNode, next, prev } = action.target;
   const tagName = state.dragInProgress;
   let index;
+  let reindex = false;
   if (!next && !prev) {
     // add to empty list
     index = 0;
@@ -93,17 +94,30 @@ const updateObjectEndDrag = (state, action) => {
     index = getNextIndex(state, parentNode.hierarchyLevelName);
   } else {
     // any child other than last
-    index = state.tagHierarchy.find(e => e.name === next).index - 0.001;
+    index = state.tagHierarchy.find(e => e.name === next).index - 0.1;
+    reindex = true;
+  }
+  let tagHierarchy = state.tagHierarchy.update(
+    state.tagHierarchy.findIndex(ele => ele.name === tagName),
+    val => Object.assign({}, val, {
+      parent: parentNode.hierarchyLevelName,
+      index,
+    }),
+  );
+  if (reindex) {
+    tagHierarchy = tagHierarchy.withMutations((list) => {
+      /* eslint-disable no-nested-ternary */
+      list
+        .filter(e => e.parent === parentNode.hierarchyLevelName)
+        .sort((a, b) => (a.index < b.index ? -1 : (a.index === b.index ? 0 : 1)))
+        .forEach((e, localIndex) => { e.index = localIndex; });
+      return list;
+      /* eslint-enable no-nested-ternary */
+    });
   }
   return {
     dragInProgress: null,
-    tagHierarchy: state.tagHierarchy.update(
-      state.tagHierarchy.findIndex(ele => ele.name === tagName),
-      val => Object.assign({}, val, {
-        parent: parentNode.hierarchyLevelName,
-        index,
-      }),
-    ),
+    tagHierarchy,
   };
 };
 
