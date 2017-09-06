@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { MemoryRouter } from 'react-router';
 
-import Footer from './Footer';
+import Footer from '../../src/components/Footer';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
