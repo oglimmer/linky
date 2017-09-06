@@ -19,7 +19,7 @@ const TagListSearch = ({ tagHierarchy, onClick, selectedTag, searchBarTerm }) =>
   return (
     <div style={divStyle}>Search result in tags:{' '}
       { tagsMatchingSearch.map(tag => (
-        <span key={Math.random()}>
+        <span key={`TagListSearch-${tag.name}`}>
           <span
             role="link"
             tabIndex="0"

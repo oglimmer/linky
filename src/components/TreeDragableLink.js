@@ -5,9 +5,7 @@ import { connect } from 'react-redux';
 import { DragSource } from 'react-dnd';
 import { beginDrag, endDragAndPersist } from '../redux/actions/tagHierarchy';
 
-@connect(state => ({
-  dragInProgress: state.tagHierarchyData.dragInProgress,
-}), dispatch => ({
+@connect(null, dispatch => ({
   beginDrag: tag => dispatch(beginDrag(tag)),
   endDrag: target => dispatch(endDragAndPersist(target)),
 }))

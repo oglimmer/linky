@@ -15,11 +15,11 @@ const styleRow = {
   paddingLeft: '20px',
 };
 
-const display = (columnName, text) => {
+const display = (id, columnName, text) => {
   switch (columnName) {
     case 'tags':
       return text.map(tag => (
-        <span key={Math.random()}>
+        <span key={tag + id}>
           <span className="label label-default">{tag}</span>
           {' '}
         </span>
@@ -48,10 +48,10 @@ const UILinkListElement = ({ id, onUpdateLink, onClickLink, faviconUrl, listColu
         const text = link[columnName];
         if (index === 0) {
           return (
-            <div key={Math.random()}>
+            <div key={columnName + id}>
               <img width="16" src={rewriteFavicon(faviconUrl, id)} alt="favicon" />
               {' '}
-              {display(columnName, text)}
+              {display(id, columnName, text)}
               { feedUpdates ? (
                 <span
                   style={styleFeedUpdate}
@@ -74,12 +74,12 @@ const UILinkListElement = ({ id, onUpdateLink, onClickLink, faviconUrl, listColu
             </div>
           );
         }
-        return (<div key={Math.random()} style={styleRow}>{display(columnName, text)}</div>);
+        return (<div key={columnName + id} style={styleRow}>{display(id, columnName, text)}</div>);
       })}
       {' '}
     </ListGroupItem>
     { id === selectedLinkForDetails ? rssDetails.map(e => (
-      <ListGroupItem key={Math.random()} href={e.link} target="_blank">
+      <ListGroupItem key={e.link} href={e.link} target="_blank">
         <img width="16" src="/static/sub.png" alt="sub item" />
         {e.title}
       </ListGroupItem>

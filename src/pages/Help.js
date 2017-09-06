@@ -58,7 +58,7 @@ const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
     <div>
       System tags are:
       <ul>
-        { TAGS.sort().map(tag => (<li key={Math.random()}>{tag}</li>)) }
+        { TAGS.sort().map(tag => (<li key={tag}>{tag}</li>)) }
       </ul>
     </div>
     <p>

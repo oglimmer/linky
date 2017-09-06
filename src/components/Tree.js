@@ -5,8 +5,21 @@ import { connect } from 'react-redux';
 import MultiBackend from 'react-dnd-multi-backend';
 import HTML5toTouch from 'react-dnd-multi-backend/lib/HTML5toTouch'; // or any other pipeline
 import { DragDropContext } from 'react-dnd';
+import withScrolling from 'react-dnd-scrollzone';
 
 import TreeLink from './TreeLink';
+
+const s = {
+  width: '500px',
+  overflow: 'auto',
+  position: 'fixed',
+  marginLeft: 'auto',
+  marginRight: 'auto',
+  top: '120px',
+  bottom: '50px',
+};
+
+const ScrollableDiv = withScrolling('div');
 
 @DragDropContext(MultiBackend(HTML5toTouch))
 @connect(state => ({
@@ -49,7 +62,7 @@ export default class Tree extends Component {
   render() {
     const tree = this.getDropZoneEnhanced();
     return (
-      <div>
+      <ScrollableDiv style={s}>
         { tree.children.map(e => (
           <TreeLink
             key={e.hierarchyLevelName}
@@ -59,7 +72,7 @@ export default class Tree extends Component {
             paddingLeft={this.props.paddingLeft}
           />
         ))}
-      </div>
+      </ScrollableDiv>
     );
   }
 }

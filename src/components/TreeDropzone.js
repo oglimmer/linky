@@ -61,15 +61,14 @@ export default class TreeDragableLink extends Component {
       height: '4px',
     };
     if (legalDropTarget(this.props)) {
-      if (this.props.dragInProgress) {
-        style.border = '1px solid #CCCCCC';
-        style.padding = '1px';
-        style.height = '2px';
-      }
       if (this.props.isOver) {
         style.border = '2px solid black';
         style.padding = '0px';
-        style.height = '0px';
+        style.height = '20px';
+      } else if (this.props.dragInProgress) {
+        style.border = '1px solid #AAAAAA';
+        style.padding = '1px';
+        style.height = '2px';
       }
     }
     return style;

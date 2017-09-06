@@ -83,7 +83,7 @@ export default class TagPage extends React.Component {
         { isRemoveAvail ? (<button onClick={this.props.onRemove}>Remove selected level</button>) : ''}
         { isRenameAvail ? (<button onClick={() => this.props.onRename(this.props.selectedNode.hierarchyLevelName)}>Rename selected level</button>) : ''}
         <Tree
-          paddingLeft={20}
+          paddingLeft={30}
           tree={tree}
           renderNode={this.renderNode}
         />

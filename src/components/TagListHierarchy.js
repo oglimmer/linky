@@ -64,7 +64,7 @@ class TagListHierarchy extends React.Component {
         <div>
           { parents.size === 1 && parents.get(0).name === 'root' ? '' : (
             <span><i className={labels[0]} />{' '}{ parents.map(tag => (
-              <span key={Math.random()}>
+              <span key={`parents-${tag.name}`}>
                 <span
                   role="link"
                   tabIndex="0"
@@ -80,7 +80,7 @@ class TagListHierarchy extends React.Component {
         </div>
         <div><i className={labels[1]} />{' '}
           { siblings.map(tag => (
-            <span key={Math.random()}>
+            <span key={`siblings-${tag.name}`}>
               <span
                 role="link"
                 tabIndex="0"
@@ -95,7 +95,7 @@ class TagListHierarchy extends React.Component {
         </div>
         { children && children.size > 0 ? (<span><i className={labels[2]} />{' '}
           { children.map(tag => (
-            <span key={Math.random()}>
+            <span key={`children-${tag.name}`}>
               <span
                 role="link"
                 tabIndex="0"
