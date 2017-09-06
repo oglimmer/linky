@@ -20,6 +20,15 @@ input {
   padding: 10px 1px 1px 1px;
 }
 
+.larger {
+  font-size: 24px;
+}
+
+.footer {
+  position: fixed;
+  bottom: 3px;
+}
+
 .horizontalScroll {
   width: 400px;
   overflow: auto;

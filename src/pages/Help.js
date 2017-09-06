@@ -143,7 +143,6 @@ const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
     <h3>Known limitations</h3>
     <div>
       <ul>
-        <li>Drag and drop in the `tags` page doesn&#39;t work on mobile devices.</li>
         <li>When clicking on a RSS line item it doesn&#39;t get removed as a `new` item.</li>
       </ul>
     </div>
