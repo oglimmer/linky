@@ -23,6 +23,7 @@ import { beginDrag, endDragAndPersist } from '../redux/actions/tagHierarchy';
   },
 }, (conn, monitor) => ({
   connectDragSource: conn.dragSource(),
+  dragPreview: conn.dragPreview(),
   isDragging: monitor.isDragging(),
 }))
 export default class TreeDragableLink extends Component {
@@ -31,6 +32,7 @@ export default class TreeDragableLink extends Component {
     level: PropTypes.number.isRequired,
     renderNode: PropTypes.func.isRequired,
     connectDragSource: PropTypes.func.isRequired,
+    dragPreview: PropTypes.func.isRequired,
     paddingLeft: PropTypes.number.isRequired,
     isDragging: PropTypes.bool.isRequired,
     // beginDrag: PropTypes.func.isRequired,
@@ -47,9 +49,11 @@ export default class TreeDragableLink extends Component {
   }
 
   render() {
-    return this.props.connectDragSource(
-      <div>
+    return this.props.dragPreview(
+      <div className="larger">
         <div style={this.calcStyle()} className="link">
+          { this.props.connectDragSource(<i className="ion-ios-keypad" />) }
+          {' '}
           { this.props.renderNode(this.props.ele) }
         </div>
         { this.props.children }
