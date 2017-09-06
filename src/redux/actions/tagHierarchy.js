@@ -126,7 +126,7 @@ export function addTagHierarchyNode() {
     return async (dispatch) => {
       dispatch(setTempMessage('sending data to server ...'));
       await Promise.resolve(dispatch({ type: ADD_TAG_HIERARCHY, name: tagName }));
-      await saveTagHierarchy();
+      await dispatch(saveTagHierarchy());
       dispatch(setInfoMessage(`Tag ${tagName} successfully added.`));
     };
   }
