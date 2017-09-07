@@ -83,6 +83,10 @@ input {
   }
 }
 
+.navbar {
+  z-index: 99999;
+}
+
 .horizontalScroll {
   width: 400px;
   overflow: auto;

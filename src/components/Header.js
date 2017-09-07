@@ -9,9 +9,8 @@ import LinkNavItem from './LinkNavItem';
 import LogoutButton from './LogoutButton';
 import InputNavItem from './InputNavItem';
 
-
 const Header = ({ authToken }) => (
-  <Navbar collapseOnSelect>
+  <Navbar collapseOnSelect className="navbar">
     <Navbar.Header>
       <Navbar.Brand>
         <Link to="/">Linky</Link>
