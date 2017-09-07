@@ -119,16 +119,18 @@ export function addTagHierarchyNode() {
   /* eslint-disable no-alert */
   const name = prompt('Enter the node`s name ([a-z0-9-])');
   /* eslint-enable no-alert */
-  const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
-  const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
-  const tagName = split[0];
-  if (tagName) {
-    return async (dispatch) => {
-      dispatch(setTempMessage('sending data to server ...'));
-      await Promise.resolve(dispatch({ type: ADD_TAG_HIERARCHY, name: tagName }));
-      await dispatch(saveTagHierarchy());
-      dispatch(setInfoMessage(`Tag ${tagName} successfully added.`));
-    };
+  if (name) {
+    const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
+    const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
+    const tagName = split[0];
+    if (tagName) {
+      return async (dispatch) => {
+        dispatch(setTempMessage('sending data to server ...'));
+        await Promise.resolve(dispatch({ type: ADD_TAG_HIERARCHY, name: tagName }));
+        await dispatch(saveTagHierarchy());
+        dispatch(setInfoMessage(`Tag ${tagName} successfully added.`));
+      };
+    }
   }
   return () => {
     // noop
@@ -155,20 +157,22 @@ export function renameTagHierarchyNode(nodeName) {
   /* eslint-disable no-alert */
   const name = prompt('Enter the new/existing node`s name ([a-z0-9-])', nodeName);
   /* eslint-enable no-alert */
-  const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
-  const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
-  const newTagName = split[0];
-  if (newTagName) {
-    return async (dispatch) => {
-      dispatch(setTempMessage('sending data to server ...'));
-      await Promise.resolve(dispatch(selectTag(null)));
-      await Promise.all([
-        dispatch(renameTagInLinks(nodeName, newTagName)),
-        Promise.resolve(dispatch(renameTagHierarchy(nodeName, newTagName))),
-        dispatch(saveChangedLinklist(nodeName, newTagName)),
-      ]);
-      dispatch(setInfoMessage(`Tag successfully renamed to ${newTagName}.`));
-    };
+  if (name) {
+    const simpleWordRegex = new RegExp('^[a-z0-9-]*$');
+    const split = name.toLowerCase().split(' ').filter(e => simpleWordRegex.test(e));
+    const newTagName = split[0];
+    if (newTagName) {
+      return async (dispatch) => {
+        dispatch(setTempMessage('sending data to server ...'));
+        await Promise.resolve(dispatch(selectTag(null)));
+        await Promise.all([
+          dispatch(renameTagInLinks(nodeName, newTagName)),
+          Promise.resolve(dispatch(renameTagHierarchy(nodeName, newTagName))),
+          dispatch(saveChangedLinklist(nodeName, newTagName)),
+        ]);
+        dispatch(setInfoMessage(`Tag successfully renamed to ${newTagName}.`));
+      };
+    }
   }
   return () => {
     // nop
