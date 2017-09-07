@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
+import classnames from 'classnames';
 
 const equalOrOnPathToRoot = (dragInProgress, parentNode) => {
   const listOfParents = [parentNode.hierarchyLevelName];
@@ -54,27 +55,26 @@ export default class TreeDragableLink extends Component {
     dragInProgress: null,
   };
 
+  calcClass() {
+    const isLegalDropTarget = legalDropTarget(this.props);
+    const hidden = !this.props.dragInProgress || !isLegalDropTarget;
+    return classnames({
+      link: true,
+      dropzoneHidden: hidden,
+      dropzoneActive: !hidden && !this.props.isOver,
+      dropzoneOver: !hidden && this.props.isOver,
+    });
+  }
+
   calcStyle() {
-    const style = {
+    return {
       marginLeft: `${this.props.paddingLeft * this.props.level}px`,
-      padding: '0px',
-      height: '4px',
     };
-    if (legalDropTarget(this.props)) {
-      if (this.props.isOver) {
-        style.border = '2px solid black';
-        style.padding = '0px';
-        style.height = '20px';
-      } else if (this.props.dragInProgress) {
-        style.border = '1px solid #AAAAAA';
-        style.padding = '1px';
-        style.height = '2px';
-      }
-    }
-    return style;
   }
 
   render() {
-    return this.props.connectDropTarget(<div style={this.calcStyle()} className="link" />);
+    return this.props.connectDropTarget(
+      <div style={this.calcStyle()} className={this.calcClass()} />,
+    );
   }
 }

@@ -52,7 +52,7 @@ export default class TreeDragableLink extends Component {
     return this.props.dragPreview(
       <div className="larger">
         <div style={this.calcStyle()} className="link">
-          { this.props.connectDragSource(<i className="ion-ios-keypad" />) }
+          { this.props.connectDragSource(<i className="dragHandle ion-ios-keypad" />) }
           {' '}
           { this.props.renderNode(this.props.ele) }
         </div>
