@@ -5,12 +5,15 @@ import { connect } from 'react-redux';
 import { DragSource } from 'react-dnd';
 import { beginDrag, endDragAndPersist } from '../redux/actions/tagHierarchy';
 
+import treeState from './TreeState';
+
 @connect(null, dispatch => ({
   beginDrag: tag => dispatch(beginDrag(tag)),
   endDrag: target => dispatch(endDragAndPersist(target)),
 }))
 @DragSource('link', {
   beginDrag(props) {
+    treeState.clear();
     props.beginDrag(props.ele.hierarchyLevelName);
     return { id: props.ele.hierarchyLevelName };
   },

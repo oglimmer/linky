@@ -38,12 +38,15 @@ input {
   height: 0px;
 }
 
+.dropzoneActiveNew {
+  animation-name: growHeightSmall;
+  animation-duration: 600ms;
+}
+
 .dropzoneActive {
   border: 1px solid #AAAAAA;
   padding: 1px;
   height: 10px;
-  animation-name: growHeightSmall;
-  animation-duration: 600ms;
 }
 
 .dropzoneOver {

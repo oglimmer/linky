@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import { DropTarget } from 'react-dnd';
 import classnames from 'classnames';
 
+import treeState from './TreeState';
+
 const equalOrOnPathToRoot = (dragInProgress, parentNode) => {
   const listOfParents = [parentNode.hierarchyLevelName];
   let parentWalker = parentNode.parent;
@@ -42,6 +44,7 @@ const legalDropTarget = (props) => {
 }))
 export default class TreeDragableLink extends Component {
   static propTypes = {
+    ele: PropTypes.shape().isRequired,
     level: PropTypes.number.isRequired,
     connectDropTarget: PropTypes.func.isRequired,
     paddingLeft: PropTypes.number.isRequired,
@@ -58,10 +61,16 @@ export default class TreeDragableLink extends Component {
   calcClass() {
     const isLegalDropTarget = legalDropTarget(this.props);
     const hidden = !this.props.dragInProgress || !isLegalDropTarget;
+    const dropzoneActiveNew =
+      !hidden && !treeState.wasCalled(this.props.ele.hierarchyLevelName);
+    if (!hidden) {
+      treeState.setCalled(this.props.ele.hierarchyLevelName);
+    }
     return classnames({
       link: true,
       dropzoneHidden: hidden,
       dropzoneActive: !hidden && !this.props.isOver,
+      dropzoneActiveNew,
       dropzoneOver: !hidden && this.props.isOver,
     });
   }
