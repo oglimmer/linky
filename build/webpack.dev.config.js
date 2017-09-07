@@ -15,7 +15,6 @@ module.exports = {
   entry: [
     './dynamic-resources/css/bootstrap-theme.min.css',
     './dynamic-resources/css/styles.css',
-    './dynamic-resources/css/tree.css',
     'ionicons/dist/css/ionicons.min.css',
     'react-hot-loader/patch',
     'webpack-hot-middleware/client',
