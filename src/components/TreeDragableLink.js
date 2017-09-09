@@ -7,7 +7,9 @@ import { beginDrag, endDragAndPersist } from '../redux/actions/tagHierarchy';
 
 import treeState from './TreeState';
 
-@connect(null, dispatch => ({
+@connect(state => ({
+  dragInProgress: state.tagHierarchyData.dragInProgress,
+}), dispatch => ({
   beginDrag: tag => dispatch(beginDrag(tag)),
   endDrag: target => dispatch(endDragAndPersist(target)),
 }))
@@ -41,13 +43,20 @@ export default class TreeDragableLink extends Component {
     // beginDrag: PropTypes.func.isRequired,
     // endDrag: PropTypes.func.isRequired,
     children: PropTypes.arrayOf(PropTypes.node).isRequired,
+    dragInProgress: PropTypes.string,
+  };
+  static defaultProps = {
+    dragInProgress: null,
   };
 
   calcStyle() {
+    const isDragInProgress = this.props.dragInProgress === this.props.ele.hierarchyLevelName;
     return {
       marginLeft: `${this.props.paddingLeft * this.props.level}px`,
       padding: '0px',
       opacity: this.props.isDragging ? '0' : '1',
+      backgroundColor: isDragInProgress ? '#888888' : '',
+      borderRadius: isDragInProgress ? '5px' : '',
     };
   }
 
