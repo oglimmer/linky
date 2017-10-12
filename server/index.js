@@ -108,7 +108,7 @@ app.use(notAtArchive(xXssProtection()));
 app.use(xFrameOptions());
 app.use(hsts());
 app.use(responseTime());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(compression());
 app.use(cookieParser());
 
