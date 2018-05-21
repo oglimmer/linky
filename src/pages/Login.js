@@ -36,6 +36,18 @@ const Login = ({ dispatch, history }) => (
         build-in RSS support, auto validation over time, due dates, html snapshots</p>
     </div>
     <div className="row">
+      <div className="panel">
+        <div className="panel-body">
+          A word about data privacy: This page tries to collect minimal personal information.
+          You can see all the data we got and stored from the 3rd party login service
+          when you click on `Help` and then click the `I am curious` button. There you can also
+          delete your account. After log in we will set 2 cookies on your computer. One has a
+          lifetime of 1 year. With clicking any of the below buttons you accept those cookies.
+          More information on this in the help section.
+        </div>
+      </div>
+    </div>
+    <div className="row">
       { BuildInfo.OAUTHLOGIN.toString() === 'true' ?
         <div className="center-form panel">
           <div className="panel-body">
