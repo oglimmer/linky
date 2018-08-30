@@ -1,0 +1,12 @@
+{
+  "_id": "_design/archives",
+  "language": "javascript",
+  "views": {
+    "byUserIdAndArchiveLinkId": {
+      "map": "function(doc) {\n  if (doc.type === 'archive') {\n    emit(doc.userHash + '/' + doc.archiveLinkid, doc);\n  }\n}"
+    },
+    "byUserId": {
+      "map": "function(doc) {\n  if (doc.type === 'archive') {\n    emit(doc.userid, doc);\n  }\n}"
+    }
+  }
+}

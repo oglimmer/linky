@@ -1,0 +1,9 @@
+{
+  "_id": "_design/hierarchy",
+  "language": "javascript",
+  "views": {
+    "byUserId": {
+      "map": "function(doc) {\n  if(doc.type === 'hierarchy') {\n    emit(doc.userid, doc);\n  }\n}"
+    }
+  }
+}

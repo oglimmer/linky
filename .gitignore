@@ -10,3 +10,4 @@ static/js/
 build/docker/from_local
 build/docker/from_git
 build/docker/sources
+localrun/
