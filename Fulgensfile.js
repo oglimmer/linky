@@ -1,10 +1,11 @@
 module.exports = {
 
   config: {
+    SchemaVersion: "1.0.0",
     Name: "linky",
     Vagrant: {
       Box: "ubuntu/xenial64",
-      Install: "npm docker.io"
+      Install: "maven openjdk-8-jdk-headless docker.io nodejs"
     }
   },
 
@@ -20,6 +21,8 @@ module.exports = {
       Artifact: "$$TMP$$/lucene-bin/bin/run",
       BeforeBuild: [
         "sed -i.bak 's/allowLeadingWildcard=false/allowLeadingWildcard=true/g' src/main/resources/couchdb-lucene.ini"
+        // "sed -i '' 's/host=localhost/host=0.0.0.0/g' src/main/resources/couchdb-lucene.ini"
+        // "sed -i '' 's/url = http:\\/\\/localhost:5984\\//url = http://$$CONNECTION_COUCHDB$$:5984//g' src/main/resources/couchdb-lucene.ini"
       ],
       AfterBuild: [
         "mv -f src/main/resources/couchdb-lucene.ini.bak src/main/resources/couchdb-lucene.ini",
@@ -71,7 +74,7 @@ module.exports = {
 
     linky: {
       Source: "node",
-      Artifact: "server/",
+      Start: "server/",
       Node: {
         Param: "-r babel-register -r babel-polyfill --trace-warnings"
       },
@@ -85,7 +88,9 @@ module.exports = {
       EnvVars: [
         "NODE_ENV=\"development\"",
         "PROXY_PORT=\"8080\"",
-        "PROXY_BIND=\"0.0.0.0\""
+        "PROXY_BIND=\"0.0.0.0\"",
+        "PORT=\"8080\"",
+        "BIND=\"0.0.0.0\""
       ]
     }
 
