@@ -20,15 +20,28 @@ module.exports = {
       Dir: "$$TMP$$/lucene",
       Artifact: "$$TMP$$/lucene-bin/bin/run",
       BeforeBuild: [
-        "sed -i.bak 's/allowLeadingWildcard=false/allowLeadingWildcard=true/g' src/main/resources/couchdb-lucene.ini"
-        // "sed -i '' 's/host=localhost/host=0.0.0.0/g' src/main/resources/couchdb-lucene.ini"
-        // "sed -i '' 's/url = http:\\/\\/localhost:5984\\//url = http://$$CONNECTION_COUCHDB$$:5984//g' src/main/resources/couchdb-lucene.ini"
+        "sed -i.bak 's/allowLeadingWildcard=false/allowLeadingWildcard=true/g' src/main/resources/couchdb-lucene.ini",
+        "sed -i '' 's/host=localhost/host=0.0.0.0/g' src/main/resources/couchdb-lucene.ini"
       ],
       AfterBuild: [
         "mv -f src/main/resources/couchdb-lucene.ini.bak src/main/resources/couchdb-lucene.ini",
         "mkdir -p \"$BASE_PWD/$$TMP$$/lucene-bin\"",
         "tar -xvf target/*.tar.gz --strip 1 -C \"$BASE_PWD/$$TMP$$/lucene-bin\""
-      ]
+      ],
+      luceneConfig: {
+        Name: "couchdb-lucene.ini",
+        Connections: [{
+          Source: "cdb",
+          Var: "url",
+          Content: "http://$$VALUE$$:5984/"
+        }],
+        Content: [
+          "allowLeadingWildcard=true",
+          "host=0.0.0.0"
+        ],
+        LoadDefaultContent: "$$TMP$$/lucene/src/main/resources/couchdb-lucene.ini",
+        AttachIntoDocker: "/home/node/exec_env/localrun/lucene-bin/conf" 
+      }
     },
 
     lucene: {
