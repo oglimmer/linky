@@ -95,6 +95,10 @@ module.exports = {
       configFile: {
         Name: "linky.properties",
         Connections: [ { Source:"cdb", Var: "db.host" } ],
+        Content: [
+          "archive.protocol=",
+          "archive.domain="
+        ],
         LoadDefaultContent: "server/util/linky_default.properties",
         AttachAsEnvVar: ["LINKY_PROPERTIES", "$$SELF_NAME$$"]
       },
