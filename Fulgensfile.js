@@ -32,12 +32,12 @@ module.exports = {
         Name: "couchdb-lucene.ini",
         Connections: [{
           Source: "cdb",
-          Var: "url",
-          Content: "http://$$VALUE$$:5984/"
+          Regexp: "url=",
+          Line: "url=http://$$VALUE$$:5984/"
         }],
         Content: [
-          "allowLeadingWildcard=true",
-          "host=0.0.0.0"
+          { Line: "allowLeadingWildcard=true" },
+          { Line: "host=0.0.0.0" }
         ],
         LoadDefaultContent: "$$TMP$$/lucene/src/main/resources/couchdb-lucene.ini",
         AttachIntoDocker: "/home/node/exec_env/localrun/lucene-bin/conf" 
@@ -74,12 +74,11 @@ module.exports = {
         Name: "local.ini",
         Connections: [{
           Source: "lucene",
-          Var: "_fti",
-          Content: "{couch_httpd_proxy, handle_proxy_req, <<\\\"http://$$VALUE$$:5985\\\">>}"
+          Line: "_fti={couch_httpd_proxy, handle_proxy_req, <<\\\"http://$$VALUE$$:5985\\\">>}"
         }],
         Content: [
-          "[httpd_global_handlers]",
-          "_fti="
+          { Line: "[httpd_global_handlers]" },
+          { Line: "_fti=" }
         ],
         AttachIntoDocker: "/usr/local/etc/couchdb/local.d" 
       }
@@ -94,10 +93,10 @@ module.exports = {
       ExposedPort: 8080,
       configFile: {
         Name: "linky.properties",
-        Connections: [ { Source:"cdb", Var: "db.host" } ],
+        Connections: [ { Source:"cdb", Regexp: "db.host=", Line: "db.host=$$VALUE$$" } ],
         Content: [
-          "archive.protocol=",
-          "archive.domain="
+          { Line: "archive.protocol=" },
+          { Line: "archive.domain=" }
         ],
         LoadDefaultContent: "server/util/linky_default.properties",
         AttachAsEnvVar: ["LINKY_PROPERTIES", "$$SELF_NAME$$"]
