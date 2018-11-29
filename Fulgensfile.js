@@ -9,6 +9,22 @@ module.exports = {
     }
   },
 
+  versions: {
+    lucenebuild: {
+      TestedWith: "3-jdk-11",
+    },
+    lucene: {
+      TestedWith: "11",
+    },
+    cdb: {
+      Docker: "1.7",
+      KnownMax: "1.7"
+    },
+    linky: {
+      TestedWith: "10 & 11"
+    }
+  },
+
   software: {
     
     lucenebuild: {
@@ -32,12 +48,12 @@ module.exports = {
         Name: "couchdb-lucene.ini",
         Connections: [{
           Source: "cdb",
-          Regexp: "url=",
+          Regexp: "^url.*=",
           Line: "url=http://$$VALUE$$:5984/"
         }],
         Content: [
-          { Line: "allowLeadingWildcard=true" },
-          { Line: "host=0.0.0.0" }
+          { Regexp: "^allowLeadingWildcard=", Line: "allowLeadingWildcard=true" },
+          { Regexp: "^host=", Line: "host=0.0.0.0" }
         ],
         LoadDefaultContent: "$$TMP$$/lucene/src/main/resources/couchdb-lucene.ini",
         AttachIntoDocker: "/home/node/exec_env/localrun/lucene-bin/conf" 
@@ -46,12 +62,15 @@ module.exports = {
 
     lucene: {
       Source: "java",
+      DockerImage: "adoptopenjdk/openjdk11-openj9",
+      DockerMemory: "150M",
       Start: "lucenebuild",
       ExposedPort: 5985
     },
 
     cdb: {
       Source: "couchdb",
+      DockerMemory: "200M",
       CouchDB: [
         {
           Schema: "linky",
@@ -74,11 +93,10 @@ module.exports = {
         Name: "local.ini",
         Connections: [{
           Source: "lucene",
-          Line: "_fti={couch_httpd_proxy, handle_proxy_req, <<\\\"http://$$VALUE$$:5985\\\">>}"
+          Line: "_fti={couch_httpd_proxy, handle_proxy_req, <<\"http://$$VALUE$$:5985\">>}"
         }],
         Content: [
-          { Line: "[httpd_global_handlers]" },
-          { Line: "_fti=" }
+          { Line: "[httpd_global_handlers]" }
         ],
         AttachIntoDocker: "/usr/local/etc/couchdb/local.d" 
       }
@@ -86,6 +104,7 @@ module.exports = {
 
     linky: {
       Source: "node",
+      DockerMemory: "200M",
       Start: "server/",
       Node: {
         Param: "-r babel-register -r babel-polyfill --trace-warnings"
@@ -95,18 +114,18 @@ module.exports = {
         Name: "linky.properties",
         Connections: [ { Source:"cdb", Regexp: "db.host=", Line: "db.host=$$VALUE$$" } ],
         Content: [
-          { Line: "archive.protocol=" },
-          { Line: "archive.domain=" }
+          { Regexp: "archive.protocol=", Line: "archive.protocol=" },
+          { Regexp: "archive.domain=", Line: "archive.domain=" }
         ],
         LoadDefaultContent: "server/util/linky_default.properties",
         AttachAsEnvVar: ["LINKY_PROPERTIES", "$$SELF_NAME$$"]
       },
       EnvVars: [
-        "NODE_ENV=\"development\"",
-        "PROXY_PORT=\"8080\"",
-        "PROXY_BIND=\"0.0.0.0\"",
-        "PORT=\"8080\"",
-        "BIND=\"0.0.0.0\""
+        { Name: "NODE_ENV", Value: "development" },
+        { Name: "PROXY_PORT", Value: "8080" },
+        { Name: "PROXY_BIND", Value: "0.0.0.0" },
+        { Name: "PORT", Value: "8080" },
+        { Name: "BIND", Value: "0.0.0.0" }
       ]
     }
 
