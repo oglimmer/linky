@@ -45,15 +45,15 @@ module.exports = {
         "tar -xvf target/*.tar.gz --strip 1 -C \"$BASE_PWD/$$TMP$$/lucene-bin\""
       ],
       luceneConfig: {
-        Name: "couchdb-lucene.ini",
-        Connections: [{
-          Source: "cdb",
-          Regexp: "^url.*=",
-          Line: "url=http://$$VALUE$$:5984/"
-        }],
+        Name: "couchdb-lucene.ini",        
         Content: [
           { Regexp: "^allowLeadingWildcard=", Line: "allowLeadingWildcard=true" },
-          { Regexp: "^host=", Line: "host=0.0.0.0" }
+          { Regexp: "^host=", Line: "host=0.0.0.0" },
+          {
+            Source: "cdb",
+            Regexp: "^url.*=",
+            Line: "url=http://$$VALUE$$:5984/"
+          }
         ],
         LoadDefaultContent: "$$TMP$$/lucene/src/main/resources/couchdb-lucene.ini",
         AttachIntoDocker: "/home/node/exec_env/localrun/lucene-bin/conf" 
@@ -91,12 +91,12 @@ module.exports = {
       ],
       couchconfig: {
         Name: "local.ini",
-        Connections: [{
-          Source: "lucene",
-          Line: "_fti={couch_httpd_proxy, handle_proxy_req, <<\"http://$$VALUE$$:5985\">>}"
-        }],
         Content: [
-          { Line: "[httpd_global_handlers]" }
+          { Line: "[httpd_global_handlers]" },
+          {
+            Source: "lucene",
+            Line: "_fti={couch_httpd_proxy, handle_proxy_req, <<\"http://$$VALUE$$:5985\">>}"
+          }
         ],
         AttachIntoDocker: "/usr/local/etc/couchdb/local.d" 
       }
@@ -112,10 +112,10 @@ module.exports = {
       ExposedPort: 8080,
       configFile: {
         Name: "linky.properties",
-        Connections: [ { Source:"cdb", Regexp: "db.host=", Line: "db.host=$$VALUE$$" } ],
         Content: [
           { Regexp: "archive.protocol=", Line: "archive.protocol=" },
-          { Regexp: "archive.domain=", Line: "archive.domain=" }
+          { Regexp: "archive.domain=", Line: "archive.domain=" },
+          { Source:"cdb", Regexp: "db.host=", Line: "db.host=$$VALUE$$" }
         ],
         LoadDefaultContent: "server/util/linky_default.properties",
         AttachAsEnvVar: ["LINKY_PROPERTIES", "$$SELF_NAME$$"]
