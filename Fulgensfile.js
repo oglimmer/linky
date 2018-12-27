@@ -55,7 +55,7 @@ module.exports = {
             Line: "url=http://$$VALUE$$:5984/"
           }
         ],
-        LoadDefaultContent: "$$TMP$$/lucene/src/main/resources/couchdb-lucene.ini",
+        LoadDefaultContent: "https://raw.githubusercontent.com/rnewson/couchdb-lucene/master/src/main/resources/couchdb-lucene.ini",
         AttachIntoDocker: "/home/node/exec_env/localrun/lucene-bin/conf" 
       }
     },
