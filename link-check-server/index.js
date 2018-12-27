@@ -145,10 +145,7 @@ const processRows = (recs) => {
     .then(updateTagHierarchies);
 };
 
-console.log(`${new Date()}: starting link-check-server`);
-linkDao.listAll().then(processRows);
-
-process.on('exit', () => {
-  console.log(`${new Date()}: exiting link-check-server`);
-});
-
+module.exports = () => {
+  console.log(`${new Date()}: starting link-check-server`);
+  linkDao.listAll().then(processRows);
+}
