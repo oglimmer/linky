@@ -293,4 +293,4 @@ app.listen(port, bind, (err) => {
 
 postStartupClean();
 
-setInterval(() => { linkCheckServer(); }, 1000*60*60*24);
+setInterval(() => { linkCheckServer(); }, 1000 * 60 * 60 * 24);

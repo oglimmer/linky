@@ -148,4 +148,4 @@ const processRows = (recs) => {
 module.exports = () => {
   console.log(`${new Date()}: starting link-check-server`);
   linkDao.listAll().then(processRows);
-}
+};
