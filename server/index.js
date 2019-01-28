@@ -98,10 +98,10 @@ const globalCSPConfig = Object.assign({},
   },
 );
 const notAtArchive = middleware => (req, res, next) => {
-  if (!req.originalUrl.startsWith('/archive/')) {
-    middleware(req, res, next);
-  } else {
+  if (req.originalUrl.startsWith('/archive/') || req.originalUrl === '/static/portal.html') {
     next();
+  } else {
+    middleware(req, res, next);
   }
 };
 
