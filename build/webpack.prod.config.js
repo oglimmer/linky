@@ -38,6 +38,8 @@ module.exports = {
     './static-resources/default.png',
     './static-resources/sub.png',
     './static-resources/favicon.ico',
+    './static-resources/portal.html',
+    './static-resources/preview.jpg',
   ],
 
   output: {
@@ -110,7 +112,7 @@ module.exports = {
         use: 'url-loader?limit=10000',
       },
       {
-        test: /\.(jpg|jpeg|gif|png|ico)$/,
+        test: /\.(jpg|jpeg|gif|png|ico|html)$/,
         exclude: /node_modules/,
         use: 'file-loader?name=[name].[ext]',
       },
