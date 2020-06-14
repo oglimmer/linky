@@ -50,7 +50,7 @@ class GetFaviconProcessor extends BaseProcessor {
               this.res.append('content-type', contentType);
               fs.writeFileSync(`${file}.contentType`, contentType);
             } else {
-              const fallbackIcon = fs.readFileSync('../../dist/static/default.png');
+              const fallbackIcon = fs.readFileSync('./dist/static/default.png');
               this.res.append('content-type', 'image/png');
               this.res.write(fallbackIcon);
             }
