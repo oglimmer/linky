@@ -36,7 +36,7 @@ class GetFaviconProcessor extends BaseProcessor {
         });
       } catch (noCacheFile) {
         const rec = await linkDao.getById(this.data.linkid);
-        const outputStream = fs.createWriteStream(file);
+        let outputStream;
         request({
           method: 'GET',
           uri: rec.faviconUrl,
@@ -44,21 +44,34 @@ class GetFaviconProcessor extends BaseProcessor {
         })
           .on('response', (response) => {
             const contentType = response.headers['content-type'];
-            this.res.append('content-type', contentType);
             this.res.append('Cache-Control', 'max-age=31536000');
-            fs.writeFileSync(`${file}.contentType`, contentType);
+            if(contentType.indexOf('image') > -1) {
+              outputStream = fs.createWriteStream(file);
+              this.res.append('content-type', contentType);
+              fs.writeFileSync(`${file}.contentType`, contentType);
+            } else {
+              const fallbackIcon = fs.readFileSync('../../dist/static/default.png');
+              this.res.append('content-type', 'image/png');
+              this.res.write(fallbackIcon);
+            }
           })
           .on('data', (data) => {
-            this.res.write(data);
-            outputStream.write(data);
+            if(outputStream) {
+              this.res.write(data);
+              outputStream.write(data);
+            }
           })
           .on('complete', () => {
             this.res.end();
-            outputStream.end();
+            if(outputStream) {
+              outputStream.end();
+            }
           })
           .on('error', () => {
             this.res.end();
-            outputStream.end();
+            if(outputStream) {
+              outputStream.end();
+            }
           });
       }
     } catch (err) {
