@@ -45,7 +45,7 @@ class GetFaviconProcessor extends BaseProcessor {
           .on('response', (response) => {
             const contentType = response.headers['content-type'];
             this.res.append('Cache-Control', 'max-age=31536000');
-            if(contentType.indexOf('image') > -1) {
+            if (contentType.indexOf('image') > -1) {
               outputStream = fs.createWriteStream(file);
               this.res.append('content-type', contentType);
               fs.writeFileSync(`${file}.contentType`, contentType);
@@ -56,20 +56,20 @@ class GetFaviconProcessor extends BaseProcessor {
             }
           })
           .on('data', (data) => {
-            if(outputStream) {
+            if (outputStream) {
               this.res.write(data);
               outputStream.write(data);
             }
           })
           .on('complete', () => {
             this.res.end();
-            if(outputStream) {
+            if (outputStream) {
               outputStream.end();
             }
           })
           .on('error', () => {
             this.res.end();
-            if(outputStream) {
+            if (outputStream) {
               outputStream.end();
             }
           });
