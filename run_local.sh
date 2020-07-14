@@ -439,7 +439,7 @@ if [ "$START_LUCENEBUILD" = "YES" ]; then
 		f_build() {
 			verbosePrint "pwd=$(pwd)\nmvn $MVN_CLEAN $MVN_OPTS package assembly:single"
 			sed -i.bak 's/allowLeadingWildcard=false/allowLeadingWildcard=true/g' src/main/resources/couchdb-lucene.ini
-			sed -i '' 's/host=localhost/host=0.0.0.0/g' src/main/resources/couchdb-lucene.ini
+			sed -i.bak 's/host=localhost/host=0.0.0.0/g' src/main/resources/couchdb-lucene.ini
 
 			mvn $MVN_CLEAN $MVN_OPTS package assembly:single
 			mv -f src/main/resources/couchdb-lucene.ini.bak src/main/resources/couchdb-lucene.ini
@@ -455,7 +455,7 @@ if [ "$START_LUCENEBUILD" = "YES" ]; then
 		f_build() {
 			verbosePrint "pwd=$(pwd)\ndocker run --name=lucenebuild --rm -v $(pwd):/usr/src/build -v "$(pwd)/localrun/.m2":/root/.m2 -w /usr/src/build $dockerImage:$TYPE_SOURCE_LUCENEBUILD_VERSION mvn $MVN_CLEAN $MVN_OPTS package assembly:single"
 			sed -i.bak 's/allowLeadingWildcard=false/allowLeadingWildcard=true/g' src/main/resources/couchdb-lucene.ini
-			sed -i '' 's/host=localhost/host=0.0.0.0/g' src/main/resources/couchdb-lucene.ini
+			sed -i.bak 's/host=localhost/host=0.0.0.0/g' src/main/resources/couchdb-lucene.ini
 			docker run --name=lucenebuild --rm -v "$(pwd)":/usr/src/build -v "$(pwd)/localrun/.m2":/root/.m2 -w /usr/src/build $dockerImage:$TYPE_SOURCE_LUCENEBUILD_VERSION mvn $MVN_CLEAN $MVN_OPTS package assembly:single
 			mv -f src/main/resources/couchdb-lucene.ini.bak src/main/resources/couchdb-lucene.ini
 			mkdir -p "$BASE_PWD/localrun/lucene-bin"
