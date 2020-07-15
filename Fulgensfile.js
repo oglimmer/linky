@@ -37,7 +37,7 @@ module.exports = {
       Artifact: "$$TMP$$/lucene-bin/bin/run",
       BeforeBuild: [
         "sed -i.bak 's/allowLeadingWildcard=false/allowLeadingWildcard=true/g' src/main/resources/couchdb-lucene.ini",
-        "sed -i '' 's/host=localhost/host=0.0.0.0/g' src/main/resources/couchdb-lucene.ini"
+        "sed -i.bak 's/host=localhost/host=0.0.0.0/g' src/main/resources/couchdb-lucene.ini"
       ],
       AfterBuild: [
         "mv -f src/main/resources/couchdb-lucene.ini.bak src/main/resources/couchdb-lucene.ini",
