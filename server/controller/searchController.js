@@ -5,7 +5,7 @@ import request from 'request-promise';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
 
-import { couchdbServer } from '../dao/NanoConnection';
+import { couchdbServer, dbAuthHeader } from '../dao/NanoConnection';
 
 // don't escape * and " - the user wants to use them in their special character's meaning
 // those should be escaped as well: '&&', '||', but I am too lazy to implement it right now
@@ -61,21 +61,28 @@ class SearchProcessor extends BaseProcessor {
 
   async process() {
     try {
-      const userInput = this.data.q.toLowerCase();
-      let luceneQuery = '';
-      fields.forEach((f) => {
-        if (userInput.startsWith(`${f}:`)) {
-          const modUserInput = f === 'url' ? purifyUrl(userInput) : userInput.substr(f.length + 1);
-          luceneQuery = `+${f}:${escapeLuceneChars(modUserInput)}`;
-        }
-      });
-      if (!luceneQuery) {
-        luceneQuery = `+${escapeLuceneChars(userInput)}`;
+      const userInput = this.data.q;
+      // let luceneQuery = '';
+      // fields.forEach((f) => {
+      //   if (userInput.startsWith(`${f}:`)) {
+      //     const modUserInput = f === 'url' ? purifyUrl(userInput) : userInput.substr(f.length + 1);
+      //     luceneQuery = `+${f}:${escapeLuceneChars(modUserInput)}`;
+      //   }
+      // });
+      // if (!luceneQuery) {
+      //   luceneQuery = `+${escapeLuceneChars(userInput)}`;
+      // }
+      // const query = encodeURIComponent(luceneQuery);
+      //const url = `${couchdbServer}/_fti/local/linky/_design/lucene/by_all?include_docs=true&q=${query}%20%2Buserid%3A${this.data.userid}`; // couchdb=1.7
+      const url = `${couchdbServer}/linky/_design/lucene/_search/by_all?include_docs=true&drilldown=\["userid","${this.data.userid}"\]&query=${userInput}`;
+      console.log(url);
+      const headers = {};
+      if(dbAuthHeader) {
+        headers.Authorization = dbAuthHeader;
       }
-      const query = encodeURIComponent(luceneQuery);
-      const url = `${couchdbServer}/_fti/local/linky/_design/lucene/by_all?include_docs=true&q=${query}%20%2Buserid%3A${this.data.userid}`;
       const searchResult = await request.get({
         url,
+        headers,
         json: true,
       });
       const docs = searchResult.rows.map(r => r.doc);

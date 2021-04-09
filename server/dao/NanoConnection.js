@@ -19,11 +19,13 @@ const config = {
 };
 
 const username = dbProps.user;
-if (username) {
-  const password = dbProps.password;
-  const auth = `Basic ${new Buffer(`${username}:${password}`).toString('base64')}`;
+const password = dbProps.password;
+const auth = `Basic ${new Buffer(`${username}:${password}`).toString('base64')}`;
+if (username) {  
   config.requestDefaults.headers.Authorization = auth;
 }
+
+export const dbAuthHeader = username ? auth : undefined;
 
 winston.loggers.get('application').debug('DB config is %j', config);
 
