@@ -85,7 +85,7 @@ class AuthenticateProcessor extends BaseProcessor {
           };
           const token = await JwtUtil.sign(claim);
           winston.loggers.get('application').debug('User id=%s authenticated', _id);
-          this.res.cookie('authToken', token, { httpOnly: true, secure: properties.server.jwt.httpsOnly });
+          this.res.cookie('authToken', token, { maxAge: 31536000000, httpOnly: true, secure: properties.server.jwt.httpsOnly });
           this.res.send({ token });
           this.res.end();
         } else {
