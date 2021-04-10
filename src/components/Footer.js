@@ -8,7 +8,7 @@ import BuildInfo from '../util/BuildInfo';
 
 const Footer = ({ location }) => (
   <div className={location.pathname === '/tags' ? 'footer' : ''}>
-    Copyright 2017-2018 by linky1.com - Build
+    Copyright 2017-2021 by linky1.com - Build
     on {BuildInfo.BUILDDATE} from {BuildInfo.BRANCHNAME}{' '}
     at <a href={`https://github.com/oglimmer/linky/commit/${BuildInfo.COMMITHASH}`}>
       {BuildInfo.COMMITHASH}

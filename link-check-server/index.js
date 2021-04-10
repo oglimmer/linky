@@ -1,9 +1,8 @@
-
 // node -r babel-register -r babel-polyfill link-check-server
 
-import request from 'request';
 import BlueBirdPromise from 'bluebird';
 import moment from 'moment';
+import axios from 'axios';
 
 import favicon from '../server/util/favicon';
 import linkDao from '../server/dao/linkDao';
@@ -13,45 +12,38 @@ import { dateRegex, getNextIndex, equalRelevant } from '../server/logic/Link';
 import { init, hasTag } from '../server/logic/TagHierarchy';
 import { CheckLinkDuplicateFinder } from '../server/util/DuplicateFinder';
 
+const getNow = () => new Date().toISOString();
+
 const cloneAndPush = (arr, eleToPush) => {
   const clone = arr.slice(0);
   clone.push(eleToPush);
   return clone;
 };
 
-const updateFavicon = rec => favicon(rec.linkUrl).then((faviconUrl) => {
+const removeElement = (arr, eleToPush) => {
+  return arr.filter(e => e != eleToPush);
+}
+
+const updateFavicon = async (rec) => {
+  const faviconUrl = await favicon(rec.linkUrl);
   const updateObj = {};
   if (faviconUrl && !equalRelevant(faviconUrl, rec.faviconUrl)) {
-    console.log(`${new Date()}: favicon ${rec.faviconUrl} changed to ${faviconUrl}`);
+    console.log(`${getNow()}: favicon ${rec.faviconUrl} changed to ${faviconUrl}`);
     updateObj.faviconUrl = faviconUrl;
     updateObj.$$DIRTY$$ = true;
   }
   return Object.assign({}, rec, updateObj);
-});
+};
 
 
-const updateUrl = rec => new Promise((resolve, reject) => {
+const updateUrl = async rec => {  
   const url = rec.linkUrl;
-  const httpGetCall = request.get({
-    url,
-    followAllRedirects: true,
-    // timeout: 500,
-  });
-  const timeout = setTimeout(() => {
-    httpGetCall.abort();
-    console.log(`${new Date()}: call to ${rec.linkUrl} timed out`);
-    reject(Object.assign({}, rec, {
-      tags: cloneAndPush(rec.tags, BROKEN),
-      $$DIRTY$$: true,
-    }));
-  }, 30000);
-  httpGetCall.on('response', (response) => {
-    clearTimeout(timeout);
-    httpGetCall.abort();
-    const newUrl = response.request.href;
+  try {
+    const response = await axios.get(url, { timeout: 5000 });
+    const newUrl = response.request.res.responseUrl;
     const updateObj = {};
     if (!(equalRelevant(newUrl, url))) {
-      console.log(`${new Date()}: link ${url} changed to ${newUrl}`);
+      console.log(`${getNow()}: link ${url} changed to ${newUrl}`);
       updateObj.$$DIRTY$$ = true;
       updateObj.linkUrl = newUrl;
       updateObj.notes = `${rec.notes}. Updated url to ${newUrl}`;
@@ -59,39 +51,55 @@ const updateUrl = rec => new Promise((resolve, reject) => {
         updateObj.tags = cloneAndPush(rec.tags, URLUPDATED);
       }
     }
-    resolve(Object.assign({}, rec, updateObj));
-  });
-  httpGetCall.on('error', () => {
-    console.log(`${new Date()}: found broken link ${url}`);
-    httpGetCall.abort();
-    clearTimeout(timeout);
-    reject(Object.assign({}, rec, {
-      tags: cloneAndPush(rec.tags, BROKEN),
-      $$DIRTY$$: true,
-    }));
-  });
-});
+    if (hasTag(rec.tags, BROKEN)) {
+      console.log(`${getNow()}: link ${url} removed BROKEN`);
+      updateObj.$$DIRTY$$ = true;
+      updateObj.tags = removeElement(rec.tags, BROKEN);
+    }
+  return Object.assign({}, rec, updateObj);
+  } catch (err) {
+    if (!hasTag(rec.tags, BROKEN)) {
+      console.log(`${getNow()}: found broken link ${url}`);
+      return Object.assign({}, rec, {
+        tags: cloneAndPush(rec.tags, BROKEN),
+        $$DIRTY$$: true,
+      });
+    } else {
+      console.log(`${getNow()}: found broken link ${url} but already marked as BROKEN`);
+      return rec;
+    }
+  }
+};
 
 const changedUserId = new Set();
 const duplicateFinder = new CheckLinkDuplicateFinder(changedUserId);
 
-const persist = (rec) => {
+const persist = async (rec) => {
   if (rec.$$DIRTY$$) {
     /* eslint-disable no-param-reassign */
     delete rec.$$DIRTY$$;
     /* eslint-enable no-param-reassign */
-    console.log(`${new Date()}: link ${rec.linkUrl} persisted`);
+    console.log(`${getNow()}: link ${rec.linkUrl} persisted`);
     changedUserId.add(rec.userid);
-    return linkDao.insert(rec);
+    return await linkDao.insert(rec);
   }
-  return Promise.resolve(rec);
+  return rec;
 };
 
-const processUrlFavicon = (rec) => {
-  if (!hasTag(rec.tags, BROKEN) && !hasTag(rec.tags, LOCKED)) {
-    return updateUrl(rec).then(updateFavicon).catch(r => r);
+const processUrlAndFavicon = async (rec) => {
+  if (!hasTag(rec.tags, LOCKED)) {
+    if (!hasTag(rec.tags, BROKEN)) {
+      // nothing ;)
+    }
+    try {
+      rec = await updateUrl(rec);
+      rec = await updateFavicon(rec);
+    } catch (err) {
+      console.log(err)
+      // ignore this
+    }
   }
-  return Promise.resolve(rec);
+  return rec;
 };
 
 const checkDue = (rec) => {
@@ -99,7 +107,7 @@ const checkDue = (rec) => {
   if (hasTag(rec.tags, DUEDATE) && !hasTag(rec.tags, DUE)) {
     if (rec.tags.filter(tag => dateRegex.test(tag))
       .some(tag => moment(tag, 'YYYY-MM-DD').isBefore(moment()))) {
-      console.log(`${new Date()}: link ${rec.linkUrl} was due.`);
+      console.log(`${getNow()}: link ${rec.linkUrl} was due.`);
       updateObj.tags = cloneAndPush(rec.tags, DUE);
       updateObj.$$DIRTY$$ = true;
     }
@@ -107,45 +115,54 @@ const checkDue = (rec) => {
   return Object.assign({}, rec, updateObj);
 };
 
-const processRow = (rec) => {
+const processRow = async (rec) => {
   duplicateFinder.counterLink(rec);
-  return processUrlFavicon(rec).then(checkDue).then(persist);
+  rec = await processUrlAndFavicon(rec);
+  rec = await checkDue(rec);
+  rec = await persist(rec);
+  return rec;
 };
 
 const updateTagHierarchies = () => {
-  changedUserId.forEach((userid) => {
-    tagDao.getHierarchyByUser(userid).then((rec) => {
-      if (rec) {
-        return rec;
-      }
-      return init([]);
-    }).then(rec => tagDao.listAllTags(userid).then((allTags) => {
-      let dirty = false;
-      allTags.filter(tag => !rec.tree.find(e => e.name === tag[0])).forEach((tag) => {
-        console.log(`${new Date()}: adding ${tag[0]} for user ${userid}`);
-        rec.tree.push({
-          name: tag[0],
-          parent: 'root',
-          index: getNextIndex(rec.tree, 'root'),
-        });
-        dirty = true;
+  changedUserId.forEach(async (userid) => {
+    let rec = await tagDao.getHierarchyByUser(userid);
+    if (!rec) {
+      rec = createTagHierarchy(userid, init([]));
+    }
+    const allTags = await tagDao.listAllTags(userid);
+    let dirty = false;
+    allTags.filter(tag => !rec.tree.find(e => e.name === tag[0])).forEach((tag) => {
+      console.log(`${getNow()}: adding ${tag[0]} for user ${userid}`);
+      rec.tree.push({
+        name: tag[0],
+        parent: 'root',
+        index: getNextIndex(rec.tree, 'root'),
       });
-      if (dirty) {
-        tagDao.insert(rec);
-        console.log(`${new Date()}: saved tagHierarchy for user ${userid}`);
-      }
-    }));
+      dirty = true;
+    });
+    if (dirty) {
+      await tagDao.insert(rec);
+      console.log(`${getNow()}: saved tagHierarchy for user ${userid}`);
+    }
   });
 };
 
-
-const processRows = (recs) => {
-  BlueBirdPromise.map(recs, processRow, { concurrency: 20 })
-    .then(() => duplicateFinder.allLinksInSystem())
-    .then(updateTagHierarchies);
+const processRows = async (recs) => {
+  console.log(`${getNow()}: found ${recs.length} records in DB...`)
+  await BlueBirdPromise.map(recs, processRow, { concurrency: 20 });
+  console.log(`${getNow()}: initial processing completed for ${duplicateFinder.allLinks.size} users`)
+  await duplicateFinder.allLinksInSystem();
+  console.log(`${getNow()}: duplicateFinder completed with allLinksInSystem()`)
+  updateTagHierarchies();
 };
 
-module.exports = () => {
-  console.log(`${new Date()}: starting link-check-server`);
-  linkDao.listAll().then(processRows);
-};
+process.on('exit', () => {
+  console.log(`${getNow()}: exiting link-check-server`);
+});
+
+(async () => {
+  console.log(`${getNow()}: starting link-check-server`);
+  const allRecords = await linkDao.listAll();  
+  processRows(allRecords);
+})();
+
