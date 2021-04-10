@@ -33,7 +33,7 @@ const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
       field. Otherwise a search will look into all fields.<br />
       You can also use the `host:` to search for a host name or `rhost:` to search for a host but in
       reverse order, so www.oglimmer.de would be de.oglimmer.www.
-      As your search cannot start with a * you have to use `rhost:de.oglimmer*` to search for all 
+      As your search cannot start with a * you have to use `rhost:de.oglimmer*` to search for all
       links in any oglimmer.de domain.
     </p>
     <h3>How is import/export working?</h3>
