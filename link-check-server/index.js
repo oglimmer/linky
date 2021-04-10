@@ -7,9 +7,9 @@ import axios from 'axios';
 import favicon from '../server/util/favicon';
 import linkDao from '../server/dao/linkDao';
 import tagDao from '../server/dao/tagDao';
-import { URLUPDATED, BROKEN, LOCKED, DUEDATE, DUE } from '../src/util/TagRegistry';
+import { URLUPDATED, BROKEN, LOCKED, DUEDATE, DUE, DUPLICATE } from '../src/util/TagRegistry';
 import { dateRegex, getNextIndex, equalRelevant } from '../server/logic/Link';
-import { init, hasTag } from '../server/logic/TagHierarchy';
+import { init, hasTag, createTagHierarchy } from '../server/logic/TagHierarchy';
 import { CheckLinkDuplicateFinder } from '../server/util/DuplicateFinder';
 
 const getNow = () => new Date().toISOString();
@@ -66,7 +66,10 @@ const updateUrl = async rec => {
       });
     } else {
       console.log(`${getNow()}: found broken link ${url} but already marked as BROKEN`);
-      return rec;
+      return Object.assign({}, rec, {
+        tags: cloneAndPush( removeElement(rec.tags, BROKEN) , BROKEN),
+        $$DIRTY$$: true,
+      });
     }
   }
 };
@@ -119,6 +122,12 @@ const processRow = async (rec) => {
   duplicateFinder.counterLink(rec);
   rec = await processUrlAndFavicon(rec);
   rec = await checkDue(rec);
+  // use this code if too many records have DUPLICATE: this removes DUPLICATE from ALL records
+  // if (hasTag(rec.tags, DUPLICATE)) {
+  //   console.log(`${getNow()}: rec ${rec.linkUrl} removed DUPLICATE`);
+  //   rec.$$DIRTY$$ = true;
+  //   rec.tags = removeElement(rec.tags, DUPLICATE);
+  // }
   rec = await persist(rec);
   return rec;
 };
@@ -162,7 +171,7 @@ process.on('exit', () => {
 
 (async () => {
   console.log(`${getNow()}: starting link-check-server`);
-  const allRecords = await linkDao.listAll();  
+  const allRecords = await linkDao.listAll();
   processRows(allRecords);
 })();
 

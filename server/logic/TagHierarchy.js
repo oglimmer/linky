@@ -49,7 +49,7 @@ const loadResponseData = async (userid) => {
   }));
 };
 
-const createTagHierarchy = (userid, tree) => ({
+export const createTagHierarchy = (userid, tree) => ({
   type: 'hierarchy',
   userid,
   tree,

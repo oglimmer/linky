@@ -33,17 +33,18 @@ class DuplicateFinderBase {
   }
 
   counterLink(rec) {
-    const nimifiedUrl = purifyLink(rec.linkUrl);
+    const purifiedUrl = purifyLink(rec.linkUrl);
+    //console.log(`purifiedUrl = ${purifiedUrl}`)
     let counterMap = this.allLinks.get(rec.userid);
     if (!counterMap) {
       counterMap = new Map();
       this.allLinks.set(rec.userid, counterMap);
     }
-    const val = counterMap.get(nimifiedUrl);
+    const val = counterMap.get(purifiedUrl);
     if (!val) {
-      counterMap.set(nimifiedUrl, 1);
+      counterMap.set(purifiedUrl, 1);
     } else {
-      counterMap.set(nimifiedUrl, val + 1);
+      counterMap.set(purifiedUrl, val + 1);
     }
   }
 }

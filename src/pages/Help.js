@@ -30,7 +30,9 @@ const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
     </p>
     <p>
       On server mode start with `tags:`, `url:`, `notes:`, `rss:` or `title:` to search just this
-      field. Otherwise a search will look into all fields.
+      field. Otherwise a search will look into all fields.<br/>
+      You can also use the `host:` to search for a host name or `rhost:` to search for a host but in reverse order, so www.oglimmer.de would be de.oglimmer.www.
+      As your search cannot start with a * you have to use `rhost:de.oglimmer*` to search for all links in any oglimmer.de domain.
     </p>
     <h3>How is import/export working?</h3>
     <p>
@@ -166,9 +168,9 @@ const HelpPage = ({ authToken, onMeUserInformation, onDeleteAccount }) => (
     <p>
       A note about account deletion: (A) While we do delete all information in our active database,
       we cannot simply delete your information on our offline backups. Those backups have a
-      retention time of 1 month. (B) The data backend of this system is a CouchDB (1.6) and thus
+      retention time of 1 month. (B) The data backend of this system is a CouchDB (3) and thus
       data deletion has some limitations, see <a href="https://wiki.apache.org/couchdb/HTTP_Document_API#DELETE" target="_blank" rel="noopener noreferrer">
-      here</a>. Once every 24h the database is compacted.
+      here</a>.
     </p>
   </div>
 );
