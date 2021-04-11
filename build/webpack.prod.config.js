@@ -13,8 +13,7 @@ const BuildInfo = require('../src/util/BuildInfo');
 const { linkyPropertiesDefined } = require('../server/util/linkyproperties');
 
 if (!linkyPropertiesDefined) {
-  console.log('environment variable LINKY_PROPERTIES not set! Abort.');
-  process.exit(1);
+  console.log('WARNING: environment variable LINKY_PROPERTIES not set! Using defaults.');
 }
 
 serverPropsLoader(BuildInfo);
