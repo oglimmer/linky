@@ -6,8 +6,12 @@ const execSync = require('child_process').execSync;
 const properties = require('./linkyproperties');
 
 let CONTACT = '';
-if (fs.existsSync('/etc/linky-contact.txt')) {
-  CONTACT = `${fs.readFileSync('/etc/linky-contact.txt')}`;
+let fileName = process.env.LINKY_CONTACT;
+if (!fileName) {
+  fileName = path.resolve(__dirname, '/etc/linky-contact.txt');
+}
+if (fs.existsSync(fileName)) {
+  CONTACT = fs.readFileSync(fileName, { encoding: 'utf8' });
 }
 
 let commitHashRaw;
