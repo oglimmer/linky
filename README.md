@@ -25,55 +25,42 @@ This project features:
 
 Linky runs as a nodejs server, but also needs a `couchdb` as the data backend.
 
-Install couchdb and import all views (see https://www.npmjs.com/package/couchviews) from build/couchdb/.
+Install couchdb version 3 and import all views from build/couchdb/.
 It is recommended to import all views build/couchdb/linky into a couchdb linky and build/couchdb/linky-archive into
 linky_archive.
 
+The easiest way to start and install the couchdb:
+
 ```
-# assuming your couchdb is running, you have npm installed and PWD is the root of linky
-curl -X PUT http://couchdb:5984/linky
-curl -X PUT http://couchdb:5984/linky_archive
-npm -g install couchviews
-couchviews push http://couchdb:5984/linky build/couchdb/linky
-couchviews push http://couchdb:5984/linky_archive build/couchdb/linky-archive
+./run_couchdb.sh
 ```
 
 ## setup for search
 
 If you want to use search from the menu you need to start a lucene server.
 
-* checkout the latest version of [couchdb-lucene](https://github.com/rnewson/couchdb-lucene) (tested with 2.1.0)
-* if you want to be able to use leading wildcards: change `allowLeadingWildcard` to true in `src/main/resources/couchdb-lucene.ini`
-* run `mvn` to build the lucene server
-* find your couchdb config and add the following lines to its local.ini
-
-```
-[httpd_global_handlers]
-_fti = {couch_httpd_proxy, handle_proxy_req, <<"http://localhost:5985">>}
-```
-
-* unzip `couchdb-lucene-<VERSION>-dist.zip` from the target folder and start couchdb-lucene via `./bin/run` from there
+This needs to be installed as a search plugin in Couchdb. The script `./run_couchdb.sh` is taking care of this search plugin as well.
 
 # dev setup
 
 This starts a webserver at :8080 for the REST services, all static files and the on-the-fly
 generated bundle.js
 
-`yarn run dev`
+`npm run dev`
 
 => open http://localhost:8080
 
 When using nodemon instead of dev you start the server with a nodemon watcher underneath.
 
-`yarn run nodemon`
+`npm run nodemon`
 
 You can check the whole project via eslint and run all unit tests with
 
-`yarn test`
+`npm test`
 
 When the couchdb is up, you can run integration tests via
 
-`yarn integrationtest`
+`npm integrationtest`
 
 # Playing with the REST service
 
@@ -109,14 +96,14 @@ To build the client side bundle.js:
 
 ```
 export LINKY_PROPERTIES="your modified version of server/util/linky_default.properties"
-yarn build
+npm build
 ```
 
 To start the server at :8080 without dynamic bundle.js generation:
 
 ```
 export LINKY_PROPERTIES="your modified version of server/util/linky_default.properties"
-yarn start
+npm start
 ```
 
 # Parameters

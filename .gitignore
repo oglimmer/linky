@@ -11,3 +11,5 @@ build/docker/from_local
 build/docker/from_git
 build/docker/sources
 localrun/
+clouseau-2.17.0/
+data/

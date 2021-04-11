@@ -53,7 +53,7 @@ import postStartupClean from './util/postStartupClean';
 
 import { hashSha256Base64 } from './util/HashUtil';
 
-import linkCheckServer from '../link-check-server';
+//import linkCheckServer from '../link-check-server';
 
 serverPropsLoader(BuildInfo);
 

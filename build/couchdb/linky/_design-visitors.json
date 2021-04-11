@@ -1,1 +1,0 @@
-{"_id":"_design/visitors","language":"javascript","views":{"byVisitorId":{"map":"function(doc) {\n  if(doc.type === 'visitor') {\n    emit(doc.visitorId, doc);\n  }\n}"}}}

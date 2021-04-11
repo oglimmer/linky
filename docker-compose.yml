@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  couchdb1:
+    image: couchdb:3.1.0
+    restart: always
+    ports:
+    - 5984:5984
+    environment:
+    - NODENAME=10.0.0.10
+    - ERL_FLAGS=-setcookie monster
+    - COUCHDB_USER=admin
+    - COUCHDB_PASSWORD=admin
+    volumes:
+    - ./config/couchdb:/opt/couchdb/etc/local.d
+    - ./data/couchdb/1:/opt/couchdb/data
+    networks:
+      couchdb-net:
+        ipv4_address: 10.0.0.10
+
+  clouseau1:
+    image: openjdk:8
+    command: >
+      java -server
+      -classpath '/app/*'
+      -Xmx2G -Dsun.net.inetaddr.ttl=30
+      -Dsun.net.inetaddr.negative.ttl=30
+      -Dlog4j.configuration=file:/config/log4j.properties
+      -XX:OnOutOfMemoryError="kill -9 %p"
+      -XX:+UseConcMarkSweepGC
+      -XX:+CMSParallelRemarkEnabled com.cloudant.clouseau.Main /config/clouseau.ini
+    restart: always
+    depends_on:
+    - couchdb1
+    volumes:
+    - ./config/clouseau:/config
+    - ./data/clouseau/1:/data
+    - ./clouseau-2.17.0:/app
+    network_mode: service:couchdb1
+
+networks:
+  couchdb-net:
+    name: couchdb-net
+    driver: bridge
+    ipam:
+      config:
+       - subnet: 10.0.0.0/24

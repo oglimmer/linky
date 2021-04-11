@@ -17,11 +17,10 @@ module.exports = {
       TestedWith: "11",
     },
     cdb: {
-      Docker: "1.7",
-      KnownMax: "1.7"
+      Docker: "3"
     },
     linky: {
-      TestedWith: "10 & 11"
+      TestedWith: "10 & 11 & 14"
     }
   },
 
