@@ -34,7 +34,7 @@ jobs:
           file: ./build/k8s/Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args:
-            CONTACT_LINE: ${{ secrets.CONTACT_LINE }}
+            - CONTACT_LINE=${{ secrets.CONTACT_LINE }}
       -
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
