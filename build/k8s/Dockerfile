@@ -3,9 +3,11 @@ FROM node:14
 WORKDIR /home/node/exec_env
 
 ARG BRANCH_NAME=master
+ARG CONTACT_LINE
 
 ADD build/k8s/logging-config.json /etc
 ADD build/k8s/entry_point.sh /home/node/exec_env
+RUN echo "Email: $CONTACT_LINE" > /etc/linky-contact.txt
 
 ADD https://api.github.com/repos/oglimmer/linky/git/refs/heads/$BRANCH_NAME /tmp/version.json
 
