@@ -7,10 +7,11 @@ import axios from 'axios';
 import favicon from '../server/util/favicon';
 import linkDao from '../server/dao/linkDao';
 import tagDao from '../server/dao/tagDao';
-import { URLUPDATED, BROKEN, LOCKED, DUEDATE, DUE, DUPLICATE } from '../src/util/TagRegistry';
+import { URLUPDATED, BROKEN, LOCKED, DUEDATE, DUE, DUPLICATE, ARCHIVE } from '../src/util/TagRegistry';
 import { dateRegex, getNextIndex, equalRelevant } from '../server/logic/Link';
 import { init, hasTag, createTagHierarchy } from '../server/logic/TagHierarchy';
 import { CheckLinkDuplicateFinder } from '../server/util/DuplicateFinder';
+import properties from '../server/util/linkyproperties';
 
 const getNow = () => new Date().toISOString();
 
@@ -35,9 +36,22 @@ const updateFavicon = async (rec) => {
   return Object.assign({}, rec, updateObj);
 };
 
+const getHostFromUrl = url => {
+  const { hostname } = new URL(url);
+  return hostname;
+}
 
+const excludedDomains = properties.server.check.exclude.split(',');
 const updateUrl = async rec => {  
   const url = rec.linkUrl;
+  const host = getHostFromUrl(url);
+  if (excludedDomains.filter(e => {
+    const indexOf = host.indexOf(e);
+    return indexOf > -1 && indexOf === host.length-e.length;
+  }).length > 0) {
+    console.log(`${getNow()}: url ${url} is excluded from updateUrl`);
+    return rec;
+  }
   try {
     const response = await axios.get(url, { timeout: 5000 });
     const newUrl = response.request.res.responseUrl;
@@ -90,7 +104,7 @@ const persist = async (rec) => {
 };
 
 const processUrlAndFavicon = async (rec) => {
-  if (!hasTag(rec.tags, LOCKED)) {
+  if (!hasTag(rec.tags, LOCKED) && !hasTag(rec.tags, ARCHIVE)) {
     if (!hasTag(rec.tags, BROKEN)) {
       // nothing ;)
     }
