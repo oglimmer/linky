@@ -11,7 +11,7 @@ if (!fileName) {
   fileName = path.resolve(__dirname, '/etc/linky-contact.txt');
 }
 if (fs.existsSync(fileName)) {
-  CONTACT = fs.readFileSync(fileName, { encoding: 'utf8' });
+  CONTACT = fs.readFileSync(fileName, { encoding: 'utf8' }).trim();
 }
 
 let commitHashRaw;
