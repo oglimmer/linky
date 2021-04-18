@@ -5,7 +5,7 @@ import tagDao from '../dao/tagDao';
 import linkDao from '../dao/linkDao';
 import ResponseUtil from '../../src/util/ResponseUtil';
 import BaseProcessor from './BaseProcessor';
-import TagHierarchyLogic from '../logic/TagHierarchy';
+import TagHierarchyLogic, { createTagHierarchy } from '../logic/TagHierarchy';
 import { READONLY_TAGS } from '../../src/util/TagRegistry';
 
 class GetTagHierarchyProcessor extends BaseProcessor {
@@ -77,7 +77,7 @@ class PersistTagHierarchyProcessor extends BaseProcessor {
       const rec = await tagDao.getHierarchyByUser(this.data.userid);
       let recToWrite;
       if (!rec) {
-        recToWrite = TagHierarchyLogic.createTagHierarchy(
+        recToWrite = createTagHierarchy(
           this.data.userid,
           this.data.tree.map(e => ({ name: e.name, parent: e.parent, index: e.index })),
         );

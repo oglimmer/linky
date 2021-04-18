@@ -53,7 +53,7 @@ import postStartupClean from './util/postStartupClean';
 
 import { hashSha256Base64 } from './util/HashUtil';
 
-//import linkCheckServer from '../link-check-server';
+// import linkCheckServer from '../link-check-server';
 
 serverPropsLoader(BuildInfo);
 
@@ -293,4 +293,4 @@ app.listen(port, bind, (err) => {
 
 postStartupClean();
 
-//setInterval(() => { linkCheckServer(); }, 1000 * 60 * 60 * 24);
+// setInterval(() => { linkCheckServer(); }, 1000 * 60 * 60 * 24);

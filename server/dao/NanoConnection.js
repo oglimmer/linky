@@ -21,7 +21,7 @@ const config = {
 const username = dbProps.user;
 const password = dbProps.password;
 const auth = `Basic ${new Buffer(`${username}:${password}`).toString('base64')}`;
-if (username) {  
+if (username) {
   config.requestDefaults.headers.Authorization = auth;
 }
 

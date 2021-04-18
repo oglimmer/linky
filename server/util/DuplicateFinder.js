@@ -34,7 +34,7 @@ class DuplicateFinderBase {
 
   counterLink(rec) {
     const purifiedUrl = purifyLink(rec.linkUrl);
-    //console.log(`purifiedUrl = ${purifiedUrl}`)
+    // console.log(`purifiedUrl = ${purifiedUrl}`)
     let counterMap = this.allLinks.get(rec.userid);
     if (!counterMap) {
       counterMap = new Map();
