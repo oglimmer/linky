@@ -92,8 +92,8 @@ if (!fs.existsSync(logDirectory)) {
 
 const globalCSPConfig = Object.assign({},
   contentSecurityPolicy.STARTER_OPTIONS, {
-    'style-src': ['https://fonts.googleapis.com', contentSecurityPolicy.SRC_SELF, contentSecurityPolicy.SRC_USAFE_INLINE],
-    'font-src': ['https://fonts.gstatic.com', contentSecurityPolicy.SRC_SELF],
+    'style-src': ['https://www.oglimmer.de', contentSecurityPolicy.SRC_SELF, contentSecurityPolicy.SRC_USAFE_INLINE],
+    'font-src': ['https://www.oglimmer.de', contentSecurityPolicy.SRC_SELF],
     'plugin-types': '',
   },
 );
