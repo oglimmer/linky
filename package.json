@@ -32,7 +32,7 @@
     "cookie-parser": "^1.4.5",
     "crypto-js": "^4.0.0",
     "ejs": "^2.5.5",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-http-proxy": "^1.0.3",
     "express-winston": "^2.3.0",
     "favicon": "https://github.com/oglimmer/node-favicon/tarball/master",
