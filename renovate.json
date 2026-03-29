@@ -1,0 +1,84 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":enableVulnerabilityAlerts",
+    ":dependencyDashboard",
+    ":semanticCommits"
+  ],
+  "timezone": "Europe/Berlin",
+  "prHourlyLimit": 10,
+  "prConcurrentLimit": 20,
+  "rebaseWhen": "behind-base-branch",
+  "rangeStrategy": "bump",
+  "automergeType": "branch",
+  "packageRules": [
+    {
+      "automerge": true,
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ]
+    },
+    {
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "automerge": true
+    },
+    {
+      "matchManagers": [
+        "maven-wrapper",
+        "gradle-wrapper"
+      ],
+      "automerge": true
+    },
+    {
+      "matchCurrentVersion": "/^0\\./",
+      "automerge": false
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "groupName": "npm dependencies"
+    },
+    {
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose"
+      ],
+      "groupName": "Docker dependencies"
+    },
+    {
+      "matchManagers": [
+        "helmv3",
+        "helmfile"
+      ],
+      "groupName": "Helm dependencies"
+    },
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "groupName": "Go dependencies"
+    }
+  ],
+  "ignoreTests": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "at any time"
+    ],
+    "automerge": true
+  },
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security"
+    ],
+    "schedule": [
+      "at any time"
+    ],
+    "automerge": true
+  }
+}
