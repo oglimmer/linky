@@ -32,6 +32,24 @@ const router = createRouter({
       meta: { public: true },
     },
     {
+      path: '/privacy',
+      name: 'privacy',
+      component: () => import('@/views/PrivacyView.vue'),
+      meta: { public: true },
+    },
+    {
+      path: '/terms',
+      name: 'terms',
+      component: () => import('@/views/TermsView.vue'),
+      meta: { public: true },
+    },
+    {
+      path: '/imprint',
+      name: 'imprint',
+      component: () => import('@/views/ImprintView.vue'),
+      meta: { public: true },
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/',
     },
