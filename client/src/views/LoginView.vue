@@ -13,14 +13,10 @@ const submitting = ref(false)
 const isRegister = ref(false)
 
 const oauthProviders = [
-  { name: 'Google', type: 'google', color: 'bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700' },
   { name: 'GitHub', type: 'github', color: 'bg-stone-800 dark:bg-stone-700 text-white hover:bg-stone-700 dark:hover:bg-stone-600' },
   { name: 'Facebook', type: 'facebook', color: 'bg-blue-600 text-white hover:bg-blue-700' },
-  { name: 'Twitter', type: 'twitter', color: 'bg-sky-500 text-white hover:bg-sky-600' },
-  { name: 'LinkedIn', type: 'linkedin', color: 'bg-blue-700 text-white hover:bg-blue-800' },
   { name: 'Bitbucket', type: 'bitbucket', color: 'bg-blue-500 text-white hover:bg-blue-600' },
   { name: 'Reddit', type: 'reddit', color: 'bg-orange-600 text-white hover:bg-orange-700' },
-  { name: 'Yahoo', type: 'yahoo', color: 'bg-purple-600 text-white hover:bg-purple-700' },
 ]
 
 async function handleSubmit() {

@@ -13,29 +13,17 @@ type Config struct {
 	// OAuth providers - each has ClientID, ClientSecret, RedirectURI
 	OAuthRedirectBase string `env:"OAUTH_REDIRECT_BASE" envDefault:"http://localhost:8080/authback"`
 
-	GoogleClientID     string `env:"GOOGLE_CLIENT_ID"`
-	GoogleClientSecret string `env:"GOOGLE_CLIENT_SECRET"`
-
 	GitHubClientID     string `env:"GITHUB_CLIENT_ID"`
 	GitHubClientSecret string `env:"GITHUB_CLIENT_SECRET"`
 
 	FacebookClientID     string `env:"FACEBOOK_CLIENT_ID"`
 	FacebookClientSecret string `env:"FACEBOOK_CLIENT_SECRET"`
 
-	TwitterConsumerKey    string `env:"TWITTER_CONSUMER_KEY"`
-	TwitterConsumerSecret string `env:"TWITTER_CONSUMER_SECRET"`
-
-	LinkedInClientID     string `env:"LINKEDIN_CLIENT_ID"`
-	LinkedInClientSecret string `env:"LINKEDIN_CLIENT_SECRET"`
-
 	BitbucketClientID     string `env:"BITBUCKET_CLIENT_ID"`
 	BitbucketClientSecret string `env:"BITBUCKET_CLIENT_SECRET"`
 
 	RedditClientID     string `env:"REDDIT_CLIENT_ID"`
 	RedditClientSecret string `env:"REDDIT_CLIENT_SECRET"`
-
-	YahooClientID     string `env:"YAHOO_CLIENT_ID"`
-	YahooClientSecret string `env:"YAHOO_CLIENT_SECRET"`
 
 	// Feature flags
 	EnableUserPass bool `env:"ENABLE_USERPASS" envDefault:"true"`

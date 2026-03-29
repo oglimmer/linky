@@ -33,29 +33,16 @@ func (h *OAuthHandler) Init(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if provider == "twitter" {
-		// For Twitter OAuth 1.0a, store the request token in a cookie.
-		http.SetCookie(w, &http.Cookie{
-			Name:     "oauth_token",
-			Value:    state,
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   h.cfg.CookieSecure,
-			SameSite: http.SameSiteLaxMode,
-			MaxAge:   900,
-		})
-	} else {
-		// For OAuth 2.0, store the state JWT in a cookie for CSRF verification.
-		http.SetCookie(w, &http.Cookie{
-			Name:     "oauth_state",
-			Value:    state,
-			Path:     "/",
-			HttpOnly: true,
-			Secure:   h.cfg.CookieSecure,
-			SameSite: http.SameSiteLaxMode,
-			MaxAge:   900,
-		})
-	}
+	// Store the state JWT in a cookie for CSRF verification.
+	http.SetCookie(w, &http.Cookie{
+		Name:     "oauth_state",
+		Value:    state,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   h.cfg.CookieSecure,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   900,
+	})
 
 	http.Redirect(w, r, authURL, http.StatusFound)
 }
@@ -66,57 +53,31 @@ func (h *OAuthHandler) Init(w http.ResponseWriter, r *http.Request) {
 func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, "type")
 
-	var source, sourceID string
-	var sourceData []byte
-	var err error
+	code := r.URL.Query().Get("code")
+	state := r.URL.Query().Get("state")
 
-	if provider == "twitter" {
-		oauthVerifier := r.URL.Query().Get("oauth_verifier")
-		oauthToken := r.URL.Query().Get("oauth_token")
-
-		// Optionally verify the token matches what we stored.
-		if cookie, cerr := r.Cookie("oauth_token"); cerr == nil {
-			if cookie.Value != oauthToken {
-				writeJSON(w, http.StatusBadRequest, map[string]string{"error": "oauth token mismatch"})
-				return
-			}
-			// Clear the cookie.
-			http.SetCookie(w, &http.Cookie{
-				Name:   "oauth_token",
-				Value:  "",
-				Path:   "/",
-				MaxAge: -1,
-			})
-		}
-
-		source, sourceID, sourceData, err = h.oauthSvc.HandleCallback(r.Context(), provider, oauthVerifier, oauthToken)
-	} else {
-		code := r.URL.Query().Get("code")
-		state := r.URL.Query().Get("state")
-
-		// Verify the state cookie matches the state parameter.
-		stateCookie, cookieErr := r.Cookie("oauth_state")
-		if cookieErr != nil || stateCookie.Value != state {
-			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid state"})
-			return
-		}
-
-		// Verify the state JWT signature and expiry.
-		if verr := h.oauthSvc.VerifyState(state); verr != nil {
-			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "expired or tampered state"})
-			return
-		}
-
-		// Clear the state cookie.
-		http.SetCookie(w, &http.Cookie{
-			Name:   "oauth_state",
-			Value:  "",
-			Path:   "/",
-			MaxAge: -1,
-		})
-
-		source, sourceID, sourceData, err = h.oauthSvc.HandleCallback(r.Context(), provider, code, state)
+	// Verify the state cookie matches the state parameter.
+	stateCookie, cookieErr := r.Cookie("oauth_state")
+	if cookieErr != nil || stateCookie.Value != state {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid state"})
+		return
 	}
+
+	// Verify the state JWT signature and expiry.
+	if verr := h.oauthSvc.VerifyState(state); verr != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "expired or tampered state"})
+		return
+	}
+
+	// Clear the state cookie.
+	http.SetCookie(w, &http.Cookie{
+		Name:   "oauth_state",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+
+	source, sourceID, sourceData, err := h.oauthSvc.HandleCallback(r.Context(), provider, code, state)
 
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "OAuth failed: " + err.Error()})
