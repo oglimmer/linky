@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "linky.fullname" . }}-server
+  labels:
+    {{- include "linky.serverLabels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    {{- include "linky.serverSelectorLabels" . | nindent 4 }}

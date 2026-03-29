@@ -153,20 +153,6 @@ async function handleDelete() {
   }
 }
 
-async function handleArchive() {
-  if (!isEditing.value) return
-  submitting.value = true
-  try {
-    await linksStore.createArchive(linksStore.editingLink!.id)
-    resetForm()
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : 'Failed to archive'
-    ui.setError(msg)
-  } finally {
-    submitting.value = false
-  }
-}
-
 function resetForm() {
   url.value = ''
   const tag = linksStore.selectedTag !== 'all' ? linksStore.selectedTag : ''
@@ -269,10 +255,6 @@ function cancel() {
         <button v-if="isEditing" type="button" @click="handleDelete" :disabled="submitting"
           class="py-2 px-4 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition">
           Delete
-        </button>
-        <button v-if="isEditing && !linksStore.editingLink?.tags.includes('archive')" type="button" @click="handleArchive" :disabled="submitting"
-          class="py-2 px-4 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 disabled:opacity-50 transition">
-          Archive
         </button>
       </div>
     </form>

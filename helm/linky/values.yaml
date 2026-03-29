@@ -1,0 +1,44 @@
+server:
+  image:
+    repository: registry.oglimmer.com/linky-server
+    tag: latest
+    pullPolicy: Always
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "25m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+
+client:
+  image:
+    repository: registry.oglimmer.com/linky-client
+    tag: latest
+    pullPolicy: Always
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "10m"
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
+
+imagePullSecrets:
+  - name: oglimmerregistrykey
+
+ingress:
+  host: www.linky1.com
+  clusterIssuer: oglimmer-com-dns
+  tlsSecretName: tls-linky-ingress-dns
+
+config:
+  port: "8080"
+  oauthRedirectBase: "https://www.linky1.com/authback"
+  enableUserPass: "true"
+  enableOAuth: "true"
+  cookieSecure: "true"
+  httpUserAgent: "Linky/1.0"
+
+# Database URL, JWT secret, and OAuth credentials go into a SealedSecret.
+# See README for instructions on creating the sealed secret.

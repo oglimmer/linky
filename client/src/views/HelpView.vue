@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const systemTags = [
   { name: 'all', desc: 'Contains all links' },
-  { name: 'archive', desc: 'Archived web pages' },
   { name: 'broken', desc: 'Links that failed HTTP validation' },
   { name: 'due', desc: 'Links past their due date' },
   { name: 'duedate', desc: 'Links with date tags (YYYY-MM-DD)' },
@@ -47,14 +46,6 @@ const searchHelp = [
           <code class="font-mono text-primary-600 dark:text-primary-400 shrink-0 w-32">{{ item.syntax }}</code>
           <span class="text-gray-600 dark:text-gray-400">{{ item.desc }}</span>
         </div>
-      </div>
-    </section>
-
-    <section class="space-y-3">
-      <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Import / Export</h2>
-      <div class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
-        <p>Export your browser bookmarks as HTML (Netscape format) and import them into Linky. Bookmark folders become tags.</p>
-        <p>You can add a tag prefix to imported tags and choose which node in your tag hierarchy to import under.</p>
       </div>
     </section>
 

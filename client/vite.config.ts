@@ -18,7 +18,6 @@ export default defineConfig({
       '/auth': 'http://localhost:8080',
       '/authback': 'http://localhost:8080',
       '/leave': 'http://localhost:8080',
-      '/archive': 'http://localhost:8080',
     },
   },
 })

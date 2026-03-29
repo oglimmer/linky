@@ -11,7 +11,6 @@ const mobileOpen = ref(false)
 const navLinks = [
   { to: '/links/portal', label: 'Links' },
   { to: '/tags', label: 'Tags' },
-  { to: '/import-export', label: 'Import / Export' },
   { to: '/help', label: 'Help' },
 ]
 </script>

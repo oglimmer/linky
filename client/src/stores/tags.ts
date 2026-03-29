@@ -71,13 +71,11 @@ export const useTagsStore = defineStore('tags', () => {
     loading.value = true
     try {
       const { data } = await api.get('/rest/tags/hierarchy')
-      // Server returns flat array with count on each node: [{ name, parent, index, count }, ...]
-      flatTags.value = data
+      // Server returns { tree: [{ name, parent, index }], tagCount: { name: count } }
+      flatTags.value = (data.tree ?? [])
         .filter((t: any) => t.name !== 'root')
         .map((t: any) => ({ name: t.name, parent: t.parent, index: t.index }))
-      tagCount.value = Object.fromEntries(
-        data.filter((t: any) => t.name !== 'root').map((t: any) => [t.name, t.count ?? 0])
-      )
+      tagCount.value = data.tagCount ?? {}
     } finally {
       loading.value = false
     }

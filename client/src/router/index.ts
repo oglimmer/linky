@@ -19,12 +19,7 @@ const router = createRouter({
       name: 'tags',
       component: () => import('@/views/TagsView.vue'),
     },
-    {
-      path: '/import-export',
-      name: 'import-export',
-      component: () => import('@/views/ImportExportView.vue'),
-    },
-    {
+{
       path: '/help',
       name: 'help',
       component: () => import('@/views/HelpView.vue'),

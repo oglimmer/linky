@@ -8,7 +8,7 @@ import { useTagsStore } from './tags'
 export const useLinksStore = defineStore('links', () => {
   const links = ref<Link[]>([])
   const selectedTag = ref('portal')
-  const sortColumn = ref<SortColumn>('lastAdded')
+  const sortColumn = ref<SortColumn>('mostUsed')
   const sortOrder = ref<SortOrder>(-1)
   const visibleColumns = ref<LinkColumn[]>(['pageTitle', 'linkUrl', 'notes', 'tags'])
   const loading = ref(false)
@@ -150,15 +150,6 @@ export const useLinksStore = defineStore('links', () => {
     }
   }
 
-  async function createArchive(id: number) {
-    const ui = useUiStore()
-    ui.setTemp('Creating archive...')
-    await api.post(`/rest/archive/${id}`)
-    ui.setInfo('Archive created')
-    // Refresh to pick up the new archive tag
-    await fetchLinks(selectedTag.value)
-  }
-
   function startEditing(link: Link) {
     editingLink.value = { ...link }
     showForm.value = true
@@ -197,7 +188,7 @@ export const useLinksStore = defineStore('links', () => {
     editingLink, showForm, rssUpdates, rssDetails, expandedRssId,
     sortedLinks,
     setSort, toggleColumn, fetchLinks, createLink, updateLink, deleteLink,
-    clickLink, searchLinks, createArchive,
+    clickLink, searchLinks,
     startEditing, stopEditing,
     fetchRssCount, fetchRssDetails, fetchAllRssUpdates,
   }

@@ -14,3 +14,4 @@ localrun/
 clouseau-2.17.0/
 data/
 server/access*.log
+.env
