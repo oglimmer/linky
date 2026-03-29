@@ -12,7 +12,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    // Proxy API requests to the Go server (server-go) running on :8080
+    // Proxy API requests to the Go server running on :8080
     proxy: {
       '/rest': 'http://localhost:8080',
       '/auth': 'http://localhost:8080',

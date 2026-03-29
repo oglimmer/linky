@@ -8,7 +8,7 @@ Linky is a bookmark manager with tagging, full-text search, and RSS feed trackin
 
 ## Commands
 
-### Go server (`server-go/`)
+### Go server (`server/`)
 
 - `go run ./cmd/linky` — Start server on :8080 (auto-runs DB migrations)
 - `go build ./cmd/linky` — Build production binary
@@ -23,7 +23,7 @@ Linky is a bookmark manager with tagging, full-text search, and RSS feed trackin
 
 ## Architecture
 
-### Server (`server-go/`)
+### Server (`server/`)
 
 Go server using chi router, sqlx for database access, and embedded SQL migrations.
 
@@ -50,7 +50,7 @@ Vue 3 SPA with Composition API, TypeScript, Tailwind CSS v4, Pinia, Vue Router, 
 
 ### Configuration
 
-Server configured via environment variables. See `server-go/.env.example`. Key: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRY`, OAuth provider `*_CLIENT_ID`/`*_CLIENT_SECRET` pairs.
+Server configured via environment variables. See `server/.env.example`. Key: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRY`, OAuth provider `*_CLIENT_ID`/`*_CLIENT_SECRET` pairs.
 
 ### Data layer
 
