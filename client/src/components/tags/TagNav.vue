@@ -35,13 +35,13 @@ function countFor(name: string) {
 <template>
   <nav class="space-y-3">
     <!-- Tag search -->
-    <div class="flex items-center gap-1.5 border-b border-gray-200 dark:border-gray-700 pb-1">
-      <MagnifyingGlassIcon class="w-3.5 h-3.5 text-gray-400 shrink-0" />
+    <div class="flex items-center gap-1.5 border-b border-stone-200 dark:border-stone-700 pb-1">
+      <MagnifyingGlassIcon class="w-3.5 h-3.5 text-stone-400 shrink-0" />
       <input
         v-model="tagFilter"
         type="text"
-        placeholder="Search tags…"
-        class="w-full bg-transparent text-xs text-gray-600 dark:text-gray-300 placeholder-gray-400 outline-none"
+        placeholder="Search tags..."
+        class="w-full bg-transparent text-xs text-stone-600 dark:text-stone-300 placeholder-stone-400 outline-none"
       />
     </div>
 
@@ -52,28 +52,28 @@ function countFor(name: string) {
           v-for="tag in matchingTags"
           :key="tag.name"
           :to="`/links/${tag.name}`"
-          class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-primary-100 dark:hover:bg-primary-900 hover:text-primary-700 transition"
+          class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-primary-100 dark:hover:bg-primary-900/50 hover:text-primary-700 dark:hover:text-primary-300 transition"
         >
           {{ tag.name }}
-          <span class="text-gray-400">({{ countFor(tag.name) }})</span>
+          <span class="text-stone-400">({{ countFor(tag.name) }})</span>
         </RouterLink>
       </div>
-      <p v-else class="text-xs text-gray-400">No tags found</p>
+      <p v-else class="text-xs text-stone-400">No tags found</p>
     </template>
 
     <!-- Normal tag context (when not searching) -->
     <template v-else>
       <!-- Breadcrumb / parent -->
-      <div v-if="parent" class="flex items-center gap-1 text-xs text-gray-400">
+      <div v-if="parent" class="flex items-center gap-1 text-xs text-stone-400">
         <RouterLink :to="`/links/${parent}`" class="hover:text-primary-600 transition">{{ parent }}</RouterLink>
         <ChevronRightIcon class="w-3 h-3" />
-        <span class="text-gray-700 dark:text-gray-200 font-medium">{{ currentTag }}</span>
+        <span class="text-stone-700 dark:text-stone-200 font-medium">{{ currentTag }}</span>
       </div>
 
       <!-- Current tag -->
-      <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+      <h2 class="font-[--font-display] text-lg font-semibold text-stone-800 dark:text-stone-200 tracking-tight">
         {{ currentTag }}
-        <span class="text-sm font-normal text-gray-400 ml-1">({{ countFor(currentTag) }})</span>
+        <span class="text-sm font-normal text-stone-400 ml-1">({{ countFor(currentTag) }})</span>
       </h2>
 
       <!-- Siblings -->
@@ -82,22 +82,22 @@ function countFor(name: string) {
           v-for="sib in siblings"
           :key="sib.name"
           :to="`/links/${sib.name}`"
-          class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-primary-100 dark:hover:bg-primary-900 hover:text-primary-700 transition"
+          class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 hover:bg-primary-100 dark:hover:bg-primary-900/50 hover:text-primary-700 dark:hover:text-primary-300 transition"
         >
           {{ sib.name }}
-          <span class="text-gray-400">({{ countFor(sib.name) }})</span>
+          <span class="text-stone-400">({{ countFor(sib.name) }})</span>
         </RouterLink>
       </div>
 
       <!-- Children -->
       <div v-if="children.length">
-        <p class="text-xs text-gray-400 mb-1.5">Subtags</p>
+        <p class="text-xs text-stone-400 mb-1.5">Subtags</p>
         <div class="flex flex-wrap gap-1.5">
           <RouterLink
             v-for="child in children"
             :key="child.name"
             :to="`/links/${child.name}`"
-            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary-50 dark:bg-primary-950 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900 transition"
+            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-primary-50 dark:bg-primary-950/50 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/50 transition"
           >
             {{ child.name }}
             <span class="opacity-60">({{ countFor(child.name) }})</span>

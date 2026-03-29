@@ -61,10 +61,10 @@ function toggleForm() {
           <button
             @click="toggleForm"
             :class="[
-              'inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition',
+              'inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm',
               linksStore.showForm
-                ? 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                : 'bg-primary-600 text-white hover:bg-primary-700',
+                ? 'bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                : 'bg-primary-600 text-white hover:bg-primary-700 shadow-primary-600/20',
             ]"
           >
             <PlusIcon class="w-4 h-4" />
@@ -75,7 +75,7 @@ function toggleForm() {
         <LinkForm v-if="linksStore.showForm" />
 
         <!-- Loading -->
-        <div v-if="linksStore.loading" class="py-12 text-center text-sm text-gray-400">Loading links...</div>
+        <div v-if="linksStore.loading" class="py-12 text-center text-sm text-stone-400">Loading links...</div>
 
         <!-- Link list -->
         <LinkList v-else :links="filteredLinks" />

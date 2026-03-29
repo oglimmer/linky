@@ -31,9 +31,9 @@ function onRootDrop(e: DragEvent) {
 </script>
 
 <template>
-  <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-y-auto max-h-[calc(100vh-16rem)]">
-    <div v-if="tagsStore.loading" class="py-12 text-center text-sm text-gray-400">Loading tags...</div>
-    <div v-else-if="!tagsStore.tree?.length" class="py-12 text-center text-sm text-gray-400">No tags yet</div>
+  <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-y-auto max-h-[calc(100vh-16rem)]">
+    <div v-if="tagsStore.loading" class="py-12 text-center text-sm text-stone-400">Loading tags...</div>
+    <div v-else-if="!tagsStore.tree?.length" class="py-12 text-center text-sm text-stone-400">No tags yet</div>
     <div v-else class="py-2">
       <TagNode v-for="node in tagsStore.tree" :key="node.name" :node="node" />
       <!-- Root-level drop zone at the bottom -->
@@ -46,7 +46,7 @@ function onRootDrop(e: DragEvent) {
           rootDragOver
             ? 'border-primary-400 bg-primary-50 dark:bg-primary-950 text-primary-600'
             : 'border-transparent text-transparent',
-          tagsStore.dragging ? 'border-gray-200 dark:border-gray-700 text-gray-400' : '',
+          tagsStore.dragging ? 'border-stone-200 dark:border-stone-700 text-stone-400' : '',
         ]"
       >
         Drop here for top level

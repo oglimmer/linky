@@ -13,18 +13,18 @@ function onKeydown(e: KeyboardEvent) {
 
 <template>
   <div class="relative">
-    <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+    <MagnifyingGlassIcon class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" />
     <input
       v-model="searchTerm"
       @keydown="onKeydown"
       type="text"
       placeholder="Search... (Enter for full-text)"
-      class="w-56 pl-8 pr-8 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+      class="w-56 pl-8 pr-8 py-1.5 text-sm rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-400 transition"
     />
     <button
       v-if="searchTerm"
       @click="clearSearch"
-      class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      class="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
     >
       <XMarkIcon class="w-4 h-4" />
     </button>

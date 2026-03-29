@@ -69,39 +69,39 @@ async function handleExport() {
 
 <template>
   <div class="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-8">
-    <h1 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Import / Export</h1>
+    <h1 class="text-xl font-semibold text-stone-800 dark:text-stone-200 font-[--font-display] tracking-tight">Import / Export</h1>
 
     <!-- Import -->
-    <section class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm p-6 space-y-4">
-      <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+    <section class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm p-6 space-y-4">
+      <h2 class="text-sm font-semibold text-stone-700 dark:text-stone-300 flex items-center gap-2">
         <ArrowUpTrayIcon class="w-4 h-4" /> Import Bookmarks
       </h2>
-      <p class="text-xs text-gray-500">Paste your bookmarks in Netscape HTML format (exported from any browser).</p>
+      <p class="text-xs text-stone-500">Paste your bookmarks in Netscape HTML format (exported from any browser).</p>
 
       <textarea
         v-model="bookmarks"
         rows="8"
         placeholder="Paste bookmarks HTML here..."
-        class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y font-mono"
+        class="w-full px-3 py-2 text-sm rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-400 resize-y font-mono"
       />
 
       <div class="flex gap-4">
         <div>
-          <label class="block text-xs text-gray-500 mb-1">Tag prefix (optional)</label>
+          <label class="block text-xs text-stone-500 mb-1">Tag prefix (optional)</label>
           <input v-model="tagPrefix" type="text" placeholder="e.g. imported-"
-            class="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-44" />
+            class="px-3 py-1.5 text-sm rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-400 w-44" />
         </div>
         <div>
-          <label class="block text-xs text-gray-500 mb-1">Root node</label>
+          <label class="block text-xs text-stone-500 mb-1">Root node</label>
           <input v-model="importNode" type="text"
-            class="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent w-44" />
+            class="px-3 py-1.5 text-sm rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-400 w-44" />
         </div>
       </div>
 
       <button
         @click="handleImport"
         :disabled="importing"
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50 transition shadow-sm shadow-primary-600/20"
       >
         <ArrowUpTrayIcon class="w-4 h-4" />
         {{ importing ? 'Importing...' : 'Import' }}
@@ -109,15 +109,15 @@ async function handleExport() {
     </section>
 
     <!-- Export -->
-    <section class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm p-6 space-y-4">
-      <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+    <section class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm p-6 space-y-4">
+      <h2 class="text-sm font-semibold text-stone-700 dark:text-stone-300 flex items-center gap-2">
         <ArrowDownTrayIcon class="w-4 h-4" /> Export Bookmarks
       </h2>
-      <p class="text-xs text-gray-500">Export all your bookmarks as Netscape HTML format.</p>
+      <p class="text-xs text-stone-500">Export all your bookmarks as Netscape HTML format.</p>
 
       <button
         @click="handleExport"
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition shadow-sm shadow-primary-600/20"
       >
         <ArrowDownTrayIcon class="w-4 h-4" />
         Export
@@ -128,7 +128,7 @@ async function handleExport() {
         :value="exportContent"
         readonly
         rows="12"
-        class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 font-mono resize-y"
+        class="w-full px-3 py-2 text-sm rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 font-mono resize-y"
       />
     </section>
   </div>

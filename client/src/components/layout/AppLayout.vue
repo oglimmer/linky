@@ -9,7 +9,7 @@ const isLoginPage = computed(() => route.name === 'login')
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col" :class="isLoginPage ? 'bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-950 dark:to-gray-900' : ''">
+  <div class="min-h-screen flex flex-col" :class="isLoginPage ? 'bg-stone-100 dark:bg-stone-950' : ''">
     <AppHeader v-if="!isLoginPage" />
     <main class="flex-1 flex flex-col">
       <slot />

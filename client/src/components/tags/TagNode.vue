@@ -104,7 +104,7 @@ function onDrop(e: DragEvent) {
         'flex items-center gap-2 py-1.5 px-3 cursor-pointer rounded-md text-sm transition select-none relative',
         isSelected
           ? 'bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200'
-          : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300',
+          : 'hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300',
         tagsStore.dragging === node.name ? 'opacity-40' : '',
       ]"
     >
@@ -115,11 +115,11 @@ function onDrop(e: DragEvent) {
 
       <ChevronRightIcon
         v-if="hasChildren"
-        class="w-3.5 h-3.5 text-gray-400 shrink-0"
+        class="w-3.5 h-3.5 text-stone-400 shrink-0"
       />
       <span v-else class="w-3.5 shrink-0" />
-      <span :class="[isEmpty ? 'text-gray-400 italic' : '']">{{ node.name }}</span>
-      <span class="text-xs text-gray-400 ml-auto">{{ node.count }}</span>
+      <span :class="[isEmpty ? 'text-stone-400 italic' : '']">{{ node.name }}</span>
+      <span class="text-xs text-stone-400 ml-auto">{{ node.count }}</span>
     </div>
     <TagNode
       v-for="child in node.children"
