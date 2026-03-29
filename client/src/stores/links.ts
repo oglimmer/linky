@@ -10,7 +10,7 @@ export const useLinksStore = defineStore('links', () => {
   const selectedTag = ref('portal')
   const sortColumn = ref<SortColumn>('mostUsed')
   const sortOrder = ref<SortOrder>(-1)
-  const visibleColumns = ref<LinkColumn[]>(['pageTitle', 'linkUrl', 'notes', 'tags'])
+  const visibleColumns = ref<LinkColumn[]>(['pageTitle', 'linkUrl'])
   const loading = ref(false)
   const editingLink = ref<Link | null>(null)
   const showForm = ref(false)

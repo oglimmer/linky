@@ -16,6 +16,13 @@ function show(col: LinkColumn) {
   return cols.value.includes(col)
 }
 
+function truncateUrl(url: string): string {
+  const slashIdx = url.indexOf('/', url.indexOf('//') + 2)
+  if (slashIdx === -1) return url
+  if (url.length <= 80) return url
+  return url.substring(0, 80) + '[...]'
+}
+
 function openLink() {
   linksStore.clickLink(props.link.id)
   window.open(`/leave?target=${props.link.id}`, '_blank')
@@ -39,14 +46,14 @@ function openLink() {
       <div class="flex-1 min-w-0 space-y-0.5">
         <div class="flex items-center gap-2">
           <button @click="openLink" class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline truncate text-left">
-            {{ show('pageTitle') && link.pageTitle ? link.pageTitle : link.linkUrl }}
+            {{ show('pageTitle') && link.pageTitle ? link.pageTitle : truncateUrl(link.linkUrl) }}
           </button>
           <span v-if="rssCount > 0" @click="linksStore.fetchRssDetails(link.id)" class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 cursor-pointer hover:bg-amber-200 transition">
             {{ rssCount }} new
           </span>
         </div>
 
-        <p v-if="show('linkUrl') && link.pageTitle" class="text-xs text-gray-400 truncate">{{ link.linkUrl }}</p>
+        <p v-if="show('linkUrl') && link.pageTitle" class="text-xs text-gray-400 truncate">{{ truncateUrl(link.linkUrl) }}</p>
         <p v-if="show('notes') && link.notes" class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{{ link.notes }}</p>
 
         <div v-if="show('tags')" class="flex flex-wrap gap-1 mt-1">
