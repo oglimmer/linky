@@ -9,6 +9,7 @@ import { RouterLink } from 'vue-router'
       <RouterLink to="/privacy" class="hover:text-primary-600 dark:hover:text-primary-400 transition">Privacy</RouterLink>
       <RouterLink to="/terms" class="hover:text-primary-600 dark:hover:text-primary-400 transition">Terms</RouterLink>
       <RouterLink to="/imprint" class="hover:text-primary-600 dark:hover:text-primary-400 transition">Imprint</RouterLink>
+      <RouterLink to="/developers" class="hover:text-primary-600 dark:hover:text-primary-400 transition">Developers</RouterLink>
     </nav>
   </footer>
 </template>

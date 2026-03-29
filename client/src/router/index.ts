@@ -50,6 +50,12 @@ const router = createRouter({
       meta: { public: true },
     },
     {
+      path: '/developers',
+      name: 'developers',
+      component: () => import('@/views/DeveloperView.vue'),
+      meta: { public: true },
+    },
+    {
       path: '/:pathMatch(.*)*',
       redirect: '/',
     },
