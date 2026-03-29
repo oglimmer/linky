@@ -46,7 +46,7 @@ function oauthLogin(type: string) {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-950 dark:to-gray-900">
+  <div class="flex-1 flex items-center justify-center px-4">
     <div class="w-full max-w-md">
       <!-- Logo -->
       <div class="text-center mb-8">
