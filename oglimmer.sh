@@ -8,8 +8,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Default configuration
 DEFAULT_REGISTRIES=("registry.oglimmer.com")
-DEFAULT_CLIENT_DEPLOYMENT="linky-linky-client"
-DEFAULT_SERVER_DEPLOYMENT="linky-linky-server"
+DEFAULT_CLIENT_DEPLOYMENT="linky-client"
+DEFAULT_SERVER_DEPLOYMENT="linky-server"
 
 # Configuration variables (can be overridden by parameters)
 REGISTRIES=("${DEFAULT_REGISTRIES[@]}")
