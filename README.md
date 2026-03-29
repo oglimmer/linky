@@ -93,6 +93,10 @@ cd server
 docker-compose up
 ```
 
+## Future work
+
+- **Link checker**: A scheduled job that validates all bookmark URLs and tags broken links with a `broken` system tag. The old version (`old-version/link-check-server/`) ran this as a nightly batch process. Could be implemented as a Go CLI command or a Kubernetes CronJob.
+
 ## Old version
 
 The previous Node.js/Express/CouchDB/React implementation is archived in `old-version/`.

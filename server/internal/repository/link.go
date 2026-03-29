@@ -140,18 +140,6 @@ func (r *LinkRepo) Search(ctx context.Context, userID int64, query string) ([]mo
 	return r.loadTagsForLinks(ctx, links)
 }
 
-func (r *LinkRepo) SearchByTag(ctx context.Context, userID int64, tag string) ([]model.Link, error) {
-	var links []model.Link
-	err := r.db.SelectContext(ctx, &links,
-		`SELECT l.* FROM links l
-         JOIN link_tags lt ON l.id = lt.link_id
-         WHERE l.user_id = ? AND lt.tag LIKE ?
-         ORDER BY l.created_at DESC`, userID, "%"+tag+"%")
-	if err != nil {
-		return nil, err
-	}
-	return r.loadTagsForLinks(ctx, links)
-}
 
 func (r *LinkRepo) RenameTag(ctx context.Context, userID int64, oldTag, newTag string) (int64, error) {
 	// Get all link IDs for this user that have the old tag

@@ -1,25 +1,15 @@
 <script setup lang="ts">
 const systemTags = [
   { name: 'all', desc: 'Contains all links' },
-  { name: 'broken', desc: 'Links that failed HTTP validation' },
-  { name: 'due', desc: 'Links past their due date' },
+  { name: 'archive', desc: 'Archived links' },
   { name: 'duedate', desc: 'Links with date tags (YYYY-MM-DD)' },
-  { name: 'duplicate', desc: 'Links sharing the same URL' },
   { name: 'locked', desc: 'Links excluded from link checking' },
-  { name: 'portal', desc: 'Default landing page links' },
   { name: 'rss', desc: 'Links with an RSS feed' },
   { name: 'untagged', desc: 'Links with no custom tags' },
-  { name: 'urlupdated', desc: 'Links updated by following redirects' },
 ]
 
 const searchHelp = [
   { syntax: 'keyword', desc: 'Full-text search across all fields' },
-  { syntax: 'tags:value', desc: 'Search by tag' },
-  { syntax: 'url:value', desc: 'Search by URL' },
-  { syntax: 'title:value', desc: 'Search by page title' },
-  { syntax: 'notes:value', desc: 'Search in notes' },
-  { syntax: 'host:domain.com', desc: 'Search by domain' },
-  { syntax: '* and ?', desc: 'Wildcard characters' },
 ]
 </script>
 

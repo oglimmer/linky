@@ -153,10 +153,6 @@ func (s *LinkService) Delete(ctx context.Context, userID, linkID int64) error {
 }
 
 func (s *LinkService) Search(ctx context.Context, userID int64, query string) ([]model.Link, error) {
-	// Parse field-specific search: tags:foo, url:bar, title:baz, notes:qux
-	if strings.HasPrefix(query, "tags:") {
-		return s.repo.SearchByTag(ctx, userID, strings.TrimPrefix(query, "tags:"))
-	}
 	return s.repo.Search(ctx, userID, query)
 }
 
