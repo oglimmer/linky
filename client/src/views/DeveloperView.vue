@@ -692,6 +692,150 @@ const expandedModels = reactive<Record<string, boolean>>({})
       </div>
     </div>
 
+    <!-- Introduction -->
+    <section class="space-y-3">
+      <h2 class="text-sm font-semibold text-stone-700 dark:text-stone-300">Introduction</h2>
+      <div class="text-sm text-stone-600 dark:text-stone-400 space-y-2">
+        <p>The Linky API lets you programmatically manage your bookmarks, tags, and RSS feeds. You can use it to build browser extensions, CLI tools, mobile apps, import/export scripts, or any custom integration.</p>
+        <p>The API follows REST conventions: resources are accessed via predictable URLs, standard HTTP methods indicate the action, and all data is exchanged as JSON.</p>
+      </div>
+    </section>
+
+    <!-- Quick start -->
+    <section class="space-y-3">
+      <h2 class="text-sm font-semibold text-stone-700 dark:text-stone-300">Quick Start</h2>
+      <div class="text-sm text-stone-600 dark:text-stone-400 space-y-2">
+        <p>Get up and running in three steps:</p>
+      </div>
+      <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm divide-y divide-stone-100 dark:divide-stone-800">
+        <div class="px-4 py-3 flex gap-3 items-start">
+          <span class="shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 text-xs font-bold flex items-center justify-center mt-0.5">1</span>
+          <div class="text-sm">
+            <div class="font-medium text-stone-700 dark:text-stone-300">Authenticate</div>
+            <div class="text-stone-500 dark:text-stone-400 mt-0.5">
+              Send your credentials to <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">POST /rest/authenticate</code> to receive a JWT token.
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 flex gap-3 items-start">
+          <span class="shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 text-xs font-bold flex items-center justify-center mt-0.5">2</span>
+          <div class="text-sm">
+            <div class="font-medium text-stone-700 dark:text-stone-300">Include the token</div>
+            <div class="text-stone-500 dark:text-stone-400 mt-0.5">
+              Add <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">Authorization: Bearer &lt;token&gt;</code> to all subsequent requests.
+            </div>
+          </div>
+        </div>
+        <div class="px-4 py-3 flex gap-3 items-start">
+          <span class="shrink-0 w-5 h-5 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 text-xs font-bold flex items-center justify-center mt-0.5">3</span>
+          <div class="text-sm">
+            <div class="font-medium text-stone-700 dark:text-stone-300">Start making requests</div>
+            <div class="text-stone-500 dark:text-stone-400 mt-0.5">
+              Create a bookmark with <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">POST /rest/links</code>, list them with <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">GET /rest/links/all</code>, or search with <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">GET /rest/search/links?q=...</code>.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-1">
+        <div class="text-xs font-medium text-stone-500 dark:text-stone-400">Example: Authenticate and list all bookmarks</div>
+        <pre class="bg-stone-900 dark:bg-stone-950 rounded-lg px-4 py-3 text-xs font-mono text-stone-300 overflow-x-auto"># 1. Get a token
+TOKEN=$(curl -s -X POST {{ baseUrl }}/rest/authenticate \
+  -H 'Content-Type: application/json' \
+  -d '{"email": "you@example.com", "password": "secret"}' \
+  | jq -r '.token')
+
+# 2. List all bookmarks
+curl -s {{ baseUrl }}/rest/links/all \
+  -H "Authorization: Bearer $TOKEN" | jq .</pre>
+      </div>
+    </section>
+
+    <!-- Conventions -->
+    <section class="space-y-3">
+      <h2 class="text-sm font-semibold text-stone-700 dark:text-stone-300">Conventions</h2>
+      <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm divide-y divide-stone-100 dark:divide-stone-800">
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <span class="shrink-0 w-28 text-xs font-medium text-stone-500 dark:text-stone-400">Content type</span>
+          <span class="text-stone-600 dark:text-stone-400">All request and response bodies use <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">application/json</code>.</span>
+        </div>
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <span class="shrink-0 w-28 text-xs font-medium text-stone-500 dark:text-stone-400">Timestamps</span>
+          <span class="text-stone-600 dark:text-stone-400">All dates are ISO 8601 in UTC, e.g. <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">2025-01-15T10:00:00Z</code>.</span>
+        </div>
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <span class="shrink-0 w-28 text-xs font-medium text-stone-500 dark:text-stone-400">Empty lists</span>
+          <span class="text-stone-600 dark:text-stone-400">Empty collections return <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">[]</code>, never <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">null</code>.</span>
+        </div>
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <span class="shrink-0 w-28 text-xs font-medium text-stone-500 dark:text-stone-400">Null fields</span>
+          <span class="text-stone-600 dark:text-stone-400">Optional fields that have no value are returned as <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">null</code>, not omitted.</span>
+        </div>
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <span class="shrink-0 w-28 text-xs font-medium text-stone-500 dark:text-stone-400">Tags format</span>
+          <span class="text-stone-600 dark:text-stone-400">When creating or updating links, tags are sent as a space-separated string (<code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">"dev tools go"</code>). In responses, they are returned as an array.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Error handling -->
+    <section class="space-y-3">
+      <h2 class="text-sm font-semibold text-stone-700 dark:text-stone-300">Error Handling</h2>
+      <div class="text-sm text-stone-600 dark:text-stone-400 space-y-2">
+        <p>The API uses standard HTTP status codes. Errors return a JSON object with an <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">error</code> field describing what went wrong.</p>
+      </div>
+      <div class="space-y-1">
+        <pre class="bg-stone-900 dark:bg-stone-950 rounded-lg px-4 py-3 text-xs font-mono text-stone-300 overflow-x-auto">{ "error": "invalid link id" }</pre>
+      </div>
+      <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm divide-y divide-stone-100 dark:divide-stone-800">
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <code class="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 shrink-0 w-12">2xx</code>
+          <span class="text-stone-600 dark:text-stone-400">Success. The response body contains the requested data or a confirmation.</span>
+        </div>
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <code class="font-mono text-xs font-bold text-amber-600 dark:text-amber-400 shrink-0 w-12">400</code>
+          <span class="text-stone-600 dark:text-stone-400">Bad request. The request body is malformed, a required field is missing, or a parameter is invalid.</span>
+        </div>
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <code class="font-mono text-xs font-bold text-amber-600 dark:text-amber-400 shrink-0 w-12">401</code>
+          <span class="text-stone-600 dark:text-stone-400">Unauthorized. The JWT token is missing, expired, or invalid.</span>
+        </div>
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <code class="font-mono text-xs font-bold text-amber-600 dark:text-amber-400 shrink-0 w-12">404</code>
+          <span class="text-stone-600 dark:text-stone-400">Not found. The requested resource does not exist.</span>
+        </div>
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <code class="font-mono text-xs font-bold text-amber-600 dark:text-amber-400 shrink-0 w-12">409</code>
+          <span class="text-stone-600 dark:text-stone-400">Conflict. The resource already exists (e.g. duplicate email on registration).</span>
+        </div>
+        <div class="px-4 py-2.5 flex items-baseline gap-4 text-sm">
+          <code class="font-mono text-xs font-bold text-red-600 dark:text-red-400 shrink-0 w-12">500</code>
+          <span class="text-stone-600 dark:text-stone-400">Server error. Something went wrong on our end. Try again or contact support.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- System tags -->
+    <section class="space-y-3">
+      <h2 class="text-sm font-semibold text-stone-700 dark:text-stone-300">System Tags</h2>
+      <div class="text-sm text-stone-600 dark:text-stone-400 space-y-2">
+        <p>Linky automatically maintains special tags that you can use to filter links. These cannot be assigned or removed manually.</p>
+      </div>
+      <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm divide-y divide-stone-100 dark:divide-stone-800">
+        <div class="flex items-baseline gap-4 px-4 py-2.5 text-sm" v-for="tag in [
+          { name: 'all', desc: 'Every link in your account.' },
+          { name: 'portal', desc: 'Your default landing page view (same as all, sorted by recent activity).' },
+          { name: 'archive', desc: 'Links you have archived.' },
+          { name: 'untagged', desc: 'Links with no user-assigned tags.' },
+          { name: 'rss', desc: 'Links that have a detected RSS feed.' },
+          { name: 'duedate', desc: 'Links tagged with a date in YYYY-MM-DD format.' },
+          { name: 'locked', desc: 'Links excluded from periodic link checking.' },
+        ]" :key="tag.name">
+          <code class="font-mono text-primary-600 dark:text-primary-400 shrink-0 w-20">{{ tag.name }}</code>
+          <span class="text-stone-600 dark:text-stone-400">{{ tag.desc }}</span>
+        </div>
+      </div>
+    </section>
+
     <!-- Auth token input -->
     <section class="space-y-3">
       <div class="flex items-center justify-between">
@@ -721,6 +865,12 @@ const expandedModels = reactive<Record<string, boolean>>({})
         </div>
       </div>
     </section>
+
+    <!-- API explorer divider -->
+    <div class="border-t border-stone-200 dark:border-stone-800 pt-6">
+      <h2 class="text-lg font-semibold text-stone-800 dark:text-stone-200 font-[--font-display] tracking-tight">API Explorer</h2>
+      <p class="mt-1 text-sm text-stone-500 dark:text-stone-400">Browse endpoints, inspect parameters and response shapes, or try requests directly from this page.</p>
+    </div>
 
     <!-- Endpoint groups -->
     <template v-for="group in endpoints" :key="group.section">
