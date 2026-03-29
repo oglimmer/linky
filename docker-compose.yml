@@ -17,7 +17,7 @@ services:
       retries: 10
 
   linky:
-    build: .
+    build: ./server
     ports:
       - "8080:8080"
     environment:
@@ -27,6 +27,13 @@ services:
     depends_on:
       mariadb:
         condition: service_healthy
+
+  client:
+    build: ./client
+    ports:
+      - "3000:80"
+    depends_on:
+      - linky
 
 volumes:
   mariadb_data:
