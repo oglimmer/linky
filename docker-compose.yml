@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   couchdb1:
     image: couchdb:3.1.0
@@ -18,7 +17,7 @@ services:
         ipv4_address: 10.0.0.10
 
   clouseau1:
-    image: openjdk:8
+    image: eclipse-temurin:8-jre
     command: >
       java -server
       -classpath '/app/*'

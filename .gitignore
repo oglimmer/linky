@@ -13,3 +13,4 @@ build/docker/sources
 localrun/
 clouseau-2.17.0/
 data/
+server/access*.log
