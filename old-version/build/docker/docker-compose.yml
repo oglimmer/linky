@@ -1,0 +1,20 @@
+version: '3'
+services:
+  couchdb:
+    image: couchdb
+    ports:
+    - "5984:5984"
+  linky:
+    build: ./linky
+    ports:
+    - "8080:8080"
+    volumes:
+    - ./sources:/home/build/linky
+    links:
+    - couchdb
+  test:
+    build: ./test
+    volumes:
+    - ./sources:/home/build/linky
+    links:
+    - linky

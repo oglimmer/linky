@@ -1,5 +1,5 @@
 export interface Link {
-  id: string
+  id: number
   linkUrl: string
   tags: string[]
   pageTitle?: string

@@ -18,7 +18,7 @@ export const useLinksStore = defineStore('links', () => {
   // RSS state
   const rssUpdates = ref<Record<string, number>>({})
   const rssDetails = ref<Record<string, { link: string; title: string }[]>>({})
-  const expandedRssId = ref<string | null>(null)
+  const expandedRssId = ref<number | null>(null)
 
   const sortedLinks = computed(() => {
     const list = [...links.value]
@@ -92,7 +92,7 @@ export const useLinksStore = defineStore('links', () => {
     return data
   }
 
-  async function updateLink(id: string, payload: LinkPayload) {
+  async function updateLink(id: number, payload: LinkPayload) {
     const ui = useUiStore()
     const tags = useTagsStore()
     ui.setTemp('Updating...')
@@ -116,7 +116,7 @@ export const useLinksStore = defineStore('links', () => {
     return data
   }
 
-  async function deleteLink(id: string) {
+  async function deleteLink(id: number) {
     const ui = useUiStore()
     const tags = useTagsStore()
     ui.setTemp('Deleting...')
@@ -131,7 +131,7 @@ export const useLinksStore = defineStore('links', () => {
     ui.setInfo('Link deleted')
   }
 
-  async function clickLink(id: string) {
+  async function clickLink(id: number) {
     const link = links.value.find((l: Link) => l.id === id)
     if (link) {
       link.callCounter++
@@ -150,7 +150,7 @@ export const useLinksStore = defineStore('links', () => {
     }
   }
 
-  async function createArchive(id: string) {
+  async function createArchive(id: number) {
     const ui = useUiStore()
     ui.setTemp('Creating archive...')
     await api.post(`/rest/archive/${id}`)
@@ -170,7 +170,7 @@ export const useLinksStore = defineStore('links', () => {
   }
 
   // RSS
-  async function fetchRssCount(linkId: string) {
+  async function fetchRssCount(linkId: number) {
     try {
       const { data } = await api.get(`/rest/links/${linkId}/rss`)
       if (data.result > 0) {
@@ -181,7 +181,7 @@ export const useLinksStore = defineStore('links', () => {
     }
   }
 
-  async function fetchRssDetails(linkId: string) {
+  async function fetchRssDetails(linkId: number) {
     const { data } = await api.get(`/rest/links/${linkId}/rssDetails`)
     rssDetails.value[linkId] = data.display
     expandedRssId.value = expandedRssId.value === linkId ? null : linkId

@@ -1,0 +1,20 @@
+{
+  "logging": {
+    "application": {
+      "console": {
+        "level": "silly",
+        "colorize": true
+      }
+    },
+    "http": {
+      "console": {
+        "level": "error"
+      }
+    },
+    "http-errors": {
+      "console": {
+        "level": "silly"
+      }
+    }
+  }
+}

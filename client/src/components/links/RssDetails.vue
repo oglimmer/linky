@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useLinksStore } from '@/stores/links'
 
-const props = defineProps<{ linkId: string }>()
+const props = defineProps<{ linkId: number }>()
 const linksStore = useLinksStore()
 
 const items = computed(() => linksStore.rssDetails[props.linkId] ?? [])

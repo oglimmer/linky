@@ -1,165 +1,98 @@
-# linky
-A link management system - or maybe just a playground for reactjs, node and stuff ;)
+# Linky
+
+A bookmark manager with tagging, full-text search, and RSS feed tracking.
 
 Installed at [https://linky1.com](https://linky1.com)
 
-This project features:
+## Architecture
 
-* react
-* redux
-* universal/isomorphic rendering
-* react-router
-* eslint
-* form based authentication
-* oauth1a / oauth2 / openid based authentication
-* REST API with jsonwebtoken
-* react-redux-form
-* CouchDB backend via nano
-* browserHistory
-* react-hot-loader
-* and a lot more ...
+- **Frontend**: Vue 3 SPA (TypeScript, Tailwind CSS, Pinia) in `client/`
+- **Backend**: Go server with MariaDB in `server-go/`
+- **Auth**: JWT tokens, email/password, OAuth 2.0 (Google, GitHub, Facebook, LinkedIn, Bitbucket, Reddit, Yahoo), OAuth 1.0a (Twitter)
 
-# initial setup
+## Dev setup
 
-## database setup
+### Prerequisites
 
-Linky runs as a nodejs server, but also needs a `couchdb` as the data backend.
+- Go 1.24+
+- Node.js 20+
+- Docker (for MariaDB)
 
-Install couchdb version 3 and import all views from build/couchdb/.
-It is recommended to import all views build/couchdb/linky into a couchdb linky and build/couchdb/linky-archive into
-linky_archive.
+### Start MariaDB
 
-The easiest way to start and install the couchdb:
-
-```
-./run_couchdb.sh
+```bash
+cd server-go
+docker-compose up -d mariadb
 ```
 
-## setup for search
+### Start the Go server
 
-If you want to use search from the menu you need to start a lucene server.
-
-This needs to be installed as a search plugin in Couchdb. The script `./run_couchdb.sh` is taking care of this search plugin as well.
-
-# dev setup
-
-This starts a webserver at :8080 for the REST services, all static files and the on-the-fly
-generated bundle.js
-
-`npm run dev`
-
-=> open http://localhost:8080
-
-When using nodemon instead of dev you start the server with a nodemon watcher underneath.
-
-`npm run nodemon`
-
-You can check the whole project via eslint and run all unit tests with
-
-`npm test`
-
-When the couchdb is up, you can run integration tests via
-
-`npm integrationtest`
-
-# Playing with the REST service
-
-See build/test for test.sh. The following commands are supported:
-
-- createuser
-- authenticate
-- createlink [tag]
-- getlinks
-- deletelink "ID"
-- html [url]
-- hierarchy
-- export
-- me
-
-On a freshly set up system just start with createuser => authenticate => createlink => getlinks.
-
-# Executing the integration tests in a docker environment
-
-Go to build/docker and use ./run.sh
-
-- `./run.sh local` will use the current project
-- `./run.sh git` will checkout the master 
-- `./run.sh clean` will clean temporary files
-
-# prod setup
-
-Copy the config from `server/util/linky_default.properties`.
-
-**At least change the jwt private key!!!**
-
-To build the client side bundle.js:
-
-```
-export LINKY_PROPERTIES="your modified version of server/util/linky_default.properties"
-npm build
+```bash
+cd server-go
+go run ./cmd/linky
 ```
 
-To start the server at :8080 without dynamic bundle.js generation:
+The server runs on `:8080`, auto-runs database migrations on startup.
 
+### Start the Vue dev server
+
+```bash
+cd client
+npm install
+npm run dev
 ```
-export LINKY_PROPERTIES="your modified version of server/util/linky_default.properties"
-npm start
+
+Open http://localhost:3000 — API requests are proxied to the Go server on `:8080`.
+
+## Configuration
+
+The Go server is configured via environment variables. See `server-go/.env.example` for all options.
+
+Key variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `8080` | Server port |
+| `DATABASE_URL` | `linky:linky@tcp(localhost:3306)/linky?parseTime=true&multiStatements=true` | MariaDB DSN |
+| `JWT_SECRET` | `change-me-in-production` | **Change in production!** |
+| `JWT_EXPIRY` | `24h` | Token lifetime |
+| `ENABLE_USERPASS` | `true` | Enable email/password auth |
+| `ENABLE_OAUTH` | `true` | Enable OAuth login |
+
+OAuth providers are configured via `<PROVIDER>_CLIENT_ID` and `<PROVIDER>_CLIENT_SECRET` env vars.
+
+## Migration from CouchDB
+
+To migrate data from an existing CouchDB instance:
+
+```bash
+cd server-go
+go run ./cmd/migrate-couchdb \
+  --couchdb-url=http://localhost:5984/linky \
+  --couchdb-user=admin \
+  --couchdb-password=secret
 ```
 
-# Parameters
+## Production
 
-The server script has several parameters:
+```bash
+cd client
+npm run build
 
-## NODE_ENV
+cd ../server-go
+go build -o linky ./cmd/linky
+DATABASE_URL="..." JWT_SECRET="..." ./linky
+```
 
-This parameter **must** either be `production` or `development`.
+The server serves the Vue client from `../client/dist/` if present.
 
-- development: webpack builds are on demand and hot-loading
-- production: webpack must be executed separately before starting the server script
+Alternatively, use Docker:
 
-## DEBUG_MODE
+```bash
+cd server-go
+docker-compose up
+```
 
-This parameter **may** either be `web` or `rest`.
+## Old version
 
-- web: the server only serves html/css/js files. The server doesn't start the REST interface. It uses the PROXY_BIND and PROXY_PORT (default: localhost:8081) to find the rest interfaces.
-- rest: the server only serves the rest interfaces. the server doesn't serve any html/css/js files.
-
-## PORT
-
-Defines the port where the http server bindes to. Default 8080.
-
-## BIND
-
-Defines the interface where the http server bindes to. Default localhost.
-
-## LINKY_PROPERTIES
-
-A file path to a json formatted property file. Is this parameter undefined the server uses ./server/util/linky_default.properties.
-You need to set this variable for `build` and `start`.
-
-## LINKY_SERVER
-
-Special parameter only used in integration tests. Defines the protocol, server and port for the linky server. Default: http://localhost:8080
-
-# URL MAP
-
-- HEAD: *, delivers just 200:
-- NODE
-  - /auth
-  - /authback
-  - /leave
-  - /rest/*
-  - /archive/*
-- STATIC_FILES
-  - /static/*
-- everthing else delivers the server-side pre-rendered html page from NODE
-  - /
-  - /links/:tag
-  - /contact
-  - /tags
-
-## Archive
-
-* All archived links are delivered by node (instead of just being a static file) to check that they belong to the current user.
-* Archived files may be deleted, as they are retrieved from couchdb on request if not available on the filesystem
-* It is strongly recommended to use a different domain for the archive, otherwise an archived page could steal your authentication token (cookie). The domain can be configured in server/util/linky_default.properties. 
+The previous Node.js/Express/CouchDB/React implementation is archived in `old-version/`.

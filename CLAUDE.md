@@ -4,46 +4,65 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is Linky
 
-Linky is a bookmark manager with tagging, full-text search, and web archiving. It's an isomorphic (universal) React+Express app backed by CouchDB.
+Linky is a bookmark manager with tagging, full-text search, and RSS feed tracking. It has a Vue 3 SPA frontend and a Go backend backed by MariaDB.
 
 ## Commands
 
-- `npm run dev` — Start dev server with webpack HMR on :8080
-- `npm run nodemon` — Dev server with nodemon watching `server/`
-- `npm start` — Production server (requires NODE_ENV=production)
-- `npm run build` — Webpack production bundle to `dist/`
-- `npm test` — ESLint (server, src, link-check-server) + Jest unit tests
-- `npm integrationtest` — Integration tests (requires running CouchDB)
-- Run a single test: `npx jest tests/client-unit/ArrayUtil.test.js`
+### Go server (`server-go/`)
 
-CouchDB for local dev: `docker-compose up` (starts CouchDB 3.1 + Clouseau search indexer).
+- `go run ./cmd/linky` — Start server on :8080 (auto-runs DB migrations)
+- `go build ./cmd/linky` — Build production binary
+- `go run ./cmd/migrate-couchdb` — Migrate data from CouchDB to MariaDB
+- `docker-compose up -d mariadb` — Start MariaDB for local dev
+
+### Vue client (`client/`)
+
+- `npm run dev` — Vite dev server on :3000 (proxies API to :8080)
+- `npm run build` — TypeScript check + production build to `dist/`
+- `npx vue-tsc -b --noEmit` — TypeScript type check only
 
 ## Architecture
 
-**Isomorphic rendering**: Express server renders React components server-side, serializes Redux state to `window.$REDUX_STATE`, and the client hydrates from that state.
+### Server (`server-go/`)
 
-**Server** (`server/`):
-- `index.js` — Express entry point: security headers (CSP, HSTS, XSS), logging (Winston+Morgan), webpack-dev-middleware in dev mode, server-side React rendering
-- `httpRoutes/` — REST route handlers (auth, link, tag, user, archive, rss)
-- `controller/` — Business logic layer
-- `dao/` — CouchDB data access via `nano` client (NanoConnection.js manages connection)
-- `auth/` — OAuth 1.0a (Twitter), OAuth 2.0 (Google, GitHub, Facebook, etc.), OpenID Connect
+Go server using chi router, sqlx for database access, and embedded SQL migrations.
 
-**Frontend** (`src/`):
-- Redux with redux-thunk for async actions, react-redux-form for forms
-- `redux/actions/` → `redux/reducers/` → connected `components/`
-- `pages/` — Route-level page components
-- `routes/` — React Router configuration
-- State uses Immutable.js, serialized/deserialized between server and client
+- `cmd/linky/main.go` — Entry point: config, DB, routing, SPA fallback
+- `cmd/migrate-couchdb/main.go` — CouchDB → MariaDB migration CLI
+- `internal/config/` — Environment-based config (`caarlos0/env`)
+- `internal/database/` — MariaDB connection + golang-migrate with embedded SQL
+- `internal/handler/` — HTTP handlers (auth, link, tag, rss, leave, oauth)
+- `internal/middleware/` — JWT auth middleware, request logging
+- `internal/model/` — Domain models with JSON tags matching client contract
+- `internal/repository/` — Data access layer (sqlx queries)
+- `internal/service/` — Business logic (link creation with URL resolution/title/favicon/system tags, tag hierarchy, RSS polling, OAuth flows)
 
-**Configuration**: `RUNCFG` env var controls server mode (`DEV`, `DEV-WEB`, `DEV-REST`, `PROD`, `PROD-REST`, `PROD-STATIC`, `PROD-PAGE-GEN`). Properties loaded from file path in `LINKY_PROPERTIES` env var, defaults in `server/util/linky_default.properties`.
+### Frontend (`client/`)
 
-**Data layer**: CouchDB with design documents in `build/couchdb/`. Full-text search via Clouseau (Java-based Lucene indexer). Archive system stores scraped pages in separate `linky_archive` database.
+Vue 3 SPA with Composition API, TypeScript, Tailwind CSS v4, Pinia, Vue Router, Axios.
+
+- `src/stores/` — Pinia stores: auth, links, tags, ui
+- `src/api/client.ts` — Axios instance with Bearer token interceptor
+- `src/composables/` — useSearch (client + server search), useRssPolling
+- `src/views/` — Route-level pages
+- `src/components/` — Organized by feature: layout/, links/, tags/, common/
+- `src/types/index.ts` — All TypeScript interfaces
+
+### Configuration
+
+Server configured via environment variables. See `server-go/.env.example`. Key: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRY`, OAuth provider `*_CLIENT_ID`/`*_CLIENT_SECRET` pairs.
+
+### Data layer
+
+MariaDB with tables: users, links, link_tags, tag_hierarchy, feed_updates, visitors. Full-text search via MariaDB FULLTEXT indexes. Schema managed by embedded SQL migrations in `internal/database/migrations/`.
 
 ## Tech Stack
 
-- React 15 / Redux / React Router 3 / Bootstrap 3
-- Express.js with Babel transpilation (es2015–es2017, stage-0)
-- Webpack (separate dev/prod configs in `build/`)
-- ESLint with Airbnb config, Jest for testing
-- CouchDB 3.x + Clouseau for search
+- Vue 3 / TypeScript / Tailwind CSS v4 / Pinia / Vite
+- Go / chi / sqlx / golang-jwt / golang-migrate
+- MariaDB 11
+- OAuth 2.0 / OpenID Connect / OAuth 1.0a
+
+## Old version
+
+The previous Node.js/Express/CouchDB/React implementation is archived in `old-version/`.

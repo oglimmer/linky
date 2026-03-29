@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS visitors;
+DROP TABLE IF EXISTS feed_updates;
+DROP TABLE IF EXISTS tag_hierarchy;
+DROP TABLE IF EXISTS link_tags;
+DROP TABLE IF EXISTS links;
+DROP TABLE IF EXISTS users;
