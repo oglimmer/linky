@@ -1,6 +1,6 @@
 services:
   couchdb1:
-    image: couchdb:3.1.0
+    image: couchdb:3.5.1
     restart: always
     ports:
     - 5984:5984
