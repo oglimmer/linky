@@ -6,6 +6,13 @@ const props = defineProps<{ linkId: number }>()
 const linksStore = useLinksStore()
 
 const items = computed(() => linksStore.rssDetails[props.linkId] ?? [])
+
+function openAndDismiss(index: number, e: MouseEvent) {
+  e.preventDefault()
+  const url = items.value[index]?.link
+  if (url) window.open(url, '_blank', 'noopener')
+  linksStore.dismissRssItem(props.linkId, index)
+}
 </script>
 
 <template>
@@ -18,7 +25,7 @@ const items = computed(() => linksStore.rssDetails[props.linkId] ?? [])
         target="_blank"
         rel="noopener"
         class="block text-xs text-amber-800 dark:text-amber-300 hover:underline truncate"
-        @click="linksStore.dismissRssItem(props.linkId, i)"
+        @click="openAndDismiss(i, $event)"
       >
         {{ item.title }}
       </a>
