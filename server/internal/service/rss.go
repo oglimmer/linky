@@ -3,13 +3,17 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/mmcdole/gofeed"
 
 	"github.com/oli/linky/internal/model"
 	"github.com/oli/linky/internal/repository"
 )
+
+var ErrFeedUnavailable = errors.New("feed unavailable")
 
 type RssService struct {
 	feedRepo *repository.FeedRepo
@@ -61,11 +65,14 @@ func (s *RssService) MarkAsRead(ctx context.Context, linkID int64) error {
 }
 
 func (s *RssService) fetchAndDiff(ctx context.Context, linkID, userID int64, rssURL string) ([]string, []model.RssItem, error) {
+	slog.Info("fetching RSS feed", "link_id", linkID, "url", rssURL)
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(rssURL)
 	if err != nil {
-		return nil, nil, fmt.Errorf("parsing RSS feed: %w", err)
+		slog.Error("failed to fetch RSS feed", "link_id", linkID, "url", rssURL, "error", err)
+		return nil, nil, fmt.Errorf("%w: %w", ErrFeedUnavailable, err)
 	}
+	slog.Info("RSS feed fetched", "link_id", linkID, "url", rssURL, "items", len(feed.Items))
 
 	// Get all entry IDs from the feed
 	var currentIDs []string
@@ -85,6 +92,7 @@ func (s *RssService) fetchAndDiff(ctx context.Context, linkID, userID int64, rss
 	// Load existing feed state
 	existing, err := s.feedRepo.GetByLinkID(ctx, linkID)
 	if err != nil {
+		slog.Error("failed to load feed state", "link_id", linkID, "error", err)
 		return nil, nil, err
 	}
 

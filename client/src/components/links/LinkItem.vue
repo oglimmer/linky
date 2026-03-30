@@ -55,6 +55,7 @@ function openLink() {
 
         <p v-if="show('linkUrl') && link.pageTitle" class="text-xs text-stone-400 truncate">{{ truncateUrl(link.linkUrl) }}</p>
         <p v-if="show('notes') && link.notes" class="text-xs text-stone-500 dark:text-stone-400 line-clamp-2">{{ link.notes }}</p>
+        <p v-if="show('rssUrl') && link.rssUrl" class="text-xs text-stone-400 truncate">RSS: {{ link.rssUrl }}</p>
 
         <div v-if="show('tags')" class="flex flex-wrap gap-1 mt-1">
           <RouterLink
@@ -69,12 +70,14 @@ function openLink() {
       </div>
 
       <!-- Actions -->
-      <button
-        @click="linksStore.startEditing(link)"
-        class="shrink-0 p-1.5 rounded-md text-stone-400 opacity-0 group-hover:opacity-100 hover:bg-stone-200 dark:hover:bg-stone-700 hover:text-stone-600 transition"
-      >
-        <PencilSquareIcon class="w-4 h-4" />
-      </button>
+      <div class="shrink-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition">
+        <button
+          @click="linksStore.startEditing(link)"
+          class="p-1.5 rounded-md text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-700 hover:text-stone-600 transition"
+        >
+          <PencilSquareIcon class="w-4 h-4" />
+        </button>
+      </div>
     </div>
 
     <!-- RSS details expansion -->

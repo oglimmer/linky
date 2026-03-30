@@ -22,6 +22,7 @@ async function loadData(tag: string) {
     linksStore.fetchLinks(tag),
     !tagsStore.flatTags?.length ? tagsStore.fetchHierarchy() : Promise.resolve(),
   ])
+  linksStore.fetchAllRssUpdates()
 }
 
 onMounted(() => {

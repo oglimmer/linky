@@ -18,6 +18,7 @@ const items = computed(() => linksStore.rssDetails[props.linkId] ?? [])
         target="_blank"
         rel="noopener"
         class="block text-xs text-amber-800 dark:text-amber-300 hover:underline truncate"
+        @click="linksStore.dismissRssItem(props.linkId, i)"
       >
         {{ item.title }}
       </a>

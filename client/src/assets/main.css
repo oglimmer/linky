@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@fontsource-variable/fraunces";
+@import "@fontsource-variable/dm-sans";
 
 @theme {
   /* Warm amber/copper primary */
@@ -15,8 +17,8 @@
   --color-primary-950: #3b190d;
 
   /* Font families */
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, serif;
+  --font-sans: 'DM Sans Variable', system-ui, sans-serif;
 }
 
 /* Base typography */

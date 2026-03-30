@@ -30,7 +30,7 @@ type Config struct {
 	EnableOAuth    bool `env:"ENABLE_OAUTH" envDefault:"true"`
 
 	// HTTP settings
-	UserAgent    string `env:"HTTP_USER_AGENT" envDefault:"Linky/1.0"`
+	UserAgent    string `env:"HTTP_USER_AGENT" envDefault:"Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"`
 	CookieSecure bool   `env:"COOKIE_SECURE" envDefault:"false"`
 }
 

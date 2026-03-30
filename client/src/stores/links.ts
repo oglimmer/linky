@@ -137,6 +137,7 @@ export const useLinksStore = defineStore('links', () => {
       link.callCounter++
       link.lastCalled = new Date().toISOString()
     }
+    delete rssUpdates.value[id]
     // The /leave endpoint handles the actual redirect and counter increment server-side
   }
 
@@ -178,6 +179,18 @@ export const useLinksStore = defineStore('links', () => {
     expandedRssId.value = expandedRssId.value === linkId ? null : linkId
   }
 
+  function dismissRssItem(linkId: number, index: number) {
+    const items = rssDetails.value[linkId]
+    if (!items) return
+    items.splice(index, 1)
+    if (items.length === 0) {
+      delete rssUpdates.value[linkId]
+      expandedRssId.value = null
+    } else {
+      rssUpdates.value[linkId] = items.length
+    }
+  }
+
   async function fetchAllRssUpdates() {
     const rssLinks = links.value.filter((l: Link) => l.rssUrl)
     await Promise.all(rssLinks.map((l: Link) => fetchRssCount(l.id)))
@@ -190,6 +203,6 @@ export const useLinksStore = defineStore('links', () => {
     setSort, toggleColumn, fetchLinks, createLink, updateLink, deleteLink,
     clickLink, searchLinks,
     startEditing, stopEditing,
-    fetchRssCount, fetchRssDetails, fetchAllRssUpdates,
+    fetchRssCount, fetchRssDetails, fetchAllRssUpdates, dismissRssItem,
   }
 })

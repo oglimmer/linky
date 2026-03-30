@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"errors"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -29,7 +31,12 @@ func (h *RssHandler) GetUpdateCount(w http.ResponseWriter, r *http.Request) {
 
 	count, err := h.rssSvc.GetUpdateCount(r.Context(), userID, linkID)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		slog.Error("rss get update count failed", "link_id", linkID, "user_id", userID, "error", err)
+		status := http.StatusInternalServerError
+		if errors.Is(err, service.ErrFeedUnavailable) {
+			status = http.StatusBadGateway
+		}
+		writeJSON(w, status, map[string]string{"error": err.Error()})
 		return
 	}
 	writeJSON(w, http.StatusOK, model.RssCountResponse{Result: count})
@@ -45,7 +52,12 @@ func (h *RssHandler) GetUpdateDetails(w http.ResponseWriter, r *http.Request) {
 
 	details, err := h.rssSvc.GetUpdateDetails(r.Context(), userID, linkID)
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		slog.Error("rss get update details failed", "link_id", linkID, "user_id", userID, "error", err)
+		status := http.StatusInternalServerError
+		if errors.Is(err, service.ErrFeedUnavailable) {
+			status = http.StatusBadGateway
+		}
+		writeJSON(w, status, map[string]string{"error": err.Error()})
 		return
 	}
 	writeJSON(w, http.StatusOK, details)
