@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { Link, LinkColumn } from '@/types'
 import { useLinksStore } from '@/stores/links'
-import { PencilSquareIcon } from '@heroicons/vue/20/solid'
+import { PencilSquareIcon, GlobeAltIcon } from '@heroicons/vue/20/solid'
 import RssDetails from './RssDetails.vue'
 
 const props = defineProps<{ link: Link }>()
@@ -10,6 +10,7 @@ const linksStore = useLinksStore()
 
 const cols = computed(() => linksStore.visibleColumns)
 const rssCount = computed(() => linksStore.rssUpdates[props.link.id] ?? 0)
+const faviconError = ref(false)
 const isRssExpanded = computed(() => linksStore.expandedRssId === props.link.id)
 
 function show(col: LinkColumn) {
@@ -34,13 +35,14 @@ function openLink() {
     <div class="flex items-start gap-3 py-3 px-4 hover:bg-primary-50/50 dark:hover:bg-primary-950/30 transition-colors duration-150">
       <!-- Favicon -->
       <img
-        v-if="link.faviconUrl"
+        v-if="link.faviconUrl && !faviconError"
         :src="`/rest/links/${link.id}/favicon`"
         class="w-4 h-4 mt-1 shrink-0 rounded"
         loading="lazy"
         alt=""
+        @error="faviconError = true"
       />
-      <div v-else class="w-4 h-4 mt-1 shrink-0 rounded bg-stone-200 dark:bg-stone-700" />
+      <GlobeAltIcon v-else class="w-4 h-4 mt-1 shrink-0 text-stone-400 dark:text-stone-500" />
 
       <!-- Content -->
       <div class="flex-1 min-w-0 space-y-0.5">
