@@ -7,7 +7,7 @@ COPY . .
 RUN CGO_ENABLED=0 go build -o /linky ./cmd/linky
 RUN CGO_ENABLED=0 go build -o /migrate-couchdb ./cmd/migrate-couchdb
 
-FROM alpine:3.21
+FROM alpine:3.23
 RUN apk add --no-cache ca-certificates tzdata
 COPY --from=builder /linky /usr/local/bin/linky
 COPY --from=builder /migrate-couchdb /usr/local/bin/migrate-couchdb
