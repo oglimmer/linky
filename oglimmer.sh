@@ -104,6 +104,7 @@ COMMANDS:
     status              Show whether the local server is running
     logs                Tail the local server log file
     test                Run server tests
+    firefox-ext         Build and sign the Firefox extension (.xpi)
 
 BUILD OPTIONS:
     -c, --client            Build and deploy client only
@@ -137,6 +138,7 @@ EXAMPLES:
     ${SCRIPT_NAME} build --registries my-registry.com       # Use custom registry
     ${SCRIPT_NAME} build --platform amd64                   # Build for AMD64 only
     ${SCRIPT_NAME} start                                    # Build and run server locally
+    ${SCRIPT_NAME} firefox-ext                               # Build and sign Firefox extension
 
 ENVIRONMENT VARIABLES:
     CLIENT_DEPLOYMENT       Override default client deployment name
@@ -169,6 +171,11 @@ parse_args() {
                 ;;
             start|stop|status|logs|test)
                 DEV_COMMAND="$1"
+                shift
+                return
+                ;;
+            firefox-ext)
+                DEV_COMMAND="firefox-ext"
                 shift
                 return
                 ;;
@@ -407,13 +414,82 @@ cmd_dev_test() {
     (cd "$SERVER_DIR" && go test ./...)
 }
 
+# Build signed Firefox extension (.xpi) for internal distribution
+cmd_firefox_ext() {
+    local ext_dir="$SCRIPT_DIR/firefox-extension"
+
+    if [[ ! -d "$ext_dir" ]]; then
+        log_error "Firefox extension directory not found: $ext_dir"
+        exit 1
+    fi
+
+    # Check for web-ext
+    if ! command -v web-ext >/dev/null 2>&1; then
+        log_error "web-ext is not installed. Install it with: npm install -g web-ext"
+        exit 1
+    fi
+
+    # Check for required AMO credentials
+    local api_key="${AMO_JWT_ISSUER:-}"
+    local api_secret="${AMO_JWT_SECRET:-}"
+
+    if [[ -z "$api_key" || -z "$api_secret" ]]; then
+        log_error "AMO API credentials are required."
+        echo
+        echo "Set the following environment variables:"
+        echo "  AMO_JWT_ISSUER   - Your AMO API key (JWT issuer)"
+        echo "  AMO_JWT_SECRET   - Your AMO API secret"
+        echo
+        echo "Get your API keys at: https://addons.mozilla.org/developers/addon/api/key/"
+        exit 1
+    fi
+
+    # Auto-increment patch version in manifest.json
+    local old_version
+    old_version=$(grep -o '"version": *"[^"]*"' "$ext_dir/manifest.json" | head -1 | cut -d'"' -f4)
+    IFS='.' read -r major minor patch <<< "$old_version"
+    patch=$((patch + 1))
+    local version="$major.$minor.$patch"
+    sed -i '' "s/\"version\": *\"$old_version\"/\"version\": \"$version\"/" "$ext_dir/manifest.json"
+
+    echo -e "${BOLD}=== Firefox Extension Build ===${RESET}"
+    echo "Version:    $old_version → $version"
+    echo "Source:     $ext_dir"
+    echo
+
+    # Run esbuild first
+    log_info "Building extension with esbuild..."
+    (cd "$ext_dir" && npm run build)
+
+    log_info "Signing extension with Mozilla Add-ons (unlisted)..."
+
+    web-ext sign \
+        --source-dir "$ext_dir" \
+        --artifacts-dir "$ext_dir/web-ext-artifacts" \
+        --api-key "$api_key" \
+        --api-secret "$api_secret" \
+        --channel unlisted \
+        --ignore-files src node_modules esbuild.config.mjs package-lock.json
+
+    if [[ $? -eq 0 ]]; then
+        echo
+        log_success "Signed .xpi created in $ext_dir/web-ext-artifacts/"
+        echo
+        echo "To install: drag the .xpi file into Firefox or open about:addons and use 'Install Add-on From File'."
+    else
+        log_error "Failed to sign extension"
+        exit 1
+    fi
+}
+
 execute_dev_command() {
     case "$DEV_COMMAND" in
-        start)  cmd_dev_start ;;
-        stop)   cmd_dev_stop ;;
-        status) cmd_dev_status ;;
-        logs)   cmd_dev_logs ;;
-        test)   cmd_dev_test ;;
+        start)       cmd_dev_start ;;
+        stop)        cmd_dev_stop ;;
+        status)      cmd_dev_status ;;
+        logs)        cmd_dev_logs ;;
+        test)        cmd_dev_test ;;
+        firefox-ext) cmd_firefox_ext ;;
     esac
 }
 

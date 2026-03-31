@@ -14,7 +14,7 @@ browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
 
 // Load saved settings
 browser.storage.local.get(['linkyApiUrl', 'linkyToken', 'linkyEmail', 'linkyPassword']).then((settings) => {
-  if (settings.linkyApiUrl) document.getElementById('linkyApiUrl').value = settings.linkyApiUrl;
+  document.getElementById('linkyApiUrl').value = settings.linkyApiUrl || 'https://www.linky1.com';
   if (settings.linkyEmail) document.getElementById('linkyEmail').value = settings.linkyEmail;
   if (settings.linkyPassword) document.getElementById('linkyPassword').value = settings.linkyPassword;
 

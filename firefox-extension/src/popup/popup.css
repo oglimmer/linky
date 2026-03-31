@@ -165,3 +165,10 @@ details summary:hover {
   border-color: #0284c7;
   box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
 }
+
+.hint {
+  font-size: 10px;
+  color: #a8a29e;
+  margin-top: -4px;
+  margin-bottom: 8px;
+}
