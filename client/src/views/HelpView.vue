@@ -2,7 +2,7 @@
 const systemTags = [
   { name: 'all', desc: 'Contains all links' },
   { name: 'archive', desc: 'Archived links' },
-  { name: 'duedate', desc: 'Links with date tags (YYYY-MM-DD)' },
+
   { name: 'locked', desc: 'Links excluded from link checking' },
   { name: 'rss', desc: 'Links with an RSS feed' },
   { name: 'untagged', desc: 'Links with no custom tags' },

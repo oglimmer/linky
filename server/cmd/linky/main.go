@@ -45,13 +45,14 @@ func main() {
 	// Services
 	userSvc := service.NewUserService(userRepo, tagRepo, cfg)
 	linkSvc := service.NewLinkService(linkRepo, tagRepo, cfg)
+	contentSvc := service.NewContentService(cfg)
 	tagSvc := service.NewTagService(tagRepo, linkRepo)
 	rssSvc := service.NewRssService(feedRepo, linkRepo)
 	oauthSvc := service.NewOAuthService(cfg)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(userSvc, cfg)
-	linkHandler := handler.NewLinkHandler(linkSvc)
+	linkHandler := handler.NewLinkHandler(linkSvc, contentSvc, userSvc)
 	tagHandler := handler.NewTagHandler(tagSvc)
 	rssHandler := handler.NewRssHandler(rssSvc)
 	leaveHandler := handler.NewLeaveHandler(linkSvc, rssSvc)
@@ -79,6 +80,7 @@ func main() {
 
 		// Link routes — register specific patterns before the catch-all {tags} pattern.
 		r.Post("/rest/links", linkHandler.Create)
+		r.Post("/rest/archive", linkHandler.Archive)
 		r.Patch("/rest/links/tags", linkHandler.RenameTag)
 		r.Get("/rest/links/{linkid}/rss", rssHandler.GetUpdateCount)
 		r.Get("/rest/links/{linkid}/rssDetails", rssHandler.GetUpdateDetails)

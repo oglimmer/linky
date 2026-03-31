@@ -14,11 +14,13 @@ import (
 )
 
 type LinkHandler struct {
-	linkSvc *service.LinkService
+	linkSvc    *service.LinkService
+	contentSvc *service.ContentService
+	userSvc    *service.UserService
 }
 
-func NewLinkHandler(linkSvc *service.LinkService) *LinkHandler {
-	return &LinkHandler{linkSvc: linkSvc}
+func NewLinkHandler(linkSvc *service.LinkService, contentSvc *service.ContentService, userSvc *service.UserService) *LinkHandler {
+	return &LinkHandler{linkSvc: linkSvc, contentSvc: contentSvc, userSvc: userSvc}
 }
 
 func (h *LinkHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +34,50 @@ func (h *LinkHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if payload.URL == "" {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "url is required"})
 		return
+	}
+
+	resp, err := h.linkSvc.Create(r.Context(), userID, payload)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusCreated, resp)
+}
+
+func (h *LinkHandler) Archive(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	var req model.ArchivePayload
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request"})
+		return
+	}
+
+	if req.HTML == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "html is required"})
+		return
+	}
+
+	title := ""
+	if req.PageTitle != nil {
+		title = *req.PageTitle
+	}
+
+	creator := ""
+	if user, err := h.userSvc.GetUser(r.Context(), userID); err == nil && user.Email != nil {
+		creator = *user.Email
+	}
+
+	archiveURL, err := h.contentSvc.Upload(req.HTML, req.OriginalURL, title, creator)
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "upload failed: " + err.Error()})
+		return
+	}
+
+	payload := model.LinkPayload{
+		URL:       archiveURL,
+		Tags:      "archived",
+		PageTitle: req.PageTitle,
+		Notes:     &req.OriginalURL,
 	}
 
 	resp, err := h.linkSvc.Create(r.Context(), userID, payload)

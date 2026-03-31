@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
-	"regexp"
+
 	"strings"
 	"time"
 
@@ -18,12 +18,10 @@ import (
 	"github.com/oli/linky/internal/repository"
 )
 
-var dateTagRegex = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
-
 // System/readonly tags that cannot be manually added or renamed
 var readonlyTags = map[string]bool{
 	"all": true, "untagged": true, "rss": true,
-	"duedate": true, "locked": true, "archive": true,
+	"locked": true, "archive": true,
 }
 
 type LinkService struct {
@@ -329,14 +327,6 @@ func applySystemTags(tags []string, rssURL *string) []string {
 	// Add "rss" if RSS URL present
 	if rssURL != nil && *rssURL != "" {
 		tagSet["rss"] = true
-	}
-
-	// Add "duedate" if any tag matches date format
-	for t := range tagSet {
-		if dateTagRegex.MatchString(t) {
-			tagSet["duedate"] = true
-			break
-		}
 	}
 
 	result := make([]string, 0, len(tagSet))

@@ -25,6 +25,11 @@ type Config struct {
 	RedditClientID     string `env:"REDDIT_CLIENT_ID"`
 	RedditClientSecret string `env:"REDDIT_CLIENT_SECRET"`
 
+	// Content backend (for archive proxying)
+	ContentAPIURL  string `env:"CONTENT_API_URL"`
+	ContentAPIUser string `env:"CONTENT_API_USER"`
+	ContentAPIPass string `env:"CONTENT_API_PASS"`
+
 	// Feature flags
 	EnableUserPass bool `env:"ENABLE_USERPASS" envDefault:"true"`
 	EnableOAuth    bool `env:"ENABLE_OAUTH" envDefault:"true"`

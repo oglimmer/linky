@@ -827,7 +827,7 @@ curl -s {{ baseUrl }}/rest/links/all \
           { name: 'archive', desc: 'Links you have archived.' },
           { name: 'untagged', desc: 'Links with no user-assigned tags.' },
           { name: 'rss', desc: 'Links that have a detected RSS feed.' },
-          { name: 'duedate', desc: 'Links tagged with a date in YYYY-MM-DD format.' },
+
           { name: 'locked', desc: 'Links excluded from periodic link checking.' },
         ]" :key="tag.name">
           <code class="font-mono text-primary-600 dark:text-primary-400 shrink-0 w-20">{{ tag.name }}</code>

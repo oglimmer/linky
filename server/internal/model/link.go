@@ -31,6 +31,13 @@ type LinkMutationResponse struct {
 	Collateral []Link `json:"collateral"`
 }
 
+// ArchivePayload is the request body for the archive endpoint.
+type ArchivePayload struct {
+	OriginalURL string  `json:"originalUrl"`
+	HTML        string  `json:"html"`
+	PageTitle   *string `json:"pageTitle"`
+}
+
 // TagRenamePayload for PATCH /rest/links/tags.
 type TagRenamePayload struct {
 	OldTagName string `json:"oldTagName"`

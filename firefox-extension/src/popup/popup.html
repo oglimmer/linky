@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Linky Archiver</h1>
+
+    <div id="current-url" class="url-display"></div>
+
+    <button id="archive-btn" class="btn-primary">Archive this page</button>
+
+    <div id="status" class="status hidden"></div>
+    <a id="result-link" class="result-link hidden" target="_blank"></a>
+
+    <hr>
+
+    <details id="settings-panel">
+      <summary>Settings</summary>
+      <div class="settings-form">
+        <label>
+          Linky API URL
+          <input type="url" id="linkyApiUrl" placeholder="https://linky.oglimmer.com">
+        </label>
+        <label>
+          Email
+          <input type="email" id="linkyEmail" placeholder="user@example.com">
+        </label>
+        <label>
+          Password
+          <input type="password" id="linkyPassword" placeholder="password">
+        </label>
+        <button id="login-btn" class="btn-secondary">Login to Linky</button>
+        <div id="login-status" class="status hidden"></div>
+      </div>
+    </details>
+  </div>
+
+  <script src="../../dist/popup.js"></script>
+</body>
+</html>

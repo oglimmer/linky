@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Linky Archiver",
+  "version": "1.0.0",
+  "description": "Archive web pages to content.oglimmer.com via Linky",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "tabs",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["dist/background.js"]
+  },
+  "browser_action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "48": "icons/icon-48.png",
+      "96": "icons/icon-96.png"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "linky-archiver@oglimmer.com"
+    }
+  }
+}
