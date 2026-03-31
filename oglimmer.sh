@@ -469,7 +469,7 @@ cmd_firefox_ext() {
         --api-key "$api_key" \
         --api-secret "$api_secret" \
         --channel unlisted \
-        --ignore-files src node_modules esbuild.config.mjs package-lock.json
+        --ignore-files src node_modules esbuild.config.mjs package.json package-lock.json web-ext-artifacts .gitignore
 
     if [[ $? -eq 0 ]]; then
         echo

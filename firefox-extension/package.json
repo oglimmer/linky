@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node esbuild.config.mjs",
     "watch": "node esbuild.config.mjs --watch",
-    "package": "npm run build && web-ext build --source-dir . --artifacts-dir web-ext-artifacts --ignore-files src node_modules esbuild.config.mjs package-lock.json"
+    "package": "npm run build && web-ext build --source-dir . --artifacts-dir web-ext-artifacts --ignore-files src node_modules esbuild.config.mjs package.json package-lock.json web-ext-artifacts .gitignore"
   },
   "dependencies": {
     "single-file-core": "^1.5.84"
