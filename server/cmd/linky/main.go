@@ -51,7 +51,7 @@ func main() {
 	oauthSvc := service.NewOAuthService(cfg)
 
 	// Handlers
-	authHandler := handler.NewAuthHandler(userSvc, cfg)
+	authHandler := handler.NewAuthHandler(userSvc)
 	linkHandler := handler.NewLinkHandler(linkSvc, contentSvc, userSvc)
 	tagHandler := handler.NewTagHandler(tagSvc)
 	rssHandler := handler.NewRssHandler(rssSvc)
@@ -65,8 +65,6 @@ func main() {
 	r.Use(middleware.Logging)
 
 	// Public routes
-	r.Post("/rest/authenticate", authHandler.Authenticate)
-	r.Post("/rest/users", authHandler.Register)
 	r.Get("/auth/oidc", oauthHandler.Init)
 	r.Get("/authback/oidc", oauthHandler.Callback)
 	r.Get("/auth/logout", oauthHandler.Logout)

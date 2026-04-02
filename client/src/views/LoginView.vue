@@ -1,34 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { useUiStore } from '@/stores/ui'
-import api from '@/api/client'
-
-const auth = useAuthStore()
-const ui = useUiStore()
-
-const email = ref('')
-const password = ref('')
-const submitting = ref(false)
-const isRegister = ref(false)
-
-async function handleSubmit() {
-  if (!email.value || !password.value) return
-  submitting.value = true
-  try {
-    if (isRegister.value) {
-      await api.post('/rest/users', { email: email.value, password: password.value })
-      ui.setInfo('Account created — signing you in...')
-    }
-    await auth.login(email.value, password.value)
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : (isRegister.value ? 'Registration failed' : 'Login failed')
-    ui.setError(msg)
-  } finally {
-    submitting.value = false
-  }
-}
-
 function ssoLogin() {
   window.location.href = '/auth/oidc'
 }
@@ -51,49 +21,17 @@ function ssoLogin() {
       </div>
 
       <div class="bg-white dark:bg-stone-900 rounded-2xl shadow-xl shadow-stone-200/50 dark:shadow-stone-900/50 p-8 space-y-6 border border-stone-200/60 dark:border-stone-800/60">
-        <!-- Email/password form -->
-        <form @submit.prevent="handleSubmit" class="space-y-4">
-          <div>
-            <label for="email" class="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-1.5">Email</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              autocomplete="email"
-              required
-              class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-400 transition text-sm"
-            />
-          </div>
-          <div>
-            <label for="password" class="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-1.5">Password</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              autocomplete="current-password"
-              required
-              class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-400 transition text-sm"
-            />
-          </div>
-          <button
-            type="submit"
-            :disabled="submitting"
-            class="w-full py-2.5 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 transition text-sm shadow-sm shadow-primary-600/20"
-          >
-            {{ submitting ? (isRegister ? 'Creating account...' : 'Signing in...') : (isRegister ? 'Create account' : 'Sign in') }}
-          </button>
-          <p class="text-center text-sm text-stone-500">
-            {{ isRegister ? 'Already have an account?' : "Don't have an account?" }}
-            <button type="button" @click="isRegister = !isRegister" class="text-primary-600 dark:text-primary-400 font-medium hover:underline ml-1">
-              {{ isRegister ? 'Sign in' : 'Register' }}
-            </button>
+        <!-- Introduction -->
+        <div class="text-center space-y-3">
+          <p class="text-stone-600 dark:text-stone-300 text-sm leading-relaxed">
+            Save, tag, and search your bookmarks. Track RSS feeds and keep your reading organized in one place.
           </p>
-        </form>
-
-        <!-- Divider -->
-        <div class="relative">
-          <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-stone-200 dark:border-stone-700"></div></div>
-          <div class="relative flex justify-center text-xs"><span class="px-3 bg-white dark:bg-stone-900 text-stone-400">or continue with</span></div>
+          <ul class="text-stone-500 dark:text-stone-400 text-xs space-y-1.5">
+            <li>Hierarchical tags for flexible organization</li>
+            <li>Full-text search across all your bookmarks</li>
+            <li>RSS feed tracking with update notifications</li>
+            <li>Browser extension for quick saving</li>
+          </ul>
         </div>
 
         <!-- SSO button -->

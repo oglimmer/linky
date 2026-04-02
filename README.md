@@ -56,10 +56,7 @@ Key variables:
 | `DATABASE_URL` | `linky:linky@tcp(localhost:3306)/linky?parseTime=true&multiStatements=true` | MariaDB DSN |
 | `JWT_SECRET` | `change-me-in-production` | **Change in production!** |
 | `JWT_EXPIRY` | `24h` | Token lifetime |
-| `ENABLE_USERPASS` | `true` | Enable email/password auth |
-| `ENABLE_OAUTH` | `true` | Enable OAuth login |
-
-OAuth providers are configured via `<PROVIDER>_CLIENT_ID` and `<PROVIDER>_CLIENT_SECRET` env vars.
+Authentication is SSO-only via OIDC. Configure the provider with `OIDC_*` env vars.
 
 ## Migration from CouchDB
 

@@ -46,35 +46,8 @@ interface EndpointGroup {
 const endpoints: EndpointGroup[] = [
   {
     section: 'Authentication',
-    description: 'User registration, login, and session management',
+    description: 'Session management (login via SSO only)',
     items: [
-      {
-        method: 'POST',
-        path: '/rest/authenticate',
-        auth: false,
-        summary: 'Login with email and password',
-        description: 'Authenticates a user and returns a JWT token. The token is also set as an HttpOnly cookie.',
-        requestBody: JSON.stringify({ email: 'user@example.com', password: 'secret' }, null, 2),
-        responses: [
-          { code: 200, description: 'Successful authentication', example: JSON.stringify({ token: 'eyJhbGciOiJIUzI1NiIs...' }, null, 2) },
-          { code: 400, description: 'Invalid request body' },
-          { code: 401, description: 'Invalid email or password' },
-        ],
-      },
-      {
-        method: 'POST',
-        path: '/rest/users',
-        auth: false,
-        summary: 'Register a new user account',
-        description: 'Creates a new user with email and password. Returns the new user ID.',
-        requestBody: JSON.stringify({ email: 'user@example.com', password: 'secret' }, null, 2),
-        responses: [
-          { code: 201, description: 'User created', example: JSON.stringify({ id: 12345 }, null, 2) },
-          { code: 400, description: 'Invalid request or missing fields' },
-          { code: 403, description: 'Email/password registration is disabled' },
-          { code: 409, description: 'Email already taken' },
-        ],
-      },
       {
         method: 'POST',
         path: '/rest/logout',
@@ -713,7 +686,7 @@ const expandedModels = reactive<Record<string, boolean>>({})
           <div class="text-sm">
             <div class="font-medium text-stone-700 dark:text-stone-300">Authenticate</div>
             <div class="text-stone-500 dark:text-stone-400 mt-0.5">
-              Send your credentials to <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">POST /rest/authenticate</code> to receive a JWT token.
+              Sign in via SSO at <code class="font-mono text-xs bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">GET /auth/oidc</code> to receive a JWT token (set as a cookie after redirect).
             </div>
           </div>
         </div>
@@ -738,11 +711,8 @@ const expandedModels = reactive<Record<string, boolean>>({})
       </div>
       <div class="space-y-1">
         <div class="text-xs font-medium text-stone-500 dark:text-stone-400">Example: Authenticate and list all bookmarks</div>
-        <pre class="bg-stone-900 dark:bg-stone-950 rounded-lg px-4 py-3 text-xs font-mono text-stone-300 overflow-x-auto"># 1. Get a token
-TOKEN=$(curl -s -X POST {{ baseUrl }}/rest/authenticate \
-  -H 'Content-Type: application/json' \
-  -d '{"email": "you@example.com", "password": "secret"}' \
-  | jq -r '.token')
+        <pre class="bg-stone-900 dark:bg-stone-950 rounded-lg px-4 py-3 text-xs font-mono text-stone-300 overflow-x-auto"># 1. Sign in via SSO in your browser at {{ baseUrl }}/auth/oidc
+#    Copy the JWT token from the authToken cookie after redirect.
 
 # 2. List all bookmarks
 curl -s {{ baseUrl }}/rest/links/all \
@@ -843,7 +813,7 @@ curl -s {{ baseUrl }}/rest/links/all \
       </div>
       <div class="bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm p-4 space-y-3">
         <p class="text-xs text-stone-500 dark:text-stone-400">
-          Protected endpoints require a JWT token. Obtain one via <code class="font-mono bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">POST /rest/authenticate</code>, then enter it below to use "Try it out".
+          Protected endpoints require a JWT token. Sign in via SSO to obtain one, then enter it below to use "Try it out".
         </p>
         <div class="flex gap-2">
           <input

@@ -7,8 +7,6 @@ metadata:
 data:
   PORT: {{ .Values.config.port | quote }}
   OAUTH_REDIRECT_BASE: {{ .Values.config.oauthRedirectBase | quote }}
-  ENABLE_USERPASS: {{ .Values.config.enableUserPass | quote }}
-  ENABLE_OAUTH: {{ .Values.config.enableOAuth | quote }}
   COOKIE_SECURE: {{ .Values.config.cookieSecure | quote }}
   HTTP_USER_AGENT: {{ .Values.config.httpUserAgent | quote }}
   OIDC_ISSUER_URL: {{ .Values.config.oidcIssuerUrl | quote }}

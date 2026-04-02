@@ -21,10 +21,6 @@ type Config struct {
 	ContentAPIUser string `env:"CONTENT_API_USER"`
 	ContentAPIPass string `env:"CONTENT_API_PASS"`
 
-	// Feature flags
-	EnableUserPass bool `env:"ENABLE_USERPASS" envDefault:"true"`
-	EnableOAuth    bool `env:"ENABLE_OAUTH" envDefault:"true"`
-
 	// HTTP settings
 	UserAgent    string `env:"HTTP_USER_AGENT" envDefault:"Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"`
 	CookieSecure bool   `env:"COOKIE_SECURE" envDefault:"false"`
