@@ -1,52 +1,62 @@
-import { loginToLinky } from '../lib/api.js';
+import { isTokenValid } from '../lib/api.js';
 
 const archiveBtn = document.getElementById('archive-btn');
 const statusEl = document.getElementById('status');
 const resultLink = document.getElementById('result-link');
 const currentUrlEl = document.getElementById('current-url');
 const loginBtn = document.getElementById('login-btn');
+const logoutBtn = document.getElementById('logout-btn');
 const loginStatus = document.getElementById('login-status');
+const authStatus = document.getElementById('auth-status');
 
 // Show current tab URL
 browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
   if (tab) currentUrlEl.textContent = tab.url;
 });
 
-// Load saved settings
-browser.storage.local.get(['linkyApiUrl', 'linkyToken', 'linkyEmail', 'linkyPassword']).then((settings) => {
-  document.getElementById('linkyApiUrl').value = settings.linkyApiUrl || 'https://www.linky1.com';
-  if (settings.linkyEmail) document.getElementById('linkyEmail').value = settings.linkyEmail;
-  if (settings.linkyPassword) document.getElementById('linkyPassword').value = settings.linkyPassword;
-
-  // If not logged in, open settings panel
-  if (!settings.linkyPassword) {
-    document.getElementById('settings-panel').open = true;
-  }
+// Check auth on popup open
+browser.storage.local.get(['linkyToken']).then((settings) => {
+  updateAuthDisplay(isTokenValid(settings.linkyToken));
 });
 
-// Login button
-loginBtn.addEventListener('click', async () => {
-  const linkyApiUrl = document.getElementById('linkyApiUrl').value.trim();
-  const email = document.getElementById('linkyEmail').value.trim();
-  const password = document.getElementById('linkyPassword').value;
-
-  if (!linkyApiUrl || !email || !password) {
-    showStatus(loginStatus, 'Please fill in URL, email, and password.', 'error');
-    return;
+function updateAuthDisplay(loggedIn) {
+  if (loggedIn) {
+    authStatus.textContent = 'Logged in';
+    authStatus.className = 'auth-status logged-in';
+    loginBtn.textContent = 'Re-login with SSO';
+    logoutBtn.classList.remove('hidden');
+  } else {
+    authStatus.textContent = 'Not logged in';
+    authStatus.className = 'auth-status not-logged-in';
+    loginBtn.textContent = 'Login with SSO';
+    logoutBtn.classList.add('hidden');
   }
+}
 
+// Login button — delegates to background script
+loginBtn.addEventListener('click', async () => {
+  showStatus(loginStatus, 'Opening SSO login...', 'info');
   loginBtn.disabled = true;
-  showStatus(loginStatus, 'Logging in...', 'info');
 
   try {
-    const token = await loginToLinky(linkyApiUrl, email, password);
-    await browser.storage.local.set({ linkyApiUrl, linkyToken: token, linkyEmail: email, linkyPassword: password });
-    showStatus(loginStatus, 'Logged in successfully!', 'success');
+    const response = await browser.runtime.sendMessage({ action: 'sso-login' });
+    if (response && response.success) {
+      showStatus(loginStatus, 'Logged in successfully!', 'success');
+      updateAuthDisplay(true);
+    } else {
+      showStatus(loginStatus, `Login failed: ${response?.error || 'unknown error'}`, 'error');
+    }
   } catch (err) {
-    showStatus(loginStatus, `Login failed: ${err.message}`, 'error');
+    showStatus(loginStatus, `Login error: ${err.message}`, 'error');
   } finally {
     loginBtn.disabled = false;
   }
+});
+
+// Logout button
+logoutBtn.addEventListener('click', async () => {
+  await browser.storage.local.remove('linkyToken');
+  updateAuthDisplay(false);
 });
 
 // Archive button

@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/oli/linky/internal/config"
@@ -22,8 +23,21 @@ func NewOAuthHandler(oauthSvc *service.OAuthService, userSvc *service.UserServic
 }
 
 // Init starts the OIDC flow by redirecting the user to the identity provider.
+// An optional ?redirect_uri= parameter allows browser extensions to receive the
+// token via redirect instead of a cookie.
 func (h *OAuthHandler) Init(w http.ResponseWriter, r *http.Request) {
-	authURL, state, err := h.oauthSvc.GetAuthURL()
+	extensionRedirect := r.URL.Query().Get("redirect_uri")
+
+	// Only allow extension redirect URIs (*.extensions.allizom.org for Firefox).
+	if extensionRedirect != "" {
+		u, err := url.Parse(extensionRedirect)
+		if err != nil || !strings.HasSuffix(u.Hostname(), ".extensions.allizom.org") {
+			writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid redirect_uri"})
+			return
+		}
+	}
+
+	authURL, state, err := h.oauthSvc.GetAuthURL(extensionRedirect)
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
@@ -88,6 +102,18 @@ func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 	token, err := h.userSvc.GenerateToken(user.ID)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to generate token"})
+		return
+	}
+
+	// Check if this flow was initiated by a browser extension.
+	extRedirect := h.oauthSvc.ExtractExtensionRedirect(state)
+	if extRedirect != "" {
+		// Redirect to the extension with the token as a query parameter.
+		u, _ := url.Parse(extRedirect)
+		q := u.Query()
+		q.Set("token", token)
+		u.RawQuery = q.Encode()
+		http.Redirect(w, r, u.String(), http.StatusFound)
 		return
 	}
 

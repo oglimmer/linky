@@ -1,23 +1,32 @@
-import { archivePage, loginToLinky } from './lib/api.js';
+import { archivePage, ssoLogin, isTokenValid } from './lib/api.js';
 
 browser.runtime.onMessage.addListener((message, sender) => {
   if (message.action === 'archive-page') {
     return handleArchive();
   }
+  if (message.action === 'sso-login') {
+    return handleSsoLogin();
+  }
   return undefined;
 });
 
-async function handleArchive() {
-  const settings = await browser.storage.local.get(['linkyApiUrl', 'linkyToken', 'linkyEmail', 'linkyPassword']);
-
-  if (!settings.linkyApiUrl || !settings.linkyEmail || !settings.linkyPassword) {
-    throw new Error('Please log in to Linky first. Open extension settings.');
+async function handleSsoLogin() {
+  try {
+    const token = await ssoLogin();
+    await browser.storage.local.set({ linkyToken: token });
+    return { success: true };
+  } catch (err) {
+    console.error('[Linky Archiver BG] SSO login error:', err);
+    return { success: false, error: err.message };
   }
+}
 
-  // Always get a fresh token before archiving
-  const token = await loginToLinky(settings.linkyApiUrl, settings.linkyEmail, settings.linkyPassword);
-  settings.linkyToken = token;
-  await browser.storage.local.set({ linkyToken: token });
+async function handleArchive() {
+  const { linkyToken } = await browser.storage.local.get(['linkyToken']);
+
+  if (!isTokenValid(linkyToken)) {
+    throw new Error('Not logged in or session expired. Please login via SSO.');
+  }
 
   // Get active tab
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
@@ -56,7 +65,7 @@ async function handleArchive() {
 
   // Send HTML to Linky server (server handles content backend upload)
   console.log('[Linky Archiver BG] Sending archive to Linky server...');
-  const resp = await archivePage(settings, result.html, result.title, tab.url);
+  const resp = await archivePage(linkyToken, result.html, result.title, tab.url);
 
   const archiveUrl = resp.primary?.linkUrl || tab.url;
   console.log('[Linky Archiver BG] Done!', archiveUrl);

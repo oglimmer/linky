@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="popup.css">
-  <!-- When built, HTML/CSS/JS are co-located in dist/popup/ -->
 </head>
 <body>
   <div class="container">
@@ -18,28 +17,10 @@
 
     <hr>
 
-    <details id="settings-panel">
-      <summary>Settings</summary>
-      <div class="settings-form">
-        <label>
-          Linky API URL
-          <input type="url" id="linkyApiUrl" placeholder="https://www.linky1.com">
-        </label>
-        <div class="hint">The base URL of your Linky instance (e.g. https://linky.oglimmer.com)</div>
-        <label>
-          Email
-          <input type="email" id="linkyEmail" placeholder="user@example.com">
-        </label>
-        <div class="hint">Your Linky account email address</div>
-        <label>
-          Password
-          <input type="password" id="linkyPassword" placeholder="password">
-        </label>
-        <div class="hint">Credentials are stored locally in the extension and used to obtain an API token</div>
-        <button id="login-btn" class="btn-secondary">Login to Linky</button>
-        <div id="login-status" class="status hidden"></div>
-      </div>
-    </details>
+    <div id="auth-status" class="auth-status"></div>
+    <button id="login-btn" class="btn-secondary">Login with SSO</button>
+    <button id="logout-btn" class="btn-secondary hidden">Logout</button>
+    <div id="login-status" class="status hidden"></div>
   </div>
 
   <script src="popup.js"></script>

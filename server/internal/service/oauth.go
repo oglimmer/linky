@@ -59,12 +59,14 @@ func (s *OAuthService) IsConfigured() bool {
 }
 
 // GetAuthURL returns the OIDC authorization URL and a signed JWT state value.
-func (s *OAuthService) GetAuthURL() (string, string, error) {
+// If extensionRedirect is non-empty, it is embedded in the state so the callback
+// can redirect back to the browser extension with the token.
+func (s *OAuthService) GetAuthURL(extensionRedirect string) (string, string, error) {
 	if s.provider == nil {
 		return "", "", fmt.Errorf("OIDC provider not configured")
 	}
 
-	state, err := s.generateState()
+	state, err := s.generateState(extensionRedirect)
 	if err != nil {
 		return "", "", fmt.Errorf("generating state: %w", err)
 	}
@@ -128,9 +130,28 @@ func (s *OAuthService) VerifyState(state string) error {
 	return err
 }
 
+// ExtractExtensionRedirect returns the ext_redirect claim from the state JWT, if present.
+func (s *OAuthService) ExtractExtensionRedirect(state string) string {
+	token, err := jwt.Parse(state, func(t *jwt.Token) (interface{}, error) {
+		return []byte(s.cfg.JWTSecret), nil
+	})
+	if err != nil {
+		return ""
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return ""
+	}
+	if redirect, ok := claims["ext_redirect"].(string); ok {
+		return redirect
+	}
+	return ""
+}
+
 // generateState creates a short-lived JWT containing a random nonce that is
-// used as the OAuth state parameter to prevent CSRF attacks.
-func (s *OAuthService) generateState() (string, error) {
+// used as the OAuth state parameter to prevent CSRF attacks. If extensionRedirect
+// is non-empty, it is included so the callback knows to redirect there.
+func (s *OAuthService) generateState(extensionRedirect string) (string, error) {
 	nonce, err := cryptoRandString(32)
 	if err != nil {
 		return "", err
@@ -138,6 +159,9 @@ func (s *OAuthService) generateState() (string, error) {
 	claims := jwt.MapClaims{
 		"nonce": nonce,
 		"exp":   time.Now().Add(15 * time.Minute).Unix(),
+	}
+	if extensionRedirect != "" {
+		claims["ext_redirect"] = extensionRedirect
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(s.cfg.JWTSecret))

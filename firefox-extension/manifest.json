@@ -5,6 +5,7 @@
   "description": "Archive web pages to content.oglimmer.com via Linky",
   "permissions": [
     "activeTab",
+    "identity",
     "storage",
     "tabs",
     "<all_urls>"

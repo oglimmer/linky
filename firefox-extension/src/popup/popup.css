@@ -124,51 +124,20 @@ hr {
   margin: 16px 0;
 }
 
-details summary {
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  color: #78716c;
-  user-select: none;
-}
-
-details summary:hover {
-  color: #44403c;
-}
-
-.settings-form {
-  margin-top: 12px;
-}
-
-.settings-form label {
-  display: block;
+.auth-status {
   font-size: 11px;
   font-weight: 500;
-  color: #78716c;
   margin-bottom: 8px;
-}
-
-.settings-form input {
-  display: block;
-  width: 100%;
-  margin-top: 3px;
   padding: 6px 8px;
-  border: 1px solid #d6d3d1;
   border-radius: 4px;
-  font-size: 12px;
-  color: #1c1917;
-  background: white;
 }
 
-.settings-form input:focus {
-  outline: none;
-  border-color: #0284c7;
-  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+.auth-status.logged-in {
+  background: #dcfce7;
+  color: #15803d;
 }
 
-.hint {
-  font-size: 10px;
-  color: #a8a29e;
-  margin-top: -4px;
-  margin-bottom: 8px;
+.auth-status.not-logged-in {
+  background: #fee2e2;
+  color: #b91c1c;
 }
