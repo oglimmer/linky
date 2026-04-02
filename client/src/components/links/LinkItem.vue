@@ -3,7 +3,6 @@ import { computed, ref } from 'vue'
 import type { Link, LinkColumn } from '@/types'
 import { useLinksStore } from '@/stores/links'
 import { PencilSquareIcon, GlobeAltIcon } from '@heroicons/vue/20/solid'
-import RssDetails from './RssDetails.vue'
 
 const props = defineProps<{ link: Link }>()
 const linksStore = useLinksStore()
@@ -11,7 +10,6 @@ const linksStore = useLinksStore()
 const cols = computed(() => linksStore.visibleColumns)
 const rssCount = computed(() => linksStore.rssUpdates[props.link.id] ?? 0)
 const faviconError = ref(false)
-const isRssExpanded = computed(() => linksStore.expandedRssId === props.link.id)
 
 function show(col: LinkColumn) {
   return cols.value.includes(col)
@@ -81,8 +79,5 @@ function openLink() {
         </button>
       </div>
     </div>
-
-    <!-- RSS details expansion -->
-    <RssDetails v-if="isRssExpanded" :link-id="link.id" />
   </div>
 </template>

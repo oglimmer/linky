@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import api from '@/api/client'
-import type { Link, LinkPayload, SortColumn, SortOrder, LinkColumn } from '@/types'
+import type { Link, LinkPayload, SortColumn, SortOrder, LinkColumn, RssUpdate } from '@/types'
 import { useUiStore } from './ui'
 import { useTagsStore } from './tags'
 
@@ -17,7 +17,7 @@ export const useLinksStore = defineStore('links', () => {
 
   // RSS state
   const rssUpdates = ref<Record<string, number>>({})
-  const rssDetails = ref<Record<string, { link: string; title: string }[]>>({})
+  const rssDetails = ref<Record<string, RssUpdate[]>>({})
   const expandedRssId = ref<number | null>(null)
 
   const sortedLinks = computed(() => {
@@ -179,6 +179,10 @@ export const useLinksStore = defineStore('links', () => {
     expandedRssId.value = expandedRssId.value === linkId ? null : linkId
   }
 
+  function closeRssPanel() {
+    expandedRssId.value = null
+  }
+
   function dismissRssItem(linkId: number, index: number) {
     const items = rssDetails.value[linkId]
     if (!items) return
@@ -203,6 +207,6 @@ export const useLinksStore = defineStore('links', () => {
     setSort, toggleColumn, fetchLinks, createLink, updateLink, deleteLink,
     clickLink, searchLinks,
     startEditing, stopEditing,
-    fetchRssCount, fetchRssDetails, fetchAllRssUpdates, dismissRssItem,
+    fetchRssCount, fetchRssDetails, fetchAllRssUpdates, dismissRssItem, closeRssPanel,
   }
 })

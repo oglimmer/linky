@@ -83,9 +83,14 @@ func (s *RssService) fetchAndDiff(ctx context.Context, linkID, userID int64, rss
 			id = item.Link
 		}
 		currentIDs = append(currentIDs, id)
+		desc := item.Description
+		if desc == "" {
+			desc = item.Content
+		}
 		items = append(items, model.RssItem{
-			Link:  item.Link,
-			Title: item.Title,
+			Link:        item.Link,
+			Title:       item.Title,
+			Description: desc,
 		})
 	}
 

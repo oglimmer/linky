@@ -3,6 +3,7 @@ import { useRoute } from 'vue-router'
 import { computed } from 'vue'
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
+import RssDetails from '@/components/links/RssDetails.vue'
 
 const route = useRoute()
 const isLoginPage = computed(() => route.name === 'login')
@@ -15,5 +16,6 @@ const isLoginPage = computed(() => route.name === 'login')
       <slot />
     </main>
     <AppFooter />
+    <RssDetails />
   </div>
 </template>

@@ -38,6 +38,7 @@ export interface TagHierarchyResponse {
 export interface RssUpdate {
   link: string
   title: string
+  description?: string
 }
 
 export interface RssDetailsResponse {
