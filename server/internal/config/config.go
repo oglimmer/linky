@@ -10,20 +10,11 @@ type Config struct {
 	JWTSecret   string `env:"JWT_SECRET" envDefault:"change-me-in-production"`
 	JWTExpiry   string `env:"JWT_EXPIRY" envDefault:"24h"`
 
-	// OAuth providers - each has ClientID, ClientSecret, RedirectURI
+	// OIDC SSO
 	OAuthRedirectBase string `env:"OAUTH_REDIRECT_BASE" envDefault:"http://localhost:8080/authback"`
-
-	GitHubClientID     string `env:"GITHUB_CLIENT_ID"`
-	GitHubClientSecret string `env:"GITHUB_CLIENT_SECRET"`
-
-	FacebookClientID     string `env:"FACEBOOK_CLIENT_ID"`
-	FacebookClientSecret string `env:"FACEBOOK_CLIENT_SECRET"`
-
-	BitbucketClientID     string `env:"BITBUCKET_CLIENT_ID"`
-	BitbucketClientSecret string `env:"BITBUCKET_CLIENT_SECRET"`
-
-	RedditClientID     string `env:"REDDIT_CLIENT_ID"`
-	RedditClientSecret string `env:"REDDIT_CLIENT_SECRET"`
+	OIDCIssuerURL     string `env:"OIDC_ISSUER_URL"`
+	OIDCClientID      string `env:"OIDC_CLIENT_ID"`
+	OIDCClientSecret  string `env:"OIDC_CLIENT_SECRET"`
 
 	// Content backend (for archive proxying)
 	ContentAPIURL  string `env:"CONTENT_API_URL"`

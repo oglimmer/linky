@@ -11,3 +11,4 @@ data:
   ENABLE_OAUTH: {{ .Values.config.enableOAuth | quote }}
   COOKIE_SECURE: {{ .Values.config.cookieSecure | quote }}
   HTTP_USER_AGENT: {{ .Values.config.httpUserAgent | quote }}
+  OIDC_ISSUER_URL: {{ .Values.config.oidcIssuerUrl | quote }}

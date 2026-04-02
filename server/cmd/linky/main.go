@@ -67,8 +67,9 @@ func main() {
 	// Public routes
 	r.Post("/rest/authenticate", authHandler.Authenticate)
 	r.Post("/rest/users", authHandler.Register)
-	r.Get("/auth/{type}", oauthHandler.Init)
-	r.Get("/authback/{type}", oauthHandler.Callback)
+	r.Get("/auth/oidc", oauthHandler.Init)
+	r.Get("/authback/oidc", oauthHandler.Callback)
+	r.Get("/auth/logout", oauthHandler.Logout)
 
 	// Protected routes
 	r.Group(func(r chi.Router) {

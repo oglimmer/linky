@@ -25,13 +25,11 @@ export const useAuthStore = defineStore('auth', () => {
     router.push('/links/portal')
   }
 
-  async function logout() {
-    try {
-      await api.post('/rest/logout')
-    } finally {
-      clearToken()
-      router.push('/')
-    }
+  function logout() {
+    clearToken()
+    // Redirect to server-side logout which clears cookies and
+    // redirects to the OIDC provider's end_session_endpoint.
+    window.location.href = '/auth/logout'
   }
 
   // Check for token in cookies (after OAuth redirect)

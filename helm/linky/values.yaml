@@ -39,6 +39,7 @@ config:
   enableOAuth: "true"
   cookieSecure: "true"
   httpUserAgent: "Linky/1.0"
+  oidcIssuerUrl: "https://id.oglimmer.de/realms/oglimmer"
 
 # Database URL, JWT secret, and OAuth credentials go into a SealedSecret.
 # See README for instructions on creating the sealed secret.

@@ -2,15 +2,14 @@ package handler
 
 import (
 	"net/http"
+	"net/url"
 	"time"
-
-	"github.com/go-chi/chi/v5"
 
 	"github.com/oli/linky/internal/config"
 	"github.com/oli/linky/internal/service"
 )
 
-// OAuthHandler serves the OAuth initiation and callback HTTP endpoints.
+// OAuthHandler serves the OIDC initiation and callback HTTP endpoints.
 type OAuthHandler struct {
 	oauthSvc *service.OAuthService
 	userSvc  *service.UserService
@@ -22,12 +21,9 @@ func NewOAuthHandler(oauthSvc *service.OAuthService, userSvc *service.UserServic
 	return &OAuthHandler{oauthSvc: oauthSvc, userSvc: userSvc, cfg: cfg}
 }
 
-// Init starts the OAuth flow by redirecting the user to the provider's
-// authorization page. The provider name is taken from the {type} URL param.
+// Init starts the OIDC flow by redirecting the user to the identity provider.
 func (h *OAuthHandler) Init(w http.ResponseWriter, r *http.Request) {
-	provider := chi.URLParam(r, "type")
-
-	authURL, state, err := h.oauthSvc.GetAuthURL(provider)
+	authURL, state, err := h.oauthSvc.GetAuthURL()
 	if err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
@@ -47,12 +43,10 @@ func (h *OAuthHandler) Init(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, authURL, http.StatusFound)
 }
 
-// Callback handles the OAuth provider redirect. It exchanges the authorization
-// code for a token, fetches the user profile, finds or creates a local user,
+// Callback handles the OIDC provider redirect. It exchanges the authorization
+// code for a token, verifies the ID token, finds or creates a local user,
 // issues a JWT, and redirects the browser to the application.
 func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
-	provider := chi.URLParam(r, "type")
-
 	code := r.URL.Query().Get("code")
 	state := r.URL.Query().Get("state")
 
@@ -77,14 +71,13 @@ func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	})
 
-	source, sourceID, sourceData, err := h.oauthSvc.HandleCallback(r.Context(), provider, code, state)
-
+	source, sourceID, sourceData, rawIDToken, err := h.oauthSvc.HandleCallback(r.Context(), code)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "OAuth failed: " + err.Error()})
 		return
 	}
 
-	// Find or create the local user associated with this OAuth identity.
+	// Find or create the local user associated with this OIDC identity.
 	user, err := h.userSvc.FindOrCreateOAuthUser(r.Context(), source, sourceID, sourceData)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to create user"})
@@ -98,8 +91,7 @@ func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set the auth token cookie. HttpOnly is false because the Vue client
-	// reads the token from the cookie on the client side.
+	// Set the auth token cookie.
 	http.SetCookie(w, &http.Cookie{
 		Name:     "authToken",
 		Value:    token,
@@ -111,6 +103,54 @@ func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(365 * 24 * time.Hour),
 	})
 
+	// Store the OIDC id_token for RP-Initiated Logout.
+	http.SetCookie(w, &http.Cookie{
+		Name:     "oidc_id_token",
+		Value:    rawIDToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   h.cfg.CookieSecure,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   86400 * 365,
+		Expires:  time.Now().Add(365 * 24 * time.Hour),
+	})
+
 	// Redirect to the application.
 	http.Redirect(w, r, "/links/portal", http.StatusFound)
+}
+
+// Logout performs RP-Initiated Logout: clears local session cookies and
+// redirects the browser to the OIDC provider's end_session_endpoint.
+func (h *OAuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	// Read id_token_hint from the cookie before clearing.
+	var idTokenHint string
+	if c, err := r.Cookie("oidc_id_token"); err == nil {
+		idTokenHint = c.Value
+	}
+
+	// Clear all auth cookies.
+	for _, name := range []string{"authToken", "oidc_id_token", "visitorToken"} {
+		http.SetCookie(w, &http.Cookie{
+			Name:   name,
+			Value:  "",
+			Path:   "/",
+			MaxAge: -1,
+		})
+	}
+
+	// Build the post-logout redirect URI (the app's login page).
+	baseURL := h.cfg.OAuthRedirectBase
+	if u, err := url.Parse(baseURL); err == nil {
+		u.Path = "/"
+		baseURL = u.String()
+	}
+
+	logoutURL := h.oauthSvc.GetLogoutURL(idTokenHint, baseURL)
+	if logoutURL == "" {
+		// Fallback if end_session_endpoint is not available.
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	http.Redirect(w, r, logoutURL, http.StatusFound)
 }

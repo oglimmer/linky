@@ -12,13 +12,6 @@ const password = ref('')
 const submitting = ref(false)
 const isRegister = ref(false)
 
-const oauthProviders = [
-  { name: 'GitHub', type: 'github', color: 'bg-stone-800 dark:bg-stone-700 text-white hover:bg-stone-700 dark:hover:bg-stone-600' },
-  { name: 'Facebook', type: 'facebook', color: 'bg-blue-600 text-white hover:bg-blue-700' },
-  { name: 'Bitbucket', type: 'bitbucket', color: 'bg-blue-500 text-white hover:bg-blue-600' },
-  { name: 'Reddit', type: 'reddit', color: 'bg-orange-600 text-white hover:bg-orange-700' },
-]
-
 async function handleSubmit() {
   if (!email.value || !password.value) return
   submitting.value = true
@@ -36,8 +29,8 @@ async function handleSubmit() {
   }
 }
 
-function oauthLogin(type: string) {
-  window.location.href = `/auth/${type}`
+function ssoLogin() {
+  window.location.href = '/auth/oidc'
 }
 </script>
 
@@ -103,18 +96,13 @@ function oauthLogin(type: string) {
           <div class="relative flex justify-center text-xs"><span class="px-3 bg-white dark:bg-stone-900 text-stone-400">or continue with</span></div>
         </div>
 
-        <!-- OAuth buttons -->
-        <div class="grid grid-cols-2 gap-2.5">
-          <button
-            v-for="provider in oauthProviders"
-            :key="provider.type"
-            @click="oauthLogin(provider.type)"
-            :class="provider.color"
-            class="flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-sm font-medium transition shadow-sm"
-          >
-            {{ provider.name }}
-          </button>
-        </div>
+        <!-- SSO button -->
+        <button
+          @click="ssoLogin()"
+          class="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-medium transition shadow-sm bg-stone-800 dark:bg-stone-700 text-white hover:bg-stone-700 dark:hover:bg-stone-600"
+        >
+          Sign in with SSO
+        </button>
       </div>
 
       <p class="mt-6 text-center text-xs text-stone-400">
