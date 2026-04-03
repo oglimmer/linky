@@ -28,8 +28,8 @@ export const useAuthStore = defineStore('auth', () => {
     const match = document.cookie.match(/(?:^|;\s*)authToken=([^;]+)/)
     if (match) {
       setToken(decodeURIComponent(match[1]))
-      // Clear the cookie — we store in localStorage
-      document.cookie = 'authToken=; Max-Age=0; path=/'
+      // Keep the cookie so browser-initiated requests (e.g. <img> for favicons)
+      // can authenticate via cookie when Authorization header is not available.
     }
   }
 

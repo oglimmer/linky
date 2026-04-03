@@ -16,3 +16,4 @@ data/
 server/access*.log
 .env
 .DS_Store
+server/linky
