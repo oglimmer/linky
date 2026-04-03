@@ -2,10 +2,12 @@
 import { computed, ref } from 'vue'
 import type { Link, LinkColumn } from '@/types'
 import { useLinksStore } from '@/stores/links'
+import { useAuthStore } from '@/stores/auth'
 import { PencilSquareIcon, GlobeAltIcon } from '@heroicons/vue/20/solid'
 
 const props = defineProps<{ link: Link }>()
 const linksStore = useLinksStore()
+const authStore = useAuthStore()
 
 const cols = computed(() => linksStore.visibleColumns)
 const rssCount = computed(() => linksStore.rssUpdates[props.link.id] ?? 0)
@@ -24,7 +26,7 @@ function truncateUrl(url: string): string {
 
 function openLink() {
   linksStore.clickLink(props.link.id)
-  window.open(`/leave?target=${props.link.id}`, '_blank')
+  window.open(`/leave?target=${props.link.id}&token=${authStore.token}`, '_blank')
 }
 </script>
 

@@ -30,6 +30,11 @@ func Auth(jwtSecret string) func(http.Handler) http.Handler {
 				}
 			}
 
+			// Fall back to query parameter (for browser navigation like /leave)
+			if tokenStr == "" {
+				tokenStr = r.URL.Query().Get("token")
+			}
+
 			if tokenStr == "" {
 				writeAuthError(w)
 				return
