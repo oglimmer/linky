@@ -108,6 +108,13 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
           </div>
           <div class="flex items-center gap-1 shrink-0 ml-4">
             <button
+              v-if="items.length > 0"
+              @click="linksStore.dismissAllRssItems(linkId!)"
+              class="px-2.5 py-1 rounded-lg text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition mr-1"
+            >
+              Dismiss all
+            </button>
+            <button
               @click="decrease"
               :disabled="fontSize <= FONT_SIZE_MIN"
               class="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition disabled:opacity-30 disabled:cursor-not-allowed"

@@ -42,6 +42,21 @@ func (h *RssHandler) GetUpdateCount(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, model.RssCountResponse{Result: count})
 }
 
+func (h *RssHandler) MarkAsRead(w http.ResponseWriter, r *http.Request) {
+	linkID, err := strconv.ParseInt(chi.URLParam(r, "linkid"), 10, 64)
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid link id"})
+		return
+	}
+
+	if err := h.rssSvc.MarkAsRead(r.Context(), linkID); err != nil {
+		slog.Error("rss mark as read failed", "link_id", linkID, "error", err)
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
 func (h *RssHandler) GetUpdateDetails(w http.ResponseWriter, r *http.Request) {
 	userID := middleware.GetUserID(r.Context())
 	linkID, err := strconv.ParseInt(chi.URLParam(r, "linkid"), 10, 64)

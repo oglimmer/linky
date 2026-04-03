@@ -190,9 +190,17 @@ export const useLinksStore = defineStore('links', () => {
     if (items.length === 0) {
       delete rssUpdates.value[linkId]
       expandedRssId.value = null
+      api.post(`/rest/links/${linkId}/rss/read`).catch(() => {})
     } else {
       rssUpdates.value[linkId] = items.length
     }
+  }
+
+  function dismissAllRssItems(linkId: number) {
+    rssDetails.value[linkId] = []
+    delete rssUpdates.value[linkId]
+    expandedRssId.value = null
+    api.post(`/rest/links/${linkId}/rss/read`).catch(() => {})
   }
 
   async function fetchAllRssUpdates() {
@@ -207,6 +215,6 @@ export const useLinksStore = defineStore('links', () => {
     setSort, toggleColumn, fetchLinks, createLink, updateLink, deleteLink,
     clickLink, searchLinks,
     startEditing, stopEditing,
-    fetchRssCount, fetchRssDetails, fetchAllRssUpdates, dismissRssItem, closeRssPanel,
+    fetchRssCount, fetchRssDetails, fetchAllRssUpdates, dismissRssItem, dismissAllRssItems, closeRssPanel,
   }
 })

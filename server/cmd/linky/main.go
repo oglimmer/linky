@@ -83,6 +83,7 @@ func main() {
 		r.Patch("/rest/links/tags", linkHandler.RenameTag)
 		r.Get("/rest/links/{linkid}/rss", rssHandler.GetUpdateCount)
 		r.Get("/rest/links/{linkid}/rssDetails", rssHandler.GetUpdateDetails)
+		r.Post("/rest/links/{linkid}/rss/read", rssHandler.MarkAsRead)
 		r.Get("/rest/links/{linkid}/favicon", linkHandler.GetFavicon)
 		r.Put("/rest/links/{linkid}", linkHandler.Update)
 		r.Delete("/rest/links/{linkid}", linkHandler.Delete)
