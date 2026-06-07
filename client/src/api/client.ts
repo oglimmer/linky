@@ -41,6 +41,9 @@ async function request<T = any>(
     const text = await res.clone().text()
     if (text.includes('Invalid auth token')) {
       localStorage.removeItem('authToken')
+      // Also clear the cookie, otherwise App.vue's checkOAuthToken() restores
+      // the expired token on reload and we redirect-loop forever.
+      document.cookie = 'authToken=; Path=/; Max-Age=0'
       window.location.href = '/'
     }
   }

@@ -117,7 +117,10 @@ func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set the auth token cookie.
+	// Set the auth token cookie. Keep its lifetime aligned with the JWT it
+	// carries — otherwise an expired token lingers in the cookie and gets
+	// resurrected on every page load, causing a 401 redirect loop.
+	tokenExpiry := h.userSvc.TokenExpiry()
 	http.SetCookie(w, &http.Cookie{
 		Name:     "authToken",
 		Value:    token,
@@ -125,8 +128,8 @@ func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: false,
 		Secure:   h.cfg.CookieSecure,
 		SameSite: http.SameSiteLaxMode,
-		MaxAge:   86400 * 365,
-		Expires:  time.Now().Add(365 * 24 * time.Hour),
+		MaxAge:   int(tokenExpiry.Seconds()),
+		Expires:  time.Now().Add(tokenExpiry),
 	})
 
 	// Store the OIDC id_token for RP-Initiated Logout.

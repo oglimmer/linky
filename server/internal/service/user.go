@@ -22,11 +22,19 @@ func NewUserService(repo *repository.UserRepo, tagRepo *repository.TagRepo, cfg 
 	return &UserService{repo: repo, tagRepo: tagRepo, cfg: cfg}
 }
 
-func (s *UserService) GenerateToken(userID int64) (string, error) {
+// TokenExpiry returns the configured JWT lifetime, falling back to 24h when
+// JWT_EXPIRY is unset or unparseable. Callers (e.g. cookie issuance) use this
+// to keep the auth cookie's lifetime aligned with the token it carries.
+func (s *UserService) TokenExpiry() time.Duration {
 	expiry, err := time.ParseDuration(s.cfg.JWTExpiry)
 	if err != nil {
-		expiry = 24 * time.Hour
+		return 24 * time.Hour
 	}
+	return expiry
+}
+
+func (s *UserService) GenerateToken(userID int64) (string, error) {
+	expiry := s.TokenExpiry()
 
 	claims := jwt.MapClaims{
 		"user_id": userID,
