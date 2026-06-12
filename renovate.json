@@ -64,7 +64,6 @@
       "groupName": "Go dependencies"
     }
   ],
-  "ignoreTests": true,
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": [
