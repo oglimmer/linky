@@ -61,7 +61,7 @@ func main() {
 	leaveHandler := handler.NewLeaveHandler(linkSvc, rssSvc)
 	oauthHandler := handler.NewOAuthHandler(oauthSvc, userSvc, cfg)
 	mcpOAuthHandler := handler.NewMCPOAuthHandler(mcpOAuthSvc, oauthSvc, cfg)
-	mcpSrv := mcpserver.NewServer(linkSvc, tagSvc, mcpOAuthSvc)
+	mcpSrv := mcpserver.NewServer(linkSvc, tagSvc, rssSvc, mcpOAuthSvc)
 
 	// Router
 	r := chi.NewRouter()

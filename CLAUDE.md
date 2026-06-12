@@ -46,7 +46,7 @@ Linky exposes its bookmarks over MCP and acts as its own OAuth 2.1 Authorization
 - `POST /oauth/register` — Dynamic Client Registration (RFC 7591); supports public (PKCE) and confidential clients.
 - `GET /oauth/authorize` — authorization-code flow with mandatory PKCE (S256). Unauthenticated users are bridged through the existing OIDC login and resumed afterward.
 - `POST /oauth/token` — `authorization_code` and `refresh_token` grants. Access tokens are Linky JWTs scoped `mcp` with `aud` bound to the MCP resource (RFC 8707).
-- `/mcp` — Streamable HTTP transport. The bearer token is validated by `MCPOAuthService.VerifyAccessToken` (signature, expiry, `mcp` scope, audience). The token's `user_id` is threaded into the existing services, which all enforce `WHERE user_id = ?`, so an authenticated user can only ever reach their own data. Tools: `list_links`, `search_links`, `create_link`, `delete_link`, `list_tags`.
+- `/mcp` — Streamable HTTP transport. The bearer token is validated by `MCPOAuthService.VerifyAccessToken` (signature, expiry, `mcp` scope, audience). The token's `user_id` is threaded into the existing services, which all enforce `WHERE user_id = ?`, so an authenticated user can only ever reach their own data. Tools: `list_links`, `search_links`, `get_link`, `create_link`, `update_link`, `delete_link`, `list_tags`, `rename_tag`, `delete_tag`, `set_tag_hierarchy`, `list_rss_updates`, `mark_rss_read`.
 
 ### Frontend (`client/`)
 
