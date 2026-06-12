@@ -66,7 +66,25 @@ func (s *OAuthService) GetAuthURL(extensionRedirect string) (string, string, err
 		return "", "", fmt.Errorf("OIDC provider not configured")
 	}
 
-	state, err := s.generateState(extensionRedirect)
+	state, err := s.generateState(extensionRedirect, "")
+	if err != nil {
+		return "", "", fmt.Errorf("generating state: %w", err)
+	}
+
+	authURL := s.oauth2.AuthCodeURL(state, oauth2.AccessTypeOffline)
+	return authURL, state, nil
+}
+
+// GetAuthURLWithReturn returns the OIDC authorization URL and state, embedding
+// an internal application path (appReturn) that the callback should redirect to
+// after a successful login instead of the default landing page. This is used to
+// resume the MCP /oauth/authorize flow once the user has authenticated.
+func (s *OAuthService) GetAuthURLWithReturn(appReturn string) (string, string, error) {
+	if s.provider == nil {
+		return "", "", fmt.Errorf("OIDC provider not configured")
+	}
+
+	state, err := s.generateState("", appReturn)
 	if err != nil {
 		return "", "", fmt.Errorf("generating state: %w", err)
 	}
@@ -148,10 +166,31 @@ func (s *OAuthService) ExtractExtensionRedirect(state string) string {
 	return ""
 }
 
+// ExtractAppReturn returns the app_return claim from the state JWT, if present.
+// It is used to resume an in-app flow (e.g. MCP authorization) after login.
+func (s *OAuthService) ExtractAppReturn(state string) string {
+	token, err := jwt.Parse(state, func(t *jwt.Token) (interface{}, error) {
+		return []byte(s.cfg.JWTSecret), nil
+	})
+	if err != nil {
+		return ""
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return ""
+	}
+	if ret, ok := claims["app_return"].(string); ok {
+		return ret
+	}
+	return ""
+}
+
 // generateState creates a short-lived JWT containing a random nonce that is
 // used as the OAuth state parameter to prevent CSRF attacks. If extensionRedirect
-// is non-empty, it is included so the callback knows to redirect there.
-func (s *OAuthService) generateState(extensionRedirect string) (string, error) {
+// is non-empty, it is included so the callback knows to redirect to a browser
+// extension. If appReturn is non-empty, it is included so the callback knows to
+// redirect to an internal application path.
+func (s *OAuthService) generateState(extensionRedirect, appReturn string) (string, error) {
 	nonce, err := cryptoRandString(32)
 	if err != nil {
 		return "", err
@@ -162,6 +201,9 @@ func (s *OAuthService) generateState(extensionRedirect string) (string, error) {
 	}
 	if extensionRedirect != "" {
 		claims["ext_redirect"] = extensionRedirect
+	}
+	if appReturn != "" {
+		claims["app_return"] = appReturn
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(s.cfg.JWTSecret))

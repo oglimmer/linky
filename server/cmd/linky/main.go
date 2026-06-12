@@ -12,6 +12,7 @@ import (
 	"github.com/oli/linky/internal/config"
 	"github.com/oli/linky/internal/database"
 	"github.com/oli/linky/internal/handler"
+	mcpserver "github.com/oli/linky/internal/mcp"
 	"github.com/oli/linky/internal/middleware"
 	"github.com/oli/linky/internal/repository"
 	"github.com/oli/linky/internal/service"
@@ -41,6 +42,7 @@ func main() {
 	linkRepo := repository.NewLinkRepo(db)
 	tagRepo := repository.NewTagRepo(db)
 	feedRepo := repository.NewFeedRepo(db)
+	mcpOAuthRepo := repository.NewMCPOAuthRepo(db)
 
 	// Services
 	userSvc := service.NewUserService(userRepo, tagRepo, cfg)
@@ -49,6 +51,7 @@ func main() {
 	tagSvc := service.NewTagService(tagRepo, linkRepo)
 	rssSvc := service.NewRssService(feedRepo, linkRepo)
 	oauthSvc := service.NewOAuthService(cfg)
+	mcpOAuthSvc := service.NewMCPOAuthService(mcpOAuthRepo, userSvc, cfg)
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(userSvc)
@@ -57,6 +60,8 @@ func main() {
 	rssHandler := handler.NewRssHandler(rssSvc)
 	leaveHandler := handler.NewLeaveHandler(linkSvc, rssSvc)
 	oauthHandler := handler.NewOAuthHandler(oauthSvc, userSvc, cfg)
+	mcpOAuthHandler := handler.NewMCPOAuthHandler(mcpOAuthSvc, oauthSvc, cfg)
+	mcpSrv := mcpserver.NewServer(linkSvc, tagSvc, mcpOAuthSvc)
 
 	// Router
 	r := chi.NewRouter()
@@ -68,6 +73,27 @@ func main() {
 	r.Get("/auth/oidc", oauthHandler.Init)
 	r.Get("/authback/oidc", oauthHandler.Callback)
 	r.Get("/auth/logout", oauthHandler.Logout)
+
+	// MCP endpoint and its OAuth 2.1 authorization server. These are grouped
+	// under CORS so MCP clients can discover and connect cross-origin; the /mcp
+	// handler enforces its own bearer-token authentication.
+	r.Group(func(r chi.Router) {
+		r.Use(middleware.CORS)
+
+		// OAuth metadata (RFC 9728 / RFC 8414).
+		r.Get("/.well-known/oauth-protected-resource", mcpOAuthHandler.ProtectedResourceMetadata)
+		r.Get("/.well-known/oauth-protected-resource/mcp", mcpOAuthHandler.ProtectedResourceMetadata)
+		r.Get("/.well-known/oauth-authorization-server", mcpOAuthHandler.AuthorizationServerMetadata)
+		r.Get("/.well-known/oauth-authorization-server/mcp", mcpOAuthHandler.AuthorizationServerMetadata)
+
+		// OAuth endpoints: dynamic client registration, authorize, token.
+		r.Post("/oauth/register", mcpOAuthHandler.Register)
+		r.Get("/oauth/authorize", mcpOAuthHandler.Authorize)
+		r.Post("/oauth/token", mcpOAuthHandler.Token)
+
+		// MCP Streamable HTTP transport (handles GET/POST/DELETE).
+		r.Handle("/mcp", mcpSrv.Handler())
+	})
 
 	// Protected routes
 	r.Group(func(r chi.Router) {

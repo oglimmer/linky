@@ -10,6 +10,12 @@ type Config struct {
 	JWTSecret   string `env:"JWT_SECRET" envDefault:"change-me-in-production"`
 	JWTExpiry   string `env:"JWT_EXPIRY" envDefault:"24h"`
 
+	// PublicBaseURL is the externally reachable origin of this server (no
+	// trailing slash). It is used as the OAuth issuer / resource identifier for
+	// the MCP authorization server metadata, so it must match the URL MCP
+	// clients connect to.
+	PublicBaseURL string `env:"PUBLIC_BASE_URL" envDefault:"http://localhost:8080"`
+
 	// OIDC SSO
 	OAuthRedirectBase string `env:"OAUTH_REDIRECT_BASE" envDefault:"http://localhost:8080/authback"`
 	OIDCIssuerURL     string `env:"OIDC_ISSUER_URL"`

@@ -144,8 +144,23 @@ func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(365 * 24 * time.Hour),
 	})
 
+	// If the login was initiated to resume an internal flow (e.g. the MCP
+	// /oauth/authorize endpoint), redirect back there now that the auth cookie
+	// is set. Only local absolute paths are honored to prevent open redirects.
+	if appReturn := h.oauthSvc.ExtractAppReturn(state); isSafeLocalPath(appReturn) {
+		http.Redirect(w, r, appReturn, http.StatusFound)
+		return
+	}
+
 	// Redirect to the application.
 	http.Redirect(w, r, "/links/portal", http.StatusFound)
+}
+
+// isSafeLocalPath reports whether p is a relative-to-origin path safe to use as
+// a redirect target. It must start with a single "/" (not "//", which would be
+// a protocol-relative URL to another host).
+func isSafeLocalPath(p string) bool {
+	return strings.HasPrefix(p, "/") && !strings.HasPrefix(p, "//")
 }
 
 // Logout performs RP-Initiated Logout: clears local session cookies and
