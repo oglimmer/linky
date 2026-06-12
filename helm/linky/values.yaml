@@ -35,6 +35,7 @@ ingress:
 config:
   port: "8080"
   oauthRedirectBase: "https://www.linky1.com/authback"
+  publicBaseUrl: "https://www.linky1.com"
   enableUserPass: "true"
   enableOAuth: "true"
   cookieSecure: "true"

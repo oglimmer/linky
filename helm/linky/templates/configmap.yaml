@@ -7,6 +7,7 @@ metadata:
 data:
   PORT: {{ .Values.config.port | quote }}
   OAUTH_REDIRECT_BASE: {{ .Values.config.oauthRedirectBase | quote }}
+  PUBLIC_BASE_URL: {{ .Values.config.publicBaseUrl | quote }}
   COOKIE_SECURE: {{ .Values.config.cookieSecure | quote }}
   HTTP_USER_AGENT: {{ .Values.config.httpUserAgent | quote }}
   OIDC_ISSUER_URL: {{ .Values.config.oidcIssuerUrl | quote }}
