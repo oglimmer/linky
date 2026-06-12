@@ -11,6 +11,8 @@ spec:
       {{- include "linky.clientSelectorLabels" . | nindent 6 }}
   template:
     metadata:
+      annotations:
+        checksum/nginx-config: {{ include (print $.Template.BasePath "/client-nginx-configmap.yaml") . | sha256sum }}
       labels:
         {{- include "linky.clientSelectorLabels" . | nindent 8 }}
     spec:
