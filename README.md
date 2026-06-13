@@ -21,8 +21,7 @@ Installed at [https://linky1.com](https://linky1.com)
 ### Start MariaDB
 
 ```bash
-cd server
-docker-compose up -d mariadb
+docker compose up -d mariadb
 ```
 
 ### Start the Go server
@@ -83,11 +82,10 @@ DATABASE_URL="..." JWT_SECRET="..." ./linky
 
 The server serves the Vue client from `../client/dist/` if present.
 
-Alternatively, use Docker:
+Alternatively, run the full stack as production images with Docker:
 
 ```bash
-cd server
-docker-compose up
+docker compose up
 ```
 
 ## Future work

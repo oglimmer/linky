@@ -17,3 +17,4 @@ server/access*.log
 .env
 .DS_Store
 server/linky
+server/linky-linux-arm64

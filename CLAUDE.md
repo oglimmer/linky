@@ -13,7 +13,7 @@ Linky is a bookmark manager with tagging, full-text search, and RSS feed trackin
 - `go run ./cmd/linky` — Start server on :8080 (auto-runs DB migrations)
 - `go build ./cmd/linky` — Build production binary
 - `go run ./cmd/migrate-couchdb` — Migrate data from CouchDB to MariaDB
-- `docker-compose up -d mariadb` — Start MariaDB for local dev
+- `docker compose up -d mariadb` — Start MariaDB for local dev (compose.yml at repo root)
 
 ### Vue client (`client/`)
 

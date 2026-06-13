@@ -34,6 +34,9 @@ PLATFORM="${PLATFORM:-arm64}"
 RELEASE_MODE=false
 SHOW_VERSIONS=false
 DEV_COMMAND=""
+LOCAL_SUBCOMMAND=""
+CM_SUBCOMMAND=""
+CM_SUBARG=""
 
 # Color output (only if terminal supports it)
 if [[ -t 1 ]] && command -v tput >/dev/null 2>&1; then
@@ -99,12 +102,11 @@ COMMANDS:
     build               Build and deploy components (default)
     release             Create a new release with version bumping and build
     show                Show current version
-    start               Build and run server locally in background
-    stop                Stop the local server process
-    status              Show whether the local server is running
-    logs                Tail the local server log file
-    test                Run server tests
     firefox-ext         Build and sign the Firefox extension (.xpi)
+    local <sub>         Run the Go server natively on this Mac (start|stop|
+                        status|logs|test). See: ${SCRIPT_NAME} local help
+    cm <sub>            Run the full stack (db+server+client) on the Apple
+                        \`container\` machine. See: ${SCRIPT_NAME} cm help
 
 BUILD OPTIONS:
     -c, --client            Build and deploy client only
@@ -137,8 +139,11 @@ EXAMPLES:
     ${SCRIPT_NAME} show                                     # Show current version
     ${SCRIPT_NAME} build --registries my-registry.com       # Use custom registry
     ${SCRIPT_NAME} build --platform amd64                   # Build for AMD64 only
-    ${SCRIPT_NAME} start                                    # Build and run server locally
+    ${SCRIPT_NAME} local start                              # Build and run server natively on this Mac
     ${SCRIPT_NAME} firefox-ext                               # Build and sign Firefox extension
+    ${SCRIPT_NAME} cm up                                    # Run db+server+client on the container machine
+    ${SCRIPT_NAME} cm status                                # Show stack status and URLs
+    ${SCRIPT_NAME} cm logs server                           # Tail the in-machine server log
 
 ENVIRONMENT VARIABLES:
     CLIENT_DEPLOYMENT       Override default client deployment name
@@ -169,13 +174,21 @@ parse_args() {
                 SHOW_VERSIONS=true
                 shift
                 ;;
-            start|stop|status|logs|test)
-                DEV_COMMAND="$1"
+            local)
+                DEV_COMMAND="local"
+                LOCAL_SUBCOMMAND="${2:-help}"
                 shift
                 return
                 ;;
             firefox-ext)
                 DEV_COMMAND="firefox-ext"
+                shift
+                return
+                ;;
+            cm)
+                DEV_COMMAND="cm"
+                CM_SUBCOMMAND="${2:-help}"
+                CM_SUBARG="${3:-}"
                 shift
                 return
                 ;;
@@ -350,6 +363,42 @@ DEV_APP_NAME="linky"
 DEV_PID_FILE="/tmp/${DEV_APP_NAME}.pid"
 DEV_LOG_FILE="/tmp/${DEV_APP_NAME}.log"
 
+# --- Container-machine (Apple `container`) run targets ---
+# Runs the full stack against a running `container` machine:
+#   db      -> a standalone mariadb container (own IP on the container network)
+#   server  -> the Go binary, compiled & run *inside* the machine (:8080)
+#   client  -> the Vite dev server, run *inside* the machine (:3000)
+# The repo is mounted into the machine at the same path as on the host, so
+# SERVER_DIR / CLIENT_DIR work verbatim inside it.
+CM_MACHINE="${CM_MACHINE:-dev}"
+CM_DB_CONTAINER="${CM_DB_CONTAINER:-linky-mariadb}"
+CM_DB_IMAGE="${CM_DB_IMAGE:-mariadb:latest}"
+CM_DB_VOLUME="${CM_DB_VOLUME:-linky-mariadb-data}"
+CM_DB_NAME="${CM_DB_NAME:-linky}"
+CM_DB_USER="${CM_DB_USER:-linky}"
+CM_DB_PASS="${CM_DB_PASS:-linky}"
+CM_DB_ROOT_PASS="${CM_DB_ROOT_PASS:-root}"
+CM_SERVER_PORT="${CM_SERVER_PORT:-8080}"
+CM_CLIENT_PORT="${CM_CLIENT_PORT:-3000}"
+CM_GO_VERSION="${CM_GO_VERSION:-1.26.4}"
+CM_SERVER_BIN="linky-linux-arm64"
+CM_SERVER_PID="/tmp/linky-cm-server.pid"
+CM_SERVER_LOG="/tmp/linky-cm-server.log"
+CM_CLIENT_PID="/tmp/linky-cm-client.pid"
+CM_CLIENT_LOG="/tmp/linky-cm-client.log"
+CM_DEPS_MARKER="node_modules/.cm-linux-arm64-musl"
+
+# Bundled dev IdP (navikt/mock-oauth2-server): a throwaway OIDC provider for
+# local login. It uses a dynamic, Host-based issuer (so it needs no client or
+# redirect-URI registration and survives changing container IPs) and accepts any
+# client credentials. Used automatically UNLESS server/.env defines its own
+# OIDC_ISSUER_URL (point that at a real IdP to override).
+CM_IDP_CONTAINER="${CM_IDP_CONTAINER:-linky-idp}"
+CM_IDP_IMAGE="${CM_IDP_IMAGE:-ghcr.io/navikt/mock-oauth2-server:2.1.10}"
+CM_IDP_PORT="${CM_IDP_PORT:-8080}"          # port inside the idp container
+CM_OIDC_CLIENT_ID="${CM_OIDC_CLIENT_ID:-linky}"
+CM_OIDC_CLIENT_SECRET="${CM_OIDC_CLIENT_SECRET:-linky-dev-secret}"
+
 # Load server .env if present
 load_server_env() {
     if [[ -f "$SERVER_DIR/.env" ]]; then
@@ -482,14 +531,586 @@ cmd_firefox_ext() {
     fi
 }
 
+# --- Container-machine stack (db + server + client) ---
+#
+# NOTE: `container machine run ... sh -c '<script>'` mangles the script argument
+# (you get "sh: -c requires an argument" / silently wrong results). Feeding the
+# script on stdin via `-i sh -s` is reliable, so every in-machine command below
+# goes through cm_exec / cm_exec_root.
+
+# Run a script (read from stdin) inside the machine as the host user.
+cm_exec() {
+    container machine run -n "$CM_MACHINE" -i sh -s
+}
+
+# Run a script (read from stdin) inside the machine as root (for apk, /usr/local).
+cm_exec_root() {
+    container machine run -n "$CM_MACHINE" --root -i sh -s
+}
+
+# Ensure the `container` CLI exists and the machine is running (boots if needed).
+cm_require() {
+    if ! command -v container >/dev/null 2>&1; then
+        log_error "'container' CLI not found. Install Apple's container tool first."
+        exit 1
+    fi
+    if ! container machine ls 2>/dev/null | awk 'NR>1{print $1}' | grep -qx "$CM_MACHINE"; then
+        log_error "container machine '$CM_MACHINE' not found."
+        echo "Create one, e.g.:  container machine create alpine:latest --name $CM_MACHINE" >&2
+        exit 1
+    fi
+    # `machine run` boots the machine if it is not already running.
+    if ! container machine run -n "$CM_MACHINE" true >/dev/null 2>&1; then
+        log_error "Could not start container machine '$CM_MACHINE'."
+        exit 1
+    fi
+}
+
+# IP of the machine on the container network (used to build reachable URLs).
+cm_machine_ip() {
+    container machine ls 2>/dev/null | awk -v m="$CM_MACHINE" '$1==m{print $4}' || true
+}
+
+# IP of the db container on the container network (reachable from the machine).
+cm_db_ip() {
+    container inspect "$CM_DB_CONTAINER" 2>/dev/null \
+        | grep -m1 ipv4Address \
+        | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' \
+        | head -1 || true
+}
+
+# State of the db container: "running" | "stopped" | "" (does not exist).
+cm_db_state() {
+    container ls -a 2>/dev/null | awk -v c="$CM_DB_CONTAINER" '$1==c{print $5}' || true
+}
+
+cm_db_start() {
+    local state; state="$(cm_db_state)"
+    if [[ "$state" == "running" ]]; then
+        log_info "DB already running ($CM_DB_CONTAINER)"
+    elif [[ "$state" == "stopped" ]]; then
+        log_info "Starting existing DB container ($CM_DB_CONTAINER)..."
+        container start "$CM_DB_CONTAINER" >/dev/null
+    else
+        log_info "Creating DB container from $CM_DB_IMAGE..."
+        container run -d --name "$CM_DB_CONTAINER" \
+            -e MARIADB_ROOT_PASSWORD="$CM_DB_ROOT_PASS" \
+            -e MARIADB_DATABASE="$CM_DB_NAME" \
+            -e MARIADB_USER="$CM_DB_USER" \
+            -e MARIADB_PASSWORD="$CM_DB_PASS" \
+            -v "$CM_DB_VOLUME":/var/lib/mysql \
+            "$CM_DB_IMAGE" >/dev/null
+    fi
+
+    log_info "Waiting for DB to accept connections..."
+    local i
+    for i in $(seq 1 60); do
+        if container exec "$CM_DB_CONTAINER" \
+            mariadb -u"$CM_DB_USER" -p"$CM_DB_PASS" "$CM_DB_NAME" -e "SELECT 1" >/dev/null 2>&1; then
+            log_success "DB ready at $(cm_db_ip):3306"
+            return 0
+        fi
+        sleep 1
+    done
+    log_error "DB did not become ready in time"
+    return 1
+}
+
+cm_db_stop() {
+    if [[ "$(cm_db_state)" == "running" ]]; then
+        container stop "$CM_DB_CONTAINER" >/dev/null && log_success "DB stopped"
+    else
+        log_info "DB not running"
+    fi
+}
+
+# --- Bundled dev IdP (mock-oauth2-server) ---
+
+cm_idp_ip() {
+    container inspect "$CM_IDP_CONTAINER" 2>/dev/null \
+        | grep -m1 ipv4Address \
+        | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' \
+        | head -1 || true
+}
+
+cm_idp_state() {
+    container ls -a 2>/dev/null | awk -v c="$CM_IDP_CONTAINER" '$1==c{print $5}' || true
+}
+
+# The OIDC issuer URL of the bundled IdP (empty until it is running).
+cm_idp_issuer() {
+    local ip; ip="$(cm_idp_ip)"
+    [[ -n "$ip" ]] && echo "http://$ip:$CM_IDP_PORT/default"
+}
+
+# True when the user has configured their own OIDC provider in server/.env.
+cm_user_oidc_configured() {
+    [[ -f "$SERVER_DIR/.env" ]] && grep -qE '^[[:space:]]*OIDC_ISSUER_URL=[^[:space:]]' "$SERVER_DIR/.env"
+}
+
+cm_idp_start() {
+    local state; state="$(cm_idp_state)"
+    if [[ "$state" == "running" ]]; then
+        log_info "Dev IdP already running ($CM_IDP_CONTAINER)"
+    elif [[ "$state" == "stopped" ]]; then
+        log_info "Starting existing dev IdP container ($CM_IDP_CONTAINER)..."
+        container start "$CM_IDP_CONTAINER" >/dev/null
+    else
+        log_info "Creating dev IdP container from $CM_IDP_IMAGE..."
+        container run -d --name "$CM_IDP_CONTAINER" \
+            -e SERVER_PORT="$CM_IDP_PORT" \
+            "$CM_IDP_IMAGE" >/dev/null
+    fi
+
+    # Wait until OIDC discovery responds — the backend panics if discovery fails
+    # at startup, so the IdP must be ready before the server is launched.
+    log_info "Waiting for dev IdP discovery..."
+    local i ip
+    for i in $(seq 1 60); do
+        ip="$(cm_idp_ip)"
+        if [[ -n "$ip" ]] && curl -fsS --max-time 3 \
+            "http://$ip:$CM_IDP_PORT/default/.well-known/openid-configuration" >/dev/null 2>&1; then
+            log_success "Dev IdP ready at http://$ip:$CM_IDP_PORT/default"
+            return 0
+        fi
+        sleep 1
+    done
+    log_error "Dev IdP did not become ready in time"
+    return 1
+}
+
+cm_idp_stop() {
+    if [[ "$(cm_idp_state)" == "running" ]]; then
+        container stop "$CM_IDP_CONTAINER" >/dev/null && log_success "Dev IdP stopped"
+    else
+        log_info "Dev IdP not running"
+    fi
+}
+
+# Install the Go toolchain into the machine (one-time, persists in the machine).
+cm_ensure_go() {
+    if container machine run -n "$CM_MACHINE" /usr/local/go/bin/go version >/dev/null 2>&1; then
+        return 0
+    fi
+    log_info "Installing Go ${CM_GO_VERSION} into machine..."
+    cm_exec_root <<EOF
+set -e
+cd /tmp
+wget -q https://go.dev/dl/go${CM_GO_VERSION}.linux-arm64.tar.gz -O go.tgz
+rm -rf /usr/local/go
+tar -C /usr/local -xzf go.tgz
+rm go.tgz
+/usr/local/go/bin/go version
+EOF
+}
+
+# Install Node.js + npm into the machine (one-time).
+cm_ensure_node() {
+    if container machine run -n "$CM_MACHINE" node --version >/dev/null 2>&1; then
+        return 0
+    fi
+    log_info "Installing Node.js + npm into machine..."
+    cm_exec_root <<'EOF'
+set -e
+/sbin/apk update >/dev/null
+/sbin/apk add --no-cache nodejs npm
+node --version
+EOF
+}
+
+# Install client deps inside the machine (linux/musl native binaries).
+# This replaces a host (darwin) node_modules; restore on macOS with `npm install`.
+# A marker file lets us skip reinstalling when the platform hasn't changed.
+cm_ensure_client_deps() {
+    cm_ensure_node
+    if cm_exec >/dev/null 2>&1 <<EOF
+[ -f $CLIENT_DIR/$CM_DEPS_MARKER ]
+EOF
+    then
+        return 0
+    fi
+    log_warning "Installing client deps in machine (replaces host node_modules; 'npm install' on macOS to restore)..."
+    cm_exec <<EOF
+set -e
+cd $CLIENT_DIR
+npm ci
+touch $CM_DEPS_MARKER
+EOF
+    log_success "Client dependencies installed"
+}
+
+# Compile the Go server inside the machine.
+cm_build() {
+    cm_ensure_go
+    local version git_commit
+    version=$(grep '"version"' "$CLIENT_DIR/package.json" | head -1 | sed -E 's/.*"version": *"([^"]+)".*/\1/')
+    git_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    log_info "Compiling server in machine (version=$version commit=$git_commit)..."
+    cm_exec <<EOF
+set -e
+export PATH=/usr/local/go/bin:\$PATH
+export GOCACHE=/tmp/go-build GOMODCACHE=/tmp/go-mod GOFLAGS=-buildvcs=false
+cd $SERVER_DIR
+go build -ldflags "-X main.Version=$version -X main.GitCommit=$git_commit" -o $CM_SERVER_BIN ./cmd/linky
+EOF
+    log_success "Server compiled: $SERVER_DIR/$CM_SERVER_BIN"
+}
+
+# Print how to log in, depending on whether the bundled dev IdP or a user-
+# configured OIDC provider is in effect.
+cm_login_hint() {
+    local mip; mip="$(cm_machine_ip)"
+    if cm_user_oidc_configured; then
+        log_info "Login: SSO via your OIDC provider from $SERVER_DIR/.env"
+        log_info "  Register this redirect URI there: http://$mip:$CM_CLIENT_PORT/authback/oidc"
+    else
+        log_info "Login: open the app, click 'Sign in with SSO', then on the dev IdP"
+        log_info "  page enter ANY username and submit (no password, no registration)."
+    fi
+}
+
+cm_server_start() {
+    cm_db_start
+    local db_ip mip app_origin idp_issuer=""
+    db_ip="$(cm_db_ip)"; mip="$(cm_machine_ip)"; app_origin="http://$mip:$CM_CLIENT_PORT"
+    if [[ -z "$db_ip" ]]; then
+        log_error "Could not resolve DB container IP"
+        return 1
+    fi
+
+    # Pick the OIDC provider: user's own (server/.env) or the bundled dev IdP.
+    # The backend does OIDC discovery at startup and PANICS if it fails, so the
+    # dev IdP must be up and discovery-ready before we launch the server.
+    if cm_user_oidc_configured; then
+        log_info "Using OIDC provider from $SERVER_DIR/.env"
+    else
+        cm_idp_start
+        idp_issuer="$(cm_idp_issuer)"
+        if [[ -z "$idp_issuer" ]]; then
+            log_error "Could not resolve dev IdP issuer URL"
+            return 1
+        fi
+    fi
+
+    # Build the binary if it is missing.
+    if ! cm_exec >/dev/null 2>&1 <<EOF
+[ -x $SERVER_DIR/$CM_SERVER_BIN ]
+EOF
+    then
+        cm_build
+    fi
+    log_info "Starting server (DB=$db_ip, listen :$CM_SERVER_PORT)..."
+    # The user-facing origin in dev is the Vite server (:$CM_CLIENT_PORT), which
+    # proxies /auth + /authback to this backend. Route the SSO flow through it
+    # (OAUTH_REDIRECT_BASE -> Vite) so login uses the current Vite frontend and
+    # the post-login redirect lands there. Values in server/.env win if present.
+    cm_exec <<EOF
+[ -f $CM_SERVER_PID ] && kill \$(cat $CM_SERVER_PID) 2>/dev/null || true
+sleep 1
+set -a
+[ -f $SERVER_DIR/.env ] && . $SERVER_DIR/.env
+set +a
+export PORT=$CM_SERVER_PORT
+export DATABASE_URL="$CM_DB_USER:$CM_DB_PASS@tcp($db_ip:3306)/$CM_DB_NAME?parseTime=true&multiStatements=true"
+: "\${OAUTH_REDIRECT_BASE:=$app_origin/authback}"; export OAUTH_REDIRECT_BASE
+: "\${PUBLIC_BASE_URL:=http://$mip:$CM_SERVER_PORT}"; export PUBLIC_BASE_URL
+: "\${OIDC_ISSUER_URL:=$idp_issuer}"; export OIDC_ISSUER_URL
+: "\${OIDC_CLIENT_ID:=$CM_OIDC_CLIENT_ID}"; export OIDC_CLIENT_ID
+: "\${OIDC_CLIENT_SECRET:=$CM_OIDC_CLIENT_SECRET}"; export OIDC_CLIENT_SECRET
+export COOKIE_SECURE=false
+: "\${JWT_SECRET:=dev-secret}"; export JWT_SECRET
+: "\${JWT_EXPIRY:=24h}"; export JWT_EXPIRY
+# Run from the repo root so the server's relative "../client/dist" lookup does
+# NOT resolve: in the cm workflow the frontend is Vite on :$CM_CLIENT_PORT, and
+# the Go server must not serve a stale built SPA on :$CM_SERVER_PORT.
+cd $SCRIPT_DIR
+setsid sh -c '$SERVER_DIR/$CM_SERVER_BIN >$CM_SERVER_LOG 2>&1 & echo \$! >$CM_SERVER_PID' </dev/null >/dev/null 2>&1
+sleep 3
+if kill -0 \$(cat $CM_SERVER_PID) 2>/dev/null; then
+    echo "server pid \$(cat $CM_SERVER_PID)"
+else
+    echo "server failed to start:"; cat $CM_SERVER_LOG; exit 1
+fi
+EOF
+    log_success "API:      http://$mip:$CM_SERVER_PORT  (API/MCP only — not the UI)"
+    cm_login_hint
+}
+
+cm_server_stop() {
+    cm_exec <<EOF
+if [ -f $CM_SERVER_PID ] && kill -0 \$(cat $CM_SERVER_PID) 2>/dev/null; then
+    kill \$(cat $CM_SERVER_PID) && echo "server stopped"
+else
+    echo "server not running"
+fi
+rm -f $CM_SERVER_PID
+EOF
+}
+
+cm_client_start() {
+    cm_ensure_client_deps
+    local mip; mip="$(cm_machine_ip)"
+    log_info "Starting Vite dev server (listen :$CM_CLIENT_PORT)..."
+    # Run vite directly via node so the tracked PID is vite itself (clean stop).
+    cm_exec <<EOF
+[ -f $CM_CLIENT_PID ] && kill \$(cat $CM_CLIENT_PID) 2>/dev/null || true
+sleep 1
+cd $CLIENT_DIR
+setsid sh -c 'node node_modules/vite/bin/vite.js --host 0.0.0.0 --port $CM_CLIENT_PORT >$CM_CLIENT_LOG 2>&1 & echo \$! >$CM_CLIENT_PID' </dev/null >/dev/null 2>&1
+sleep 4
+if kill -0 \$(cat $CM_CLIENT_PID) 2>/dev/null; then
+    echo "client pid \$(cat $CM_CLIENT_PID)"
+else
+    echo "client failed to start:"; cat $CM_CLIENT_LOG; exit 1
+fi
+EOF
+    log_success "App:      http://$mip:$CM_CLIENT_PORT  <- open this in your browser"
+}
+
+cm_client_stop() {
+    cm_exec <<EOF
+if [ -f $CM_CLIENT_PID ] && kill -0 \$(cat $CM_CLIENT_PID) 2>/dev/null; then
+    kill \$(cat $CM_CLIENT_PID) && echo "client stopped"
+else
+    echo "client not running"
+fi
+rm -f $CM_CLIENT_PID
+EOF
+}
+
+cm_up() {
+    cm_db_start
+    cm_build
+    cm_server_start
+    cm_client_start
+    echo
+    cm_status
+    echo
+    log_success "Open the app at  http://$(cm_machine_ip):$CM_CLIENT_PORT  (sign in via SSO there)."
+    log_info "Do NOT use :$CM_SERVER_PORT in the browser — it is the API only."
+}
+
+cm_down() {
+    cm_client_stop
+    cm_server_stop
+    cm_idp_stop
+    cm_db_stop
+}
+
+cm_status() {
+    local mip db_ip db_state idp_state idp_ip
+    mip="$(cm_machine_ip)"; db_ip="$(cm_db_ip)"; db_state="$(cm_db_state)"
+    idp_state="$(cm_idp_state)"; idp_ip="$(cm_idp_ip)"
+    echo -e "${BOLD}=== Container-machine stack ===${RESET}"
+    echo "Machine '$CM_MACHINE': $(container machine ls 2>/dev/null | awk -v m="$CM_MACHINE" '$1==m{print $8" ("$4")"}')"
+    echo "DB ($CM_DB_CONTAINER): ${db_state:-not created}${db_ip:+ @ $db_ip:3306}"
+    if cm_user_oidc_configured; then
+        echo "IdP: using OIDC from $SERVER_DIR/.env"
+    else
+        echo "IdP ($CM_IDP_CONTAINER): ${idp_state:-not created}${idp_ip:+ @ http://$idp_ip:$CM_IDP_PORT/default}"
+    fi
+    cm_exec <<EOF
+if [ -f $CM_SERVER_PID ] && kill -0 \$(cat $CM_SERVER_PID) 2>/dev/null; then
+    echo "API (server): running (pid \$(cat $CM_SERVER_PID)) -> http://$mip:$CM_SERVER_PORT"
+else
+    echo "API (server): stopped"
+fi
+if [ -f $CM_CLIENT_PID ] && kill -0 \$(cat $CM_CLIENT_PID) 2>/dev/null; then
+    echo "App (client): running (pid \$(cat $CM_CLIENT_PID)) -> http://$mip:$CM_CLIENT_PORT  <- open this"
+else
+    echo "App (client): stopped"
+fi
+EOF
+}
+
+cm_logs() {
+    local what="${1:-}"
+    case "$what" in
+        server)
+            container machine run -n "$CM_MACHINE" -i sh -s <<EOF
+tail -n 200 -f $CM_SERVER_LOG
+EOF
+            ;;
+        client)
+            container machine run -n "$CM_MACHINE" -i sh -s <<EOF
+tail -n 200 -f $CM_CLIENT_LOG
+EOF
+            ;;
+        db)
+            container logs -f -n 200 "$CM_DB_CONTAINER"
+            ;;
+        *)
+            log_error "usage: ${SCRIPT_NAME} cm logs <server|client|db>"
+            exit 1
+            ;;
+    esac
+}
+
+cm_help() {
+    cat << EOF
+Usage: ${SCRIPT_NAME} cm <subcommand>
+
+Run the full Linky stack on the Apple \`container\` machine '${CM_MACHINE}':
+  db     - standalone mariadb container
+  idp    - bundled dev OIDC provider (mock-oauth2-server) for local login
+  server - Go binary compiled & run inside the machine (:${CM_SERVER_PORT})
+  client - Vite dev server run inside the machine (:${CM_CLIENT_PORT})
+
+SUBCOMMANDS:
+  up             Start everything (db + build + server + client), then status
+  down           Stop client, server and db
+  restart        down + up
+  status         Show state and reachable URLs
+  logs <c>       Tail logs for: server | client | db   (Ctrl-C to exit)
+  build          Compile the server inside the machine
+  provision      Install Go, Node and client deps in the machine (one-time)
+  help-details   Show the raw commands to bring up all 3 components manually
+  db-start / db-stop
+  idp-start / idp-stop
+  server-start / server-stop
+  client-start / client-stop
+
+ENVIRONMENT OVERRIDES:
+  CM_MACHINE (=${CM_MACHINE})  CM_DB_IMAGE (=${CM_DB_IMAGE})
+  CM_SERVER_PORT (=${CM_SERVER_PORT})  CM_CLIENT_PORT (=${CM_CLIENT_PORT})  CM_GO_VERSION (=${CM_GO_VERSION})
+
+NOTES:
+  - Open the app on the CLIENT port (:${CM_CLIENT_PORT}, Vite). The server port
+    (:${CM_SERVER_PORT}) is the API/MCP only — opening it in a browser is wrong.
+  - Login is SSO-only. By default a throwaway dev IdP (mock-oauth2-server) is
+    started and wired up automatically — just click 'Sign in with SSO' and enter
+    any username (no password). To use a real IdP instead, set OIDC_ISSUER_URL /
+    OIDC_CLIENT_ID / OIDC_CLIENT_SECRET in ${SERVER_DIR}/.env; the SSO flow is
+    routed through Vite, so register redirect URI
+    http://<machine-ip>:${CM_CLIENT_PORT}/authback/oidc there.
+  - Machine and DB IPs are resolved at runtime (they change across reboots).
+  - 'cm up' provisions the machine automatically on first run.
+  - Installing client deps replaces a macOS node_modules; run 'npm install'
+    on the host to restore native macOS dev.
+EOF
+}
+
+cm_help_details() {
+    cat << EOF
+Manual bring-up of all 3 components (what 'cm up' automates).
+Commands are flush-left so you can copy-paste them as-is.
+
+One-time: install Go, Node and client deps in the machine:
+
+${SCRIPT_NAME} cm provision
+
+
+# 1) Database — a mariadb container
+
+container run -d --name ${CM_DB_CONTAINER} \\
+  -e MARIADB_ROOT_PASSWORD=${CM_DB_ROOT_PASS} \\
+  -e MARIADB_DATABASE=${CM_DB_NAME} \\
+  -e MARIADB_USER=${CM_DB_USER} \\
+  -e MARIADB_PASSWORD=${CM_DB_PASS} \\
+  -v ${CM_DB_VOLUME}:/var/lib/mysql \\
+  ${CM_DB_IMAGE}
+
+# then note its IP (the address column):
+container ls
+
+
+# 2) Backend — Go server inside the machine (replace DB_IP with the IP from step 1)
+
+container machine run -n ${CM_MACHINE} -i sh -s <<'SH'
+cd ${SERVER_DIR}
+/usr/local/go/bin/go build -buildvcs=false -o ${CM_SERVER_BIN} ./cmd/linky
+PORT=${CM_SERVER_PORT} \\
+DATABASE_URL='${CM_DB_USER}:${CM_DB_PASS}@tcp(DB_IP:3306)/${CM_DB_NAME}?parseTime=true&multiStatements=true' \\
+JWT_SECRET=dev-secret \\
+./${CM_SERVER_BIN}
+SH
+
+
+# 3) Frontend — Vite dev server inside the machine
+
+container machine run -n ${CM_MACHINE} -i sh -s <<'SH'
+cd ${CLIENT_DIR}
+npm run dev -- --host 0.0.0.0 --port ${CM_CLIENT_PORT}
+SH
+
+
+# Open the app at  http://MACHINE_IP:${CM_CLIENT_PORT}   (MACHINE_IP = IP column of: container machine ls)
+
+Notes:
+  - Run steps 2 and 3 in separate terminals; both stay in the foreground.
+  - In-machine commands use '-i sh -s' with the script on stdin;
+    "sh -c '<script>'" does not work reliably with 'container machine run'.
+EOF
+}
+
+cmd_cm() {
+    local sub="${1:-help}" arg="${2:-}"
+    case "$sub" in
+        help|"")      cm_help; return ;;
+        help-details) cm_help_details; return ;;
+    esac
+    cm_require
+    case "$sub" in
+        up)           cm_up ;;
+        down)         cm_down ;;
+        restart)      cm_down; cm_up ;;
+        status)       cm_status ;;
+        logs)         cm_logs "$arg" ;;
+        build)        cm_build ;;
+        provision)    cm_ensure_go; cm_ensure_client_deps ;;
+        db-start)     cm_db_start ;;
+        db-stop)      cm_db_stop ;;
+        idp-start)    cm_idp_start ;;
+        idp-stop)     cm_idp_stop ;;
+        server-start) cm_server_start ;;
+        server-stop)  cm_server_stop ;;
+        client-start) cm_client_start ;;
+        client-stop)  cm_client_stop ;;
+        *)
+            log_error "Unknown cm subcommand: $sub"
+            cm_help
+            exit 1
+            ;;
+    esac
+}
+
+local_help() {
+    cat << EOF
+Usage: ${SCRIPT_NAME} local <subcommand>
+
+Run the Go server natively on this Mac (local dev, server only).
+
+SUBCOMMANDS:
+  start    Build and run the server in the background (pid: ${DEV_PID_FILE})
+  stop     Stop the local server process
+  status   Show whether the local server is running
+  logs     Tail the local server log file (${DEV_LOG_FILE})
+  test     Run server tests (go test ./...)
+EOF
+}
+
+cmd_local() {
+    local sub="${1:-help}"
+    case "$sub" in
+        start)   cmd_dev_start ;;
+        stop)    cmd_dev_stop ;;
+        status)  cmd_dev_status ;;
+        logs)    cmd_dev_logs ;;
+        test)    cmd_dev_test ;;
+        help|"") local_help ;;
+        *)
+            log_error "Unknown local subcommand: $sub"
+            local_help
+            exit 1
+            ;;
+    esac
+}
+
 execute_dev_command() {
     case "$DEV_COMMAND" in
-        start)       cmd_dev_start ;;
-        stop)        cmd_dev_stop ;;
-        status)      cmd_dev_status ;;
-        logs)        cmd_dev_logs ;;
-        test)        cmd_dev_test ;;
+        local)       cmd_local "$LOCAL_SUBCOMMAND" ;;
         firefox-ext) cmd_firefox_ext ;;
+        cm)          cmd_cm "$CM_SUBCOMMAND" "$CM_SUBARG" ;;
     esac
 }
 
