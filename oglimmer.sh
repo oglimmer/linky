@@ -109,8 +109,8 @@ COMMANDS:
                         \`container\` machine. See: ${SCRIPT_NAME} cm help
 
 BUILD OPTIONS:
-    -c, --client            Build and deploy client only
-    -s, --server            Build and deploy server only
+    -f, --frontend          Build and deploy frontend (client) only
+    -b, --backend           Build and deploy backend (server) only
     -a, --all               Build and deploy both client and server (default if no component specified)
     -v, --verbose           Enable verbose output
     -n, --no-restart        Skip Kubernetes deployment restart
@@ -133,8 +133,8 @@ BUILD OPTIONS:
 
 EXAMPLES:
     ${SCRIPT_NAME} build                                    # Build and deploy both components with defaults
-    ${SCRIPT_NAME} build -c                                 # Build and deploy client only
-    ${SCRIPT_NAME} build -s -v                              # Build and deploy server with verbose output
+    ${SCRIPT_NAME} build -f                                 # Build and deploy frontend (client) only
+    ${SCRIPT_NAME} build -b -v                              # Build and deploy backend (server) with verbose output
     ${SCRIPT_NAME} release                                  # Create a new release with version bump and build
     ${SCRIPT_NAME} show                                     # Show current version
     ${SCRIPT_NAME} build --registries my-registry.com       # Use custom registry
@@ -201,11 +201,11 @@ parse_args() {
 
     while [[ $# -gt 0 ]]; do
         case $1 in
-            -c|--client)
+            -f|--frontend|--client)
                 BUILD_CLIENT=true
                 shift
                 ;;
-            -s|--server)
+            -b|--backend|--server)
                 BUILD_SERVER=true
                 shift
                 ;;

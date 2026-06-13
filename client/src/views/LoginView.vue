@@ -71,6 +71,24 @@ function ssoLogin() {
           <div class="text-xs font-semibold text-stone-700 dark:text-stone-300">Browser Extension</div>
           <div class="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5 leading-snug">Save any page with one click from your browser</div>
         </div>
+
+        <!-- MCP — full-width highlight for the new AI integration -->
+        <div class="group col-span-2 relative overflow-hidden bg-gradient-to-br from-primary-50/80 to-white/70 dark:from-primary-950/40 dark:to-stone-900/70 backdrop-blur-sm rounded-xl p-4 border border-primary-200/60 dark:border-primary-800/50 hover:border-primary-300/80 dark:hover:border-primary-700/70 transition-all duration-300 hover:shadow-md hover:shadow-primary-100/40 dark:hover:shadow-primary-950/40">
+          <div class="flex items-start gap-3">
+            <div class="shrink-0 mt-0.5">
+              <svg class="w-5 h-5 text-primary-500 dark:text-primary-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" /></svg>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-stone-700 dark:text-stone-300">AI Assistant Access</span>
+                <span class="text-[9px] font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 bg-primary-100/80 dark:bg-primary-900/40 px-1.5 py-0.5 rounded">New</span>
+              </div>
+              <div class="text-[11px] text-stone-500 dark:text-stone-500 mt-1 leading-snug">
+                Connect Claude and other AI assistants via the Model Context Protocol (MCP) to search, save, and organize your bookmarks in natural language.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Sign in -->
