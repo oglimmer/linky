@@ -14,6 +14,8 @@ require (
 	golang.org/x/oauth2 v0.36.0
 )
 
+require codeberg.org/fhuebner/ocipack v0.1.0 // indirect
+
 require (
 	github.com/google/jsonschema-go v0.4.3 // indirect
 	github.com/modelcontextprotocol/go-sdk v1.6.1
@@ -35,3 +37,5 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	golang.org/x/text v0.37.0 // indirect
 )
+
+tool codeberg.org/fhuebner/ocipack/cmd/ocipack

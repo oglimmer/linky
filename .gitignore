@@ -18,3 +18,4 @@ server/access*.log
 .DS_Store
 server/linky
 server/linky-linux-arm64
+server/dist/

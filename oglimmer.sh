@@ -31,6 +31,9 @@ RESTART="${RESTART:-true}"
 PUSH="${PUSH:-true}"
 HELP=false
 PLATFORM="${PLATFORM:-arm64}"
+# When true, the backend image is built daemon-free with ocipack (static binary
+# packed into an OCI tarball) instead of `docker build` against server/Dockerfile.
+USE_OCIPACK="${USE_OCIPACK:-false}"
 RELEASE_MODE=false
 SHOW_VERSIONS=false
 DEV_COMMAND=""
@@ -115,6 +118,9 @@ BUILD OPTIONS:
     -v, --verbose           Enable verbose output
     -n, --no-restart        Skip Kubernetes deployment restart
     --no-push               Skip pushing images to registry
+    --ocipack               Build the backend image with ocipack (daemon-free, scratch
+                            OCI tarball from the static binary) instead of docker build.
+                            Backend only; single-arch (amd64/arm64/auto, not multi).
     --dry-run               Show what would be done without executing
 
     # Registry configuration options
@@ -135,6 +141,7 @@ EXAMPLES:
     ${SCRIPT_NAME} build                                    # Build and deploy both components with defaults
     ${SCRIPT_NAME} build -f                                 # Build and deploy frontend (client) only
     ${SCRIPT_NAME} build -b -v                              # Build and deploy backend (server) with verbose output
+    ${SCRIPT_NAME} build -b --ocipack                       # Build backend daemon-free with ocipack (no Dockerfile)
     ${SCRIPT_NAME} release                                  # Create a new release with version bump and build
     ${SCRIPT_NAME} show                                     # Show current version
     ${SCRIPT_NAME} build --registries my-registry.com       # Use custom registry
@@ -220,6 +227,10 @@ parse_args() {
                 ;;
             -n|--no-restart)
                 RESTART=false
+                shift
+                ;;
+            --ocipack)
+                USE_OCIPACK=true
                 shift
                 ;;
             --no-push)
@@ -312,7 +323,19 @@ parse_args() {
 
 # Check if required tools are available
 check_prerequisites() {
-    local tools=("docker" "kubectl")
+    local tools=("kubectl")
+
+    # Docker is needed to build the client image, to build the server image via
+    # the docker path, and to publish an ocipack image (docker load/tag/push).
+    # An ocipack backend build with --no-push only writes a tarball, so it needs
+    # no docker daemon at all.
+    local docker_needed=true
+    if [[ "$BUILD_CLIENT" == false && "$USE_OCIPACK" == true && "$PUSH" == false ]]; then
+        docker_needed=false
+    fi
+    if [[ "$docker_needed" == true ]]; then
+        tools+=("docker")
+    fi
 
     # Add additional tools for release mode
     if [[ "$RELEASE_MODE" == true ]]; then
@@ -332,15 +355,16 @@ check_prerequisites() {
         exit 1
     fi
 
-    # Check if Docker daemon is running (skip in dry-run mode)
-    if [[ "$DRY_RUN" != true ]] && ! docker info >/dev/null 2>&1; then
+    # Check if Docker daemon is running (skip in dry-run mode, and when no docker
+    # operation is required, e.g. an ocipack backend build with --no-push)
+    if [[ "$docker_needed" == true && "$DRY_RUN" != true ]] && ! docker info >/dev/null 2>&1; then
         log_error "Docker daemon is not running"
         echo "Please start Docker and try again." >&2
         exit 1
     fi
 
     # Check if buildx is available for multi-platform builds
-    if [[ "$PLATFORM" == "multi" ]]; then
+    if [[ "$docker_needed" == true && "$PLATFORM" == "multi" ]]; then
         if ! docker buildx version &> /dev/null; then
             log_error "Docker buildx is required for multi-platform builds but not available"
             log_info "Please install Docker Desktop or enable buildx plugin"
@@ -1169,6 +1193,90 @@ get_platform_args() {
     echo "$platform_args"
 }
 
+# Build the backend image with ocipack (daemon-free): compile the static binaries
+# and pack them into an OCI tarball, then load/tag/push via docker.
+# Args: <version> <git_commit> <image_tag>...
+build_server_ocipack() {
+    local version="$1"
+    local git_commit="$2"
+    shift 2
+    local image_tags=("$@")
+
+    # Resolve a single GOARCH; ocipack tarballs are single-arch.
+    local goarch
+    case "$PLATFORM" in
+        amd64) goarch="amd64" ;;
+        arm64) goarch="arm64" ;;
+        auto|"") goarch="$(go env GOARCH)" ;;
+        multi)
+            log_error "--ocipack builds a single-arch image; --platform multi is not supported."
+            log_info "Pick --platform amd64 or arm64, or use the docker build path for multi-arch."
+            exit 1
+            ;;
+    esac
+
+    # Normalize each ref to name:tag (docker load needs an explicit tag).
+    local i
+    for i in "${!image_tags[@]}"; do
+        case "${image_tags[$i]##*/}" in
+            *:*) ;;                              # already has a tag
+            *) image_tags[$i]="${image_tags[$i]}:latest" ;;
+        esac
+    done
+    local primary_tag="${image_tags[0]}"
+
+    local dist="$SERVER_DIR/dist"
+    local tarball="$dist/linky-${goarch}.tar.gz"
+
+    log_info "Building backend image with ocipack (arch: ${goarch})"
+    for tag in "${image_tags[@]}"; do
+        log_info "  - $tag"
+    done
+
+    local ldflags="-s -w -X main.Version=${version} -X main.GitCommit=${git_commit}"
+    local build_env="CGO_ENABLED=0 GOOS=linux GOARCH=${goarch} GOFLAGS=-buildvcs=false"
+
+    # 1) Compile both static binaries into the staging dir.
+    # 2) Pack linky as the entrypoint; migrate-couchdb rides along as an extra file.
+    #    The CA bundle is added automatically (replaces apk add ca-certificates).
+    local cmd="mkdir -p '$dist'"
+    cmd="$cmd && (cd '$SERVER_DIR' && ${build_env} go build -ldflags '${ldflags}' -o '$dist/linky' ./cmd/linky)"
+    cmd="$cmd && (cd '$SERVER_DIR' && ${build_env} go build -ldflags '${ldflags}' -o '$dist/migrate-couchdb' ./cmd/migrate-couchdb)"
+    cmd="$cmd && (cd '$SERVER_DIR' && GOFLAGS=-buildvcs=false go tool ocipack"
+    cmd="$cmd -tag '$primary_tag'"
+    cmd="$cmd -add-file /usr/local/bin/migrate-couchdb:'$dist/migrate-couchdb':0755"
+    cmd="$cmd '$dist/linky' '$tarball')"
+
+    # 3) Publish via docker only when pushing. With --no-push we stop at the
+    #    tarball so the build stays daemon-free (no docker required at all).
+    if [[ "$PUSH" == true ]]; then
+        # Load into docker, tag for any additional registries, then push.
+        cmd="$cmd && docker load -i '$tarball'"
+        if [[ ${#image_tags[@]} -gt 1 ]]; then
+            for tag in "${image_tags[@]:1}"; do
+                cmd="$cmd && docker tag '$primary_tag' '$tag'"
+            done
+        fi
+        for tag in "${image_tags[@]}"; do
+            cmd="$cmd && docker push '$tag'"
+        done
+    fi
+
+    log_verbose "Build command: $cmd"
+
+    if execute_cmd "$cmd"; then
+        log_success "server image built successfully (ocipack)"
+        if [[ "$PUSH" == true ]]; then
+            log_success "server image pushed to ${#image_tags[@]} target(s)"
+        else
+            log_info "server image written to ${tarball} (not pushed; no docker used)"
+        fi
+    else
+        log_error "Failed to build server image with ocipack"
+        exit 1
+    fi
+}
+
 # Build Docker image for multiple targets
 build_image() {
     local component="$1"
@@ -1286,6 +1394,7 @@ execute_build() {
     fi
     if [[ "$BUILD_SERVER" == true ]]; then
         echo "Server Deploy:     $SERVER_DEPLOYMENT"
+        echo "Server Builder:    $([[ "$USE_OCIPACK" == true ]] && echo "ocipack (daemon-free)" || echo "docker (server/Dockerfile)")"
     fi
     echo -e "${BOLD}===========================${RESET}"
     echo
@@ -1303,7 +1412,11 @@ execute_build() {
 
     # Build server
     if [[ "$BUILD_SERVER" == true ]]; then
-        build_image "server" "--build-arg VERSION=${app_version} --build-arg GIT_COMMIT=${git_commit} server/" "${SERVER_IMAGES[@]}"
+        if [[ "$USE_OCIPACK" == true ]]; then
+            build_server_ocipack "${app_version}" "${git_commit}" "${SERVER_IMAGES[@]}"
+        else
+            build_image "server" "--build-arg VERSION=${app_version} --build-arg GIT_COMMIT=${git_commit} server/" "${SERVER_IMAGES[@]}"
+        fi
     fi
 
     # Restart deployments if requested
