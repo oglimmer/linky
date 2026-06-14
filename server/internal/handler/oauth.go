@@ -85,14 +85,16 @@ func (h *OAuthHandler) Callback(w http.ResponseWriter, r *http.Request) {
 		MaxAge: -1,
 	})
 
-	source, sourceID, sourceData, rawIDToken, err := h.oauthSvc.HandleCallback(r.Context(), code)
+	source, issuer, sourceID, sourceData, rawIDToken, err := h.oauthSvc.HandleCallback(r.Context(), code)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "OAuth failed: " + err.Error()})
 		return
 	}
 
-	// Find or create the local user associated with this OIDC identity.
-	user, err := h.userSvc.FindOrCreateOAuthUser(r.Context(), source, sourceID, sourceData)
+	// Find or create the local user associated with this OIDC identity. The
+	// account is keyed on (source, issuer, sub), so it is scoped to the IdP that
+	// issued the verified token.
+	user, err := h.userSvc.FindOrCreateOAuthUser(r.Context(), source, issuer, sourceID, sourceData)
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to create user"})
 		return

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -52,6 +53,16 @@ func main() {
 	rssSvc := service.NewRssService(feedRepo, linkRepo)
 	oauthSvc := service.NewOAuthService(cfg)
 	mcpOAuthSvc := service.NewMCPOAuthService(mcpOAuthRepo, userSvc, cfg)
+
+	// Backfill the issuer column for legacy OIDC users created before identities
+	// were bound to their issuer. Safe and idempotent: every pre-existing
+	// source='oidc' row was issued by the single configured OIDC provider.
+	if n, err := userSvc.BackfillOIDCIssuer(context.Background()); err != nil {
+		slog.Error("failed to backfill OIDC issuer", "error", err)
+		os.Exit(1)
+	} else if n > 0 {
+		slog.Info("backfilled OIDC issuer for legacy users", "rows", n)
+	}
 
 	// Handlers
 	authHandler := handler.NewAuthHandler(userSvc)

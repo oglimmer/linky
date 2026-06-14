@@ -49,12 +49,21 @@ func (s *UserService) GetUser(ctx context.Context, userID int64) (*model.User, e
 	return s.repo.GetByID(ctx, userID)
 }
 
+// BackfillOIDCIssuer stamps the configured OIDC issuer onto legacy OIDC users
+// that predate the issuer column. It is a no-op when OIDC is not configured.
+func (s *UserService) BackfillOIDCIssuer(ctx context.Context) (int64, error) {
+	if s.cfg.OIDCIssuerURL == "" {
+		return 0, nil
+	}
+	return s.repo.BackfillOIDCIssuer(ctx, s.cfg.OIDCIssuerURL)
+}
+
 func (s *UserService) DeleteUser(ctx context.Context, userID int64) error {
 	return s.repo.Delete(ctx, userID)
 }
 
-func (s *UserService) FindOrCreateOAuthUser(ctx context.Context, source, sourceID string, sourceData []byte) (*model.User, error) {
-	user, err := s.repo.GetBySourceID(ctx, source, sourceID)
+func (s *UserService) FindOrCreateOAuthUser(ctx context.Context, source, issuer, sourceID string, sourceData []byte) (*model.User, error) {
+	user, err := s.repo.GetBySourceID(ctx, source, issuer, sourceID)
 	if err != nil {
 		return nil, err
 	}
@@ -64,10 +73,12 @@ func (s *UserService) FindOrCreateOAuthUser(ctx context.Context, source, sourceI
 
 	// Create new user
 	src := source
+	iss := issuer
 	sid := sourceID
 	raw := json.RawMessage(sourceData)
 	newUser := &model.User{
 		Source:     &src,
+		Issuer:     &iss,
 		SourceID:  &sid,
 		SourceData: &raw,
 	}

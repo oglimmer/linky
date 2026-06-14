@@ -94,34 +94,36 @@ func (s *OAuthService) GetAuthURLWithReturn(appReturn string) (string, string, e
 }
 
 // HandleCallback exchanges the authorization code for tokens, verifies the
-// ID token, and returns the provider name ("oidc"), the subject claim,
-// the raw ID token claims as JSON, and the raw ID token string (for logout).
-func (s *OAuthService) HandleCallback(ctx context.Context, code string) (string, string, json.RawMessage, string, error) {
+// ID token, and returns the provider name ("oidc"), the verified issuer ("iss"),
+// the subject claim, the raw ID token claims as JSON, and the raw ID token
+// string (for logout). The issuer is taken from the verified token, so the
+// account is bound to the IdP that cryptographically asserted the identity.
+func (s *OAuthService) HandleCallback(ctx context.Context, code string) (string, string, string, json.RawMessage, string, error) {
 	if s.provider == nil {
-		return "", "", nil, "", fmt.Errorf("OIDC provider not configured")
+		return "", "", "", nil, "", fmt.Errorf("OIDC provider not configured")
 	}
 
 	token, err := s.oauth2.Exchange(ctx, code)
 	if err != nil {
-		return "", "", nil, "", fmt.Errorf("exchanging code: %w", err)
+		return "", "", "", nil, "", fmt.Errorf("exchanging code: %w", err)
 	}
 
 	rawIDToken, ok := token.Extra("id_token").(string)
 	if !ok {
-		return "", "", nil, "", fmt.Errorf("no id_token in token response")
+		return "", "", "", nil, "", fmt.Errorf("no id_token in token response")
 	}
 
 	idToken, err := s.verifier.Verify(ctx, rawIDToken)
 	if err != nil {
-		return "", "", nil, "", fmt.Errorf("verifying id_token: %w", err)
+		return "", "", "", nil, "", fmt.Errorf("verifying id_token: %w", err)
 	}
 
 	var claims json.RawMessage
 	if err := idToken.Claims(&claims); err != nil {
-		return "", "", nil, "", fmt.Errorf("extracting claims: %w", err)
+		return "", "", "", nil, "", fmt.Errorf("extracting claims: %w", err)
 	}
 
-	return "oidc", idToken.Subject, claims, rawIDToken, nil
+	return "oidc", idToken.Issuer, idToken.Subject, claims, rawIDToken, nil
 }
 
 // GetLogoutURL builds the OIDC RP-Initiated Logout URL. If idTokenHint is

@@ -10,6 +10,7 @@ type User struct {
 	Email        *string         `db:"email" json:"email,omitempty"`
 	PasswordHash *string         `db:"password_hash" json:"-"`
 	Source       *string         `db:"source" json:"source,omitempty"`
+	Issuer       *string         `db:"issuer" json:"issuer,omitempty"`
 	SourceID     *string         `db:"source_id" json:"sourceId,omitempty"`
 	SourceData   *json.RawMessage `db:"source_data" json:"sourceData,omitempty"`
 	CreatedAt    time.Time       `db:"created_at" json:"createdDate"`
