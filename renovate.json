@@ -4,8 +4,13 @@
     "config:recommended",
     ":enableVulnerabilityAlerts",
     ":dependencyDashboard",
-    ":semanticCommits"
+    ":semanticCommits",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests",
+    ":pinDevDependencies",
+    "abandonments:recommended"
   ],
+  "configMigration": true,
   "timezone": "Europe/Berlin",
   "prHourlyLimit": 10,
   "prConcurrentLimit": 20,
@@ -14,19 +19,36 @@
   "automergeType": "branch",
   "packageRules": [
     {
-      "automerge": true,
+      "description": "Group each manager's non-major updates into one PR per manager",
       "matchUpdateTypes": [
         "minor",
-        "patch"
-      ]
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest"
+      ],
+      "groupName": "{{manager}} non-major dependencies"
     },
     {
+      "description": "Automerge minor, patch, pin, pinDigest, digest updates (low-risk, non-major)",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Automerge all devDependencies (build/test tooling, not shipped to consumers)",
       "matchDepTypes": [
         "devDependencies"
       ],
       "automerge": true
     },
     {
+      "description": "Automerge Maven/Gradle wrapper updates",
       "matchManagers": [
         "maven-wrapper",
         "gradle-wrapper"
@@ -34,44 +56,49 @@
       "automerge": true
     },
     {
+      "description": "Never automerge 0.x releases — semver allows breaking changes before 1.0",
       "matchCurrentVersion": "/^0\\./",
       "automerge": false
     },
     {
-      "matchManagers": [
-        "npm"
+      "description": "Keep Docker :latest live — never pin a moving tag to a digest",
+      "matchDatasources": [
+        "docker"
       ],
-      "groupName": "npm dependencies"
+      "matchCurrentValue": "/^latest$/",
+      "pinDigests": false
     },
     {
-      "matchManagers": [
-        "dockerfile",
-        "docker-compose"
+      "description": "No release-age delay on Docker digest pins — a pin records which image a tag resolves to, not a new version (version bumps keep their soak)",
+      "matchDatasources": [
+        "docker"
       ],
-      "groupName": "Docker dependencies"
+      "matchUpdateTypes": [
+        "pin",
+        "pinDigest",
+        "digest"
+      ],
+      "minimumReleaseAge": "0 days"
     },
     {
-      "matchManagers": [
-        "helmv3",
-        "helmfile"
+      "description": "Isolate major updates behind Dependency Dashboard approval",
+      "matchUpdateTypes": [
+        "major"
       ],
-      "groupName": "Helm dependencies"
-    },
-    {
-      "matchManagers": [
-        "gomod"
-      ],
-      "groupName": "Go dependencies"
+      "dependencyDashboardApproval": true
     }
   ],
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": [
-      "at any time"
+      "before 5am on monday"
     ],
     "automerge": true
   },
   "vulnerabilityAlerts": {
+    "minimumReleaseAge": "0 days",
     "labels": [
       "security"
     ],
