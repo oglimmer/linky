@@ -1,0 +1,87 @@
+name: Build & push images
+
+# Builds the server and/or client Docker images and pushes them to
+# registry.oglimmer.com via the repo's oglimmer.sh script, on the in-cluster
+# self-hosted ARC runner (arm64, Docker-in-Docker). Only the components whose
+# files changed are built (mirrors ci.yml). The runner has no kubectl, so
+# oglimmer.sh triggers the rollout via the restart hook (restart.oglimmer.com)
+# using the RESTART_TOKEN secret passed in the environment.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# One build per ref; cancel superseded pushes.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Detect which parts of the repo changed so we only build the relevant images.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.filter.outputs.server }}
+      client: ${{ steps.filter.outputs.client }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
+        id: filter
+        with:
+          filters: |
+            server:
+              - 'server/**'
+              - 'oglimmer.sh'
+              - '.github/workflows/build.yml'
+            client:
+              - 'client/**'
+              - 'oglimmer.sh'
+              - '.github/workflows/build.yml'
+
+  server:
+    needs: changes
+    if: ${{ needs.changes.outputs.server == 'true' }}
+    runs-on: arc-linky   # in-cluster ARC runner scale set
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Log in to registry.oglimmer.com
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
+        with:
+          registry: registry.oglimmer.com
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      # --platform auto -> plain `docker build` + `docker push` via the dind
+      # daemon (native arm64). oglimmer.sh defaults PLATFORM=arm64, which would
+      # route through the buildx docker-container driver whose push session
+      # times out against the registry's public ingress, so override it here.
+      # No kubectl on the runner, so the rollout goes through the restart hook.
+      - name: Build, push & restart server
+        env:
+          RESTART_TOKEN: ${{ secrets.RESTART_TOKEN }}
+        run: ./oglimmer.sh build -b --platform auto --verbose
+
+  client:
+    needs: changes
+    if: ${{ needs.changes.outputs.client == 'true' }}
+    runs-on: arc-linky
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Log in to registry.oglimmer.com
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4
+        with:
+          registry: registry.oglimmer.com
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      # No kubectl on the runner, so the rollout goes through the restart hook.
+      - name: Build, push & restart client
+        env:
+          RESTART_TOKEN: ${{ secrets.RESTART_TOKEN }}
+        run: ./oglimmer.sh build -f --platform auto --verbose
